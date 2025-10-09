@@ -1,0 +1,39 @@
+version: '3.8'
+services:
+  db:
+    image: postgis/postgis:13-3.1
+    container_name: resilient_db
+    environment:
+      - POSTGRES_DB=resilient_routing_db
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - ./database.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    restart: always
+
+  etl:
+    build: .
+    container_name: resilient_etl
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_NAME=resilient_routing_db
+      - DB_USER=user
+      - DB_PASS=password
+    # Este contenedor se ejecutará una vez (el main.py) y luego se detendrá.
+
+  web:
+    image: nginx:alpine
+    container_name: resilient_web
+    volumes:
+      - ./web:/usr/share/nginx/html
+    ports:
+      - "8080:80"
+    depends_on:
+      - etl
+    restart: always
