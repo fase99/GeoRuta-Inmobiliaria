@@ -25,8 +25,7 @@ services:
       - DB_NAME=resilient_routing_db
       - DB_USER=user
       - DB_PASS=password
-    # Este contenedor se ejecutará una vez (el main.py) y luego se detendrá.
-
+    
   web:
     image: nginx:alpine
     container_name: resilient_web

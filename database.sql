@@ -24,7 +24,8 @@ CREATE TABLE IF NOT EXISTS houses (
     id SERIAL PRIMARY KEY,
     title TEXT,
     price NUMERIC,
-    geom GEOMETRY(Point,4326)
+    geom GEOMETRY(Point,4326),
+    nearest_node BIGINT
 );
 
 CREATE TABLE IF NOT EXISTS health_centers (

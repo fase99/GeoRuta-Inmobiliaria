@@ -42,6 +42,15 @@ def calculate_and_save_route(start_lat=None, start_lon=None, end_lat=None, end_l
     if end_node is None and end_lat is not None and end_lon is not None:
         end_node = find_nearest_node(cur, end_lon, end_lat)
 
+    # If house ids provided in place of nodes, map them to nearest_node
+    def house_to_node(hid):
+        cur.execute('SELECT nearest_node, ST_X(geom) as lon, ST_Y(geom) as lat FROM houses WHERE id = %s;', (hid,))
+        r = cur.fetchone()
+        if not r:
+            return None
+        nearest, lon, lat = r
+        return nearest if nearest else find_nearest_node(cur, lon, lat)
+
     # Fallback: pick two random nodes if none provided
     if start_node is None or end_node is None:
         cur.execute('SELECT id FROM nodes;')
@@ -76,15 +85,47 @@ def main():
     parser.add_argument('--end-lon', type=float)
     parser.add_argument('--start-node', type=int)
     parser.add_argument('--end-node', type=int)
+    parser.add_argument('--start-house-id', type=int)
+    parser.add_argument('--end-house-id', type=int)
     args = parser.parse_args()
+
+    # Map houses to nodes if provided
+    start_node = args.start_node
+    end_node = args.end_node
+    if args.start_house_id:
+        # open a temp connection to map id -> node
+        conn_tmp = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASS)
+        cur_tmp = conn_tmp.cursor()
+        cur_tmp.execute('SELECT nearest_node, ST_X(geom) as lon, ST_Y(geom) as lat FROM houses WHERE id = %s;', (args.start_house_id,))
+        row = cur_tmp.fetchone()
+        if row:
+            nearest, lon, lat = row
+            start_node = nearest or None
+            if start_node is None and lon is not None and lat is not None:
+                # find nearest node by geom
+                cur_tmp.execute("SELECT id FROM nodes ORDER BY geom <-> ST_SetSRID(ST_MakePoint(%s, %s),4326) LIMIT 1;", (lon, lat))
+                r = cur_tmp.fetchone(); start_node = r[0] if r else None
+        cur_tmp.close(); conn_tmp.close()
+    if args.end_house_id:
+        conn_tmp = psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASS)
+        cur_tmp = conn_tmp.cursor()
+        cur_tmp.execute('SELECT nearest_node, ST_X(geom) as lon, ST_Y(geom) as lat FROM houses WHERE id = %s;', (args.end_house_id,))
+        row = cur_tmp.fetchone()
+        if row:
+            nearest, lon, lat = row
+            end_node = nearest or None
+            if end_node is None and lon is not None and lat is not None:
+                cur_tmp.execute("SELECT id FROM nodes ORDER BY geom <-> ST_SetSRID(ST_MakePoint(%s, %s),4326) LIMIT 1;", (lon, lat))
+                r = cur_tmp.fetchone(); end_node = r[0] if r else None
+        cur_tmp.close(); conn_tmp.close()
 
     calculate_and_save_route(
         start_lat=args.start_lat,
         start_lon=args.start_lon,
         end_lat=args.end_lat,
         end_lon=args.end_lon,
-        start_node=args.start_node,
-        end_node=args.end_node,
+        start_node=start_node,
+        end_node=end_node,
     )
 
 

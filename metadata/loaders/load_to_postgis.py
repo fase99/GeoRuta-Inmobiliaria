@@ -34,6 +34,14 @@ def load_houses(conn):
         cur.execute("INSERT INTO houses (title, price, geom) VALUES (%s, %s, ST_SetSRID(ST_MakePoint(%s, %s), 4326));", (title, price, lon, lat))
         inserted += 1
     conn.commit()
+    # Map each house to the nearest network node (requires nodes table populated by infra loader)
+    try:
+        cur = conn.cursor()
+        cur.execute("UPDATE houses SET nearest_node = (SELECT id FROM nodes ORDER BY nodes.geom <-> houses.geom LIMIT 1);")
+        conn.commit()
+        cur.close()
+    except Exception as e:
+        print('Warning: could not compute nearest_node for houses:', e)
     cur.close()
     print(f'Inserted {inserted} houses')
 
@@ -97,6 +105,7 @@ def create_tables(conn):
         name text,
         comuna text,
         geom geometry(Point,4326)
+        nearest_node bigint
     );
     CREATE TABLE IF NOT EXISTS metro_stations (
         id serial PRIMARY KEY,
