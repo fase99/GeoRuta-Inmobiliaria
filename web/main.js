@@ -1,140 +1,279 @@
-document.addEventListener('DOMContentLoaded', function () {
-    // 1. Inicialización del mapa
+// Execute immediately (IIFE) so dynamically injected script always runs
+(function(){
+    // Early guard: ensure Leaflet (L) is available to avoid uncaught ReferenceError
+    const dmElem = document.getElementById('debug-mainjs');
+    if (typeof L === 'undefined') {
+        const msg = 'Leaflet no cargado (L undefined). Comprueba conexión a CDN o instala archivos locales en /web/vendor/';
+        console.error(msg);
+        if (dmElem) dmElem.textContent = msg;
+        // Add a visible notice in the controls panel
+        try {
+            const controls = document.getElementById('controls');
+            if (controls) {
+                const alertBox = document.createElement('div');
+                alertBox.style.background = '#ffdede';
+                alertBox.style.border = '1px solid #ff8a8a';
+                alertBox.style.padding = '8px';
+                alertBox.style.marginBottom = '8px';
+                alertBox.textContent = 'ERROR: La librería Leaflet no se cargó. Revisa conexión a Internet o coloca leaflet.js/leaflet.css en /web/vendor/';
+                controls.insertBefore(alertBox, controls.firstChild);
+            }
+        } catch (e) { console.warn('Could not insert leaflet missing notice', e); }
+        return; // stop initialization to avoid runtime exceptions
+    }
+
+    // Inicialización del mapa
     const map = L.map('map').setView([-33.43, -70.60], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    // Variables para almacenar datos y marcadores
+    // Layers
+    const housesLayer = L.layerGroup().addTo(map);
+    const healthLayer = L.layerGroup().addTo(map);
+    const metroLayer = L.layerGroup().addTo(map);
+
+    // Icons
+    const icons = {
+        home: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        }),
+        health: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-violet.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        }),
+        metro: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        })
+    };
+
+    // State
     let housesData = [];
+    let additionalHouses = [];
     let houseMarkers = [];
+    let healthPois = [];
+    let metroPois = [];
     let startPointMarker = null;
 
+    // Controls (some are optional depending on index.html version)
     const comunaFilter = document.getElementById('comuna-filter');
     const startPointBtn = document.getElementById('start-point-btn');
     const calculateRouteBtn = document.getElementById('calculate-route-btn');
+    const applyPoiFiltersBtn = document.getElementById('apply-poi-filters'); // optional
+    const filterHealthCb = document.getElementById('filter-health'); // optional
+    const filterMetroCb = document.getElementById('filter-metro'); // optional
+    const showHealthCb = document.getElementById('show-health-layer'); // optional
+    const showMetroCb = document.getElementById('show-metro-layer'); // optional
+    const showHousesCb = document.getElementById('show-houses-layer'); // optional
+    const poiRadiusInput = document.getElementById('poi-radius'); // optional
 
-    // 2. Cargar datos de las casas desde el JSON
-    fetch('data/casas.json')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            housesData = data;
-            populateComunas(housesData);
-            displayHouses(housesData);
-        })
-        .catch(error => console.error('Error al cargar los datos de las casas:', error));
+    // Safe DOM helpers
+    function setText(id, text) { const el = document.getElementById(id); if (el) el.textContent = text; }
 
-    // 3. Poblar el filtro de comunas
-    function populateComunas(houses) {
-        const comunas = [...new Set(houses.map(house => house.comuna))];
-        comunas.forEach(comuna => {
-            const option = document.createElement('option');
-            option.value = comuna;
-            option.textContent = comuna;
-            comunaFilter.appendChild(option);
+    const debugMain = id => { const el = document.getElementById(id); return el; };
+
+    // Helpers
+    function haversineDistance(a, b) {
+        const R = 6371000; // meters
+        const toRad = x => x * Math.PI / 180;
+        const dLat = toRad(b.lat - a.lat);
+        const dLon = toRad(b.lon - a.lon);
+        const lat1 = toRad(a.lat);
+        const lat2 = toRad(b.lat);
+        const sinDlat = Math.sin(dLat / 2);
+        const sinDlon = Math.sin(dLon / 2);
+        const aHarv = sinDlat * sinDlat + Math.cos(lat1) * Math.cos(lat2) * sinDlon * sinDlon;
+        const c = 2 * Math.atan2(Math.sqrt(aHarv), Math.sqrt(1 - aHarv));
+        return R * c;
+    }
+
+    // Load and merge houses
+    function loadHouses() {
+        const primary = fetch('data/casas.json').then(r => r.json()).catch(e => { console.error('casas.json load error', e); return []; });
+        const secondary = fetch('data/casa-venta-toctoc.json').then(r => r.json()).catch(e => { console.warn('casa-venta-toctoc.json missing', e); return []; });
+        return Promise.all([primary, secondary]).then(([p, s]) => {
+            housesData = p || [];
+            additionalHouses = s || [];
+            // Merge by id, prefer primary
+            const byId = new Map();
+            housesData.forEach(h => byId.set(h.id, h));
+            additionalHouses.forEach(h => { if (!byId.has(h.id)) byId.set(h.id, h); });
+            housesData = Array.from(byId.values());
+                setText('debug-casas', `casas cargadas: ${housesData.length}`);
+                populateComunas(housesData);
+                displayHouses(housesData);
         });
     }
 
-    // 4. Mostrar/actualizar marcadores de casas en el mapa
-    function displayHouses(houses) {
-        // Limpiar marcadores existentes
-        houseMarkers.forEach(marker => map.removeLayer(marker));
-        houseMarkers = [];
+    function populateComunas(houses) {
+        // clear existing except 'todos'
+        const current = new Set();
+        Array.from(comunaFilter.options).forEach(o => current.add(o.value));
+        const comunas = [...new Set(houses.map(house => house.comuna).filter(Boolean))].sort();
+        comunas.forEach(comuna => {
+            if (!current.has(comuna)) {
+                const option = document.createElement('option');
+                option.value = comuna;
+                option.textContent = comuna;
+                comunaFilter.appendChild(option);
+            }
+        });
+    }
 
+    function displayHouses(houses) {
+        housesLayer.clearLayers();
+        houseMarkers = [];
         houses.forEach(house => {
             if (house.lat && house.lon) {
-                const marker = L.marker([house.lat, house.lon]).addTo(map);
-                
-                // Formatear precio a CLP
-                const formattedPrice = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(house.precio_uf > 1000 ? house.precio_uf : house.precio_peso);
-
-                const popupContent = `
-                    <div style="width: 200px;">
-                        <img src="${house.imagen}" alt="imagen casa" style="width:100%; height:auto; border-radius: 4px;">
-                        <h4 style="margin: 5px 0;">${house.titulo}</h4>
-                        <p style="margin: 2px 0;"><b>Precio:</b> ${formattedPrice}</p>
-                        <p style="margin: 2px 0;"><b>Dorms:</b> ${house.dormitorios} | <b>Baños:</b> ${house.baños}</p>
-                        <a href="${house.url}" target="_blank">Ver más detalles</a>
-                    </div>
-                `;
-                marker.bindPopup(popupContent);
-                marker.houseData = house; // Guardar datos en el marcador
+                const marker = L.marker([house.lat, house.lon], { icon: icons.home });
+                const formattedPrice = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(house.precio_peso || house.precio_uf || 0);
+                const popup = `\n                    <div style="width:220px">\n                        <img src="${house.imagen || ''}" style="width:100%;height:auto;border-radius:4px"/>\n                        <h4 style="margin:6px 0">${house.titulo || ''}</h4>\n                        <p style="margin:2px 0"><b>Precio:</b> ${formattedPrice}</p>\n                        <p style="margin:2px 0"><b>Comuna:</b> ${house.comuna || ''}</p>\n                        <a href="${house.url || '#'}" target="_blank">Ver</a>\n                    </div>\n                `;
+                marker.bindPopup(popup);
+                marker.houseData = house;
                 houseMarkers.push(marker);
+                housesLayer.addLayer(marker);
             }
         });
+        setText('houses-filtered-count', houseMarkers.length);
     }
 
-    // 5. Event Listener para el filtro de comuna
     comunaFilter.addEventListener('change', (e) => {
-        const selectedComuna = e.target.value;
-        let filteredHouses;
-
-        if (selectedComuna === 'todos') {
-            filteredHouses = housesData;
-        } else {
-            filteredHouses = housesData.filter(house => house.comuna === selectedComuna);
-        }
-        displayHouses(filteredHouses);
+        const selected = e.target.value;
+        if (selected === 'todos') displayHouses(housesData);
+        else displayHouses(housesData.filter(h => h.comuna === selected));
     });
 
-    // 6. Event Listener para el botón de punto de partida
+    // CSV parsing (pipe-delimited)
+    function parsePipeCSV(text) {
+        const lines = text.split(/\r?\n/).filter(Boolean);
+        const header = lines[0].split('|').map(h => h.trim());
+        const rows = lines.slice(1).map(line => {
+            const cols = line.split('|');
+            const obj = {};
+            header.forEach((h, i) => obj[h] = cols[i]);
+            return obj;
+        });
+        return rows;
+    }
+
+    // Metro CSV uses commas; we parse simple CSV by splitting line
+    function parseCSV(text) {
+        const lines = text.split(/\r?\n/).filter(Boolean);
+        const header = lines[0].split(',').map(h => h.trim());
+        const rows = lines.slice(1).map(line => {
+            const cols = line.split(',');
+            const obj = {};
+            header.forEach((h, i) => obj[h] = cols[i]);
+            return obj;
+        });
+        return rows;
+    }
+
+    function loadHealth() {
+        return fetch('data/Establecimientos_de_Salud.csv').then(r => r.text()).then(t => {
+            const parsed = parsePipeCSV(t);
+            healthPois = parsed.map(p => ({
+                name: p.NOMBRE || p.NOM_COM || p.DIRECCION || '',
+                lat: parseFloat(p.LATITUD),
+                lon: parseFloat(p.LONGITUD),
+                tipo: p.TIPO || ''
+            })).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+            healthPois.forEach(p => {
+                const m = L.marker([p.lat, p.lon], { icon: icons.health }).bindPopup(`<b>${p.name}</b><br>${p.tipo}`);
+                healthLayer.addLayer(m);
+            });
+            setText('debug-health', `salud cargados: ${healthPois.length}`);
+            setText('health-count', healthPois.length);
+        }).catch(e => { console.error('failed parse health csv', e); const d=document.getElementById('debug-health'); if(d)d.textContent='salud load error'; });
+    }
+
+    function mercatorToLatLon(x, y) {
+        // input appears to be EPSG:3857 (Web Mercator) but negated; check signs -- file seems in meters with negative X/Y.
+        // We'll assume these are WebMercator coordinates (x,y) and convert.
+        const lon = (x / 20037508.34) * 180;
+        let lat = (y / 20037508.34) * 180;
+        lat = 180 / Math.PI * (2 * Math.atan(Math.exp(lat * Math.PI / 180)) - Math.PI / 2);
+        return { lat, lon };
+    }
+
+    function loadMetro() {
+        return fetch('data/Estaciones_actuales_Metro_de_Santiago.csv').then(r => r.text()).then(t => {
+            const parsed = parseCSV(t);
+            metroPois = parsed.map(p => {
+                const x = parseFloat(p.X);
+                const y = parseFloat(p.Y);
+                if (isNaN(x) || isNaN(y)) return null;
+                const ll = mercatorToLatLon(x, y);
+                return { name: p.nombre || p.estacion || p.nombre, lat: ll.lat, lon: ll.lon, linea: p.linea };
+            }).filter(Boolean);
+            metroPois.forEach(p => {
+                const m = L.marker([p.lat, p.lon], { icon: icons.metro }).bindPopup(`<b>${p.name}</b><br>${p.linea || ''}`);
+                metroLayer.addLayer(m);
+            });
+            setText('debug-metro', `metro cargados: ${metroPois.length}`);
+            setText('metro-count', metroPois.length);
+        }).catch(e => { console.error('failed parse metro csv', e); const d=document.getElementById('debug-metro'); if(d)d.textContent='metro load error'; });
+    }
+
+    // Apply POI filters
+    function applyPoiFilters() {
+        const radius = (poiRadiusInput && parseFloat(poiRadiusInput.value)) ? parseFloat(poiRadiusInput.value) : 500;
+        let nearbyCount = 0;
+        // Build list of selected POIs
+        const selectedPois = [];
+        if (filterHealthCb && filterHealthCb.checked) selectedPois.push(...healthPois.map(p => ({ lat: p.lat, lon: p.lon })));
+        if (filterMetroCb && filterMetroCb.checked) selectedPois.push(...metroPois.map(p => ({ lat: p.lat, lon: p.lon })));
+
+        // For each house marker check distance to any selected poi
+        const matched = [];
+        houseMarkers.forEach(marker => {
+            const h = marker.houseData;
+            const point = { lat: h.lat, lon: h.lon };
+            const near = selectedPois.some(p => haversineDistance(point, p) <= radius);
+            if (near) { matched.push(h); nearbyCount++; marker.addTo(housesLayer); }
+            else { housesLayer.removeLayer(marker); }
+        });
+        setText('nearby-pois-count', nearbyCount);
+        setText('houses-filtered-count', matched.length);
+    }
+
+    // Toggle layers (only attach if control exists)
+    if (showHealthCb) showHealthCb.addEventListener('change', e => { if (e.target.checked) healthLayer.addTo(map); else map.removeLayer(healthLayer); });
+    if (showMetroCb) showMetroCb.addEventListener('change', e => { if (e.target.checked) metroLayer.addTo(map); else map.removeLayer(metroLayer); });
+    if (showHousesCb) showHousesCb.addEventListener('change', e => { if (e.target.checked) housesLayer.addTo(map); else map.removeLayer(housesLayer); });
+
+    if (applyPoiFiltersBtn) applyPoiFiltersBtn.addEventListener('click', () => applyPoiFilters());
+
+    // Start point
     startPointBtn.addEventListener('click', () => {
         navigator.geolocation.getCurrentPosition(position => {
             const { latitude, longitude } = position.coords;
-            
-            if (startPointMarker) {
-                map.removeLayer(startPointMarker);
-            }
-
-            startPointMarker = L.marker([latitude, longitude], {
-                icon: L.icon({ // Icono diferente para el punto de partida
-                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-                    iconSize: [25, 41],
-                    iconAnchor: [12, 41],
-                    popupAnchor: [1, -34],
-                    shadowSize: [41, 41]
-                })
-            }).addTo(map);
-            
-            startPointMarker.bindPopup('<b>Tu ubicación</b><br>Punto de partida').openPopup();
-            map.setView([latitude, longitude], 15);
-
-        }, error => {
-            console.error('Error al obtener la ubicación:', error);
-            alert('No se pudo obtener tu ubicación. Asegúrate de haber concedido los permisos.');
-        });
+            if (startPointMarker) map.removeLayer(startPointMarker);
+            startPointMarker = L.marker([latitude, longitude], { icon: L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25,41], iconAnchor:[12,41] }) }).addTo(map);
+            startPointMarker.bindPopup('<b>Tu ubicación</b>').openPopup();
+            map.setView([latitude, longitude], 14);
+        }, err => { console.error('geolocation err', err); alert('No se pudo obtener ubicación.'); });
     });
 
-    // 7. Event Listener para calcular la ruta (lógica futura)
+    // Placeholder for route calculation button
     calculateRouteBtn.addEventListener('click', () => {
-        if (!startPointMarker) {
-            alert('Por favor, define un punto de partida usando "Usar mi ubicación".');
-            return;
-        }
-
-        const visibleHouses = houseMarkers.filter(marker => map.hasLayer(marker));
-        if (visibleHouses.length === 0) {
-            alert('No hay casas seleccionadas en el mapa para calcular la ruta.');
-            return;
-        }
-
-        const startPoint = startPointMarker.getLatLng();
-        const housePoints = visibleHouses.map(marker => marker.getLatLng());
-
-        console.log("Punto de partida:", startPoint);
-        console.log("Casas seleccionadas:", housePoints);
-
-        // Lógica futura:
-        // Aquí se haría una llamada (fetch) a un endpoint del backend (ej. /calculate_route)
-        // enviando el punto de partida y las coordenadas de las casas.
-        // El backend, con los scripts de Python, calcularía la ruta óptima
-        // y la devolvería para ser dibujada en el mapa.
-        alert('Funcionalidad de cálculo de ruta en desarrollo.\nLos puntos seleccionados se han mostrado en la consola.');
+        if (!startPointMarker) return alert('Define punto de partida');
+        const visible = houseMarkers.filter(m => housesLayer.hasLayer(m));
+        if (visible.length === 0) return alert('No hay casas visibles para calcular ruta');
+        // For now just draw polylines connecting start -> houses in order
+        const start = startPointMarker.getLatLng();
+        const latlngs = [start].concat(visible.map(m => m.getLatLng()));
+        L.polyline(latlngs, { color: 'green' }).addTo(map);
+        alert('Ruta dibujada en orden de visualización (temporal)');
     });
-});
+
+    // Load everything
+    Promise.all([loadHouses(), loadHealth(), loadMetro()]).then(() => {
+        const dm = debugMain('debug-mainjs'); if (dm) dm.textContent = 'main.js ejecutado';
+    });
+})();

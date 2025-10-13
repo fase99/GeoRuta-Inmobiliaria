@@ -48,33 +48,5 @@ def load_data():
     conn.close()
 
 if __name__ == "__main__":
-    load_data()```
-
-#### **`metadata/` y `amenazas/` (Scripts Simulados)**
-
-**`metadata/extract_gas_stations.py`**
-```python
-import geojson
-from config import DATA_DIR
-
-# SIMULACIÓN: Datos estáticos que simulan una respuesta de la API de Overpass
-simulated_data = [
-    {"name": "Copec Los Conquistadores", "brand": "Copec", "lon": -70.610, "lat": -33.417},
-    {"name": "Shell Costanera", "brand": "Shell", "lon": -70.605, "lat": -33.410},
-    {"name": "Petrobras Bilbao", "brand": "Petrobras", "lon": -70.590, "lat": -33.435},
-]
-
-features = []
-for station in simulated_data:
-    point = geojson.Point((station["lon"], station["lat"]))
-    features.append(geojson.Feature(geometry=point, properties={
-        "name": station["name"],
-        "brand": station["brand"]
-    }))
-
-feature_collection = geojson.FeatureCollection(features)
-output_path = f"{DATA_DIR}/gas_stations.geojson"
-with open(output_path, 'w') as f:
-    geojson.dump(feature_collection, f)
+    load_data()
     
-print(f"Datos de bencineras simulados guardados en {output_path}")

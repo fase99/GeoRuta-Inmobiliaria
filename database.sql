@@ -17,25 +17,26 @@ CREATE TABLE edges (
     geom GEOMETRY(LineString, 4326)
 );
 
-CREATE TABLE gas_stations (
+
+
+-- Tables for web datasets
+CREATE TABLE IF NOT EXISTS houses (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(255),
-    brand VARCHAR(100),
-    geom GEOMETRY(Point, 4326)
+    title TEXT,
+    price NUMERIC,
+    geom GEOMETRY(Point,4326)
 );
 
-CREATE TABLE historical_congestion (
-    edge_id INT,
-    day_of_week INT,
-    hour_of_day INT,
-    avg_speed_kmh FLOAT,
-    PRIMARY KEY (edge_id, day_of_week, hour_of_day)
+CREATE TABLE IF NOT EXISTS health_centers (
+    id SERIAL PRIMARY KEY,
+    name TEXT,
+    comuna TEXT,
+    geom GEOMETRY(Point,4326)
 );
 
-CREATE TABLE traffic_incidents (
+CREATE TABLE IF NOT EXISTS metro_stations (
     id SERIAL PRIMARY KEY,
-    description TEXT,
-    incident_type VARCHAR(100),
-    report_time TIMESTAMPTZ DEFAULT NOW(),
-    geom GEOMETRY(Point, 4326)
+    name TEXT,
+    linea TEXT,
+    geom GEOMETRY(Point,4326)
 );

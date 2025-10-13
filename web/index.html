@@ -1,80 +1,82 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Visualizador de Ruteo Resiliente</title>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <style>
-        body { 
-            margin: 0; 
-            padding: 0; 
-            font-family: sans-serif;
-        }
-        #map { 
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 0;
-            right: 300px; /* Deja espacio para el panel de control */
-        }
-        #controls {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 300px;
-            height: 100vh;
-            background: white;
-            padding: 15px;
-            box-sizing: border-box;
-            overflow-y: auto;
-            border-left: 1px solid #ccc;
-        }
-        #controls h1 {
-            font-size: 1.5em;
-            margin-top: 0;
-        }
-        .control-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        select, button {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-        }
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GeoRuta Inmobiliaria</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <style>
+    html,body{height:100%;margin:0}
+    #map{position:absolute;left:0;top:0;right:300px;bottom:0}
+    #controls{position:absolute;right:0;top:0;width:300px;height:100vh;background:#fff;padding:12px;box-sizing:border-box;overflow:auto;border-left:1px solid #ddd}
+    h1{font-size:18px;margin:0 0 10px}
+    .control-group{margin-bottom:12px}
+    select,button{width:100%;padding:8px;box-sizing:border-box}
+    button{background:#007bff;color:#fff;border:none;cursor:pointer}
+    button:hover{background:#0056b3}
+    .small{font-size:13px;color:#444}
+    .debug{font-size:13px;color:#666}
+  </style>
 </head>
 <body>
-    <div id="map"></div>
-    <div id="controls">
-        <h1>GeoRuta Inmobiliaria</h1>
-        <div class="control-group">
-            <label for="comuna-filter">Filtrar por Comuna:</label>
-            <select id="comuna-filter">
-                <option value="todos">Todos</option>
-            </select>
-        </div>
-        <div class="control-group">
-            <button id="start-point-btn">Usar mi ubicación como partida</button>
-        </div>
-        <div class="control-group">
-            <button id="calculate-route-btn">Calcular Ruta Óptima</button>
-        </div>
+  <div id="map"></div>
+  <div id="controls">
+    <h1>GeoRuta Inmobiliaria</h1>
+    <div class="control-group">
+      <label for="comuna-filter">Filtrar por comuna</label>
+      <select id="comuna-filter"><option value="todos">Todos</option></select>
     </div>
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="main.js"></script>
+
+    <div class="control-group">
+      <button id="start-point-btn">Usar mi ubicación como partida</button>
+    </div>
+
+    <div class="control-group">
+      <button id="calculate-route-btn">Calcular Ruta Óptima</button>
+    </div>
+
+    <div class="control-group">
+      <h3 class="small">Contadores</h3>
+      <p class="small">Casas visibles: <b><span id="houses-filtered-count">0</span></b></p>
+      <p class="small">Centros de salud: <b><span id="health-count">0</span></b></p>
+      <p class="small">Estaciones metro: <b><span id="metro-count">0</span></b></p>
+    </div>
+
+    <div class="control-group debug">
+      <h3 class="small">Estado</h3>
+      <p>Main script: <span id="debug-mainjs">no cargado</span></p>
+      <p>Salud: <span id="debug-health">no cargado</span></p>
+      <p>Metro: <span id="debug-metro">no cargado</span></p>
+      <p>Casas: <span id="debug-casas">no cargado</span></p>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <script>
+    // Cache-busted loader for main.js and fetch diagnostic
+    (function(){
+      const debug = id => document.getElementById(id) || null;
+      const dm = debug('debug-mainjs');
+      const url = 'main.js?v=' + Date.now();
+
+      // inject script
+      const s = document.createElement('script');
+      s.src = url; s.async = true;
+      s.onload = function(){ if (dm) dm.textContent = 'loaded'; console.log('main.js loaded'); };
+      s.onerror = function(e){ if (dm) dm.textContent = 'failed to load'; console.error('main.js load error', e); };
+      document.body.appendChild(s);
+
+      // fetch diagnostic (shows size)
+      fetch(url).then(r => {
+        if (!r.ok) { if (dm) dm.textContent = 'fetch failed '+r.status; return; }
+        return r.text().then(t => { if (dm) dm.textContent = 'fetched ('+t.length+' bytes)'; });
+      }).catch(e => { if (dm) dm.textContent = 'fetch error'; console.error('fetch main.js', e); });
+
+      window.addEventListener('error', function(evt){
+        try{ const el = debug('debug-mainjs'); const msg = evt.message + ' @ ' + evt.filename + ':' + evt.lineno; if (el) el.textContent = 'runtime error: '+msg; console.error('global err', evt.error||msg);}catch(e){}
+      });
+    })();
+  </script>
 </body>
 </html>

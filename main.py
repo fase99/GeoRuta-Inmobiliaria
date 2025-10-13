@@ -20,13 +20,9 @@ if __name__ == "__main__":
     run_script("infraestructura/loaders/load_infra.py")
 
     # --- FASE 2: METADATA ---
-    run_script("metadata/extract_gas_stations.py")
-    run_script("metadata/extract_historical_congestion.py")
-    run_script("metadata/loaders/load_metadata.py")
-
-    # --- FASE 3: AMENAZAS ---
-    run_script("amenazas/extract_traffic_incidents.py")
-    run_script("amenazas/loaders/load_amenazas.py")
+    # Removed gas stations and traffic extraction/load as requested.
+    # Instead, run the consolidated loader that imports existing web/data files into PostGIS.
+    run_script("metadata/loaders/load_to_postgis.py")
 
     # --- FASE 4: RUTA DE EJEMPLO ---
     run_script("generate_dijkstra_route.py")
