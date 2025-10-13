@@ -1,10 +1,10 @@
 import json
 import csv
 import psycopg2
-from config import DB_HOST, DB_NAME, DB_USER, DB_PASS
+from config import DB_HOST, DB_NAME, DB_USER, DB_PASS, DATA_DIR
 from pathlib import Path
 
-DATA_DIR = Path('web/data')
+DATA_DIR = Path(DATA_DIR)
 
 def connect():
     return psycopg2.connect(host=DB_HOST, dbname=DB_NAME, user=DB_USER, password=DB_PASS)
@@ -105,6 +105,14 @@ def create_tables(conn):
         geom geometry(Point,4326)
     );
     ''')
+    conn.commit()
+    cur.close()
+
+    # Create spatial indexes
+    cur = conn.cursor()
+    cur.execute("CREATE INDEX IF NOT EXISTS idx_houses_geom ON houses USING GIST (geom);")
+    cur.execute("CREATE INDEX IF NOT EXISTS idx_health_geom ON health_centers USING GIST (geom);")
+    cur.execute("CREATE INDEX IF NOT EXISTS idx_metro_geom ON metro_stations USING GIST (geom);")
     conn.commit()
     cur.close()
 

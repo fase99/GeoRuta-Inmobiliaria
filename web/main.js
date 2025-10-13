@@ -61,9 +61,13 @@
     let startPointMarker = null;
 
     // Controls (some are optional depending on index.html version)
-    const comunaFilter = document.getElementById('comuna-filter');
+    // Controls
+    const comunaFilter = null; // comuna filter removed from UI
     const startPointBtn = document.getElementById('start-point-btn');
     const calculateRouteBtn = document.getElementById('calculate-route-btn');
+    const filterByMetroCb = document.getElementById('filter-by-metro');
+    const filterByHealthCb = document.getElementById('filter-by-health');
+    const metroRadiusInput = document.getElementById('metro-radius');
     const applyPoiFiltersBtn = document.getElementById('apply-poi-filters'); // optional
     const filterHealthCb = document.getElementById('filter-health'); // optional
     const filterMetroCb = document.getElementById('filter-metro'); // optional
@@ -111,18 +115,7 @@
     }
 
     function populateComunas(houses) {
-        // clear existing except 'todos'
-        const current = new Set();
-        Array.from(comunaFilter.options).forEach(o => current.add(o.value));
-        const comunas = [...new Set(houses.map(house => house.comuna).filter(Boolean))].sort();
-        comunas.forEach(comuna => {
-            if (!current.has(comuna)) {
-                const option = document.createElement('option');
-                option.value = comuna;
-                option.textContent = comuna;
-                comunaFilter.appendChild(option);
-            }
-        });
+        // comuna UI removed - no-op
     }
 
     function displayHouses(houses) {
@@ -142,11 +135,39 @@
         setText('houses-filtered-count', houseMarkers.length);
     }
 
-    comunaFilter.addEventListener('change', (e) => {
-        const selected = e.target.value;
-        if (selected === 'todos') displayHouses(housesData);
-        else displayHouses(housesData.filter(h => h.comuna === selected));
-    });
+    // Unified proximity filtering: houses must satisfy all enabled proximity checks (AND logic)
+    function applyProximityFilters() {
+        const metroEnabled = filterByMetroCb && filterByMetroCb.checked;
+        const healthEnabled = filterByHealthCb && filterByHealthCb.checked;
+        // if neither enabled, show all
+        if (!metroEnabled && !healthEnabled) { displayHouses(housesData); return; }
+
+        const radius = metroRadiusInput ? parseFloat(metroRadiusInput.value) : 500;
+        const metroPoints = metroPois.map(m => ({ lat: m.lat, lon: m.lon }));
+        const healthPoints = healthPois.map(h => ({ lat: h.lat, lon: h.lon }));
+
+        const matched = [];
+        housesLayer.clearLayers();
+        houseMarkers.forEach(marker => {
+            const h = marker.houseData;
+            const point = { lat: h.lat, lon: h.lon };
+            let ok = true;
+            if (metroEnabled) {
+                const nearMetro = metroPoints.some(mp => haversineDistance(point, mp) <= radius);
+                if (!nearMetro) ok = false;
+            }
+            if (healthEnabled) {
+                const nearHealth = healthPoints.some(hp => haversineDistance(point, hp) <= radius);
+                if (!nearHealth) ok = false;
+            }
+            if (ok) { matched.push(h); housesLayer.addLayer(marker); }
+        });
+        setText('houses-filtered-count', matched.length);
+    }
+
+    if (filterByMetroCb) filterByMetroCb.addEventListener('change', applyProximityFilters);
+    if (filterByHealthCb) filterByHealthCb.addEventListener('change', applyProximityFilters);
+    if (metroRadiusInput) metroRadiusInput.addEventListener('change', applyProximityFilters);
 
     // CSV parsing (pipe-delimited)
     function parsePipeCSV(text) {

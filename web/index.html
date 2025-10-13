@@ -23,8 +23,18 @@
   <div id="controls">
     <h1>GeoRuta Inmobiliaria</h1>
     <div class="control-group">
-      <label for="comuna-filter">Filtrar por comuna</label>
-      <select id="comuna-filter"><option value="todos">Todos</option></select>
+      <label>
+        <input type="checkbox" id="filter-by-metro" /> Filtrar por estaciones de metro cercanas
+      </label>
+      <div style="margin-top:6px">
+        <label>
+          <input type="checkbox" id="filter-by-health" /> Filtrar por centros de salud cercanos
+        </label>
+      </div>
+      <div style="margin-top:6px">
+        <label for="metro-radius" class="small">Radio (metros)</label>
+        <input type="number" id="metro-radius" value="500" min="50" max="5000" style="width:100%;padding:6px;box-sizing:border-box" />
+      </div>
     </div>
 
     <div class="control-group">
@@ -42,14 +52,7 @@
       <p class="small">Estaciones metro: <b><span id="metro-count">0</span></b></p>
     </div>
 
-    <div class="control-group debug">
-      <h3 class="small">Estado</h3>
-      <p>Main script: <span id="debug-mainjs">no cargado</span></p>
-      <p>Salud: <span id="debug-health">no cargado</span></p>
-      <p>Metro: <span id="debug-metro">no cargado</span></p>
-      <p>Casas: <span id="debug-casas">no cargado</span></p>
-    </div>
-  </div>
+    
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 

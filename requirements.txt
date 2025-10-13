@@ -1,0 +1,8 @@
+psycopg2-binary
+geojson
+osmnx
+geopandas
+shapely
+fiona
+pyproj
+rtree
