@@ -81,11 +81,22 @@ def load_data():
 
     conn.commit()
 
-    # Crear topología de pgRouting
-    print("Creando topología de pgRouting...")
-    cur.execute("SELECT pgr_createTopology('edges', 0.00001, 'geom', 'id', 'source', 'target');")
-    conn.commit()
-    print("Topología creada exitosamente.")
+    # Crear índices espaciales
+    try:
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_nodes_geom ON nodes USING GIST (geom);")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_edges_geom ON edges USING GIST (geom);")
+        conn.commit()
+    except Exception as e:
+        print('Warning creating spatial indexes', e)
+
+    # Crear topología de pgRouting (si disponible)
+    try:
+        print("Creando topología de pgRouting...")
+        cur.execute("SELECT pgr_createTopology('edges', 0.00001, 'geom', 'id', 'source', 'target');")
+        conn.commit()
+        print("Topología creada exitosamente.")
+    except Exception as e:
+        print('pgRouting topology creation failed or pgRouting not installed:', e)
 
     cur.close()
     conn.close()

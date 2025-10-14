@@ -6,5 +6,5 @@ DB_NAME = os.getenv("DB_NAME", "resilient_routing_db")
 DB_USER = os.getenv("DB_USER", "user")
 DB_PASS = os.getenv("DB_PASS", "password")
 
-# Ubicación para los archivos de datos generados
-DATA_DIR = "sitio_web/data"
+# Ubicación para los archivos de datos generados (carpeta donde están los geojson usados por el frontend)
+DATA_DIR = "web/data"

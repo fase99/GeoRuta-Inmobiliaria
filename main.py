@@ -13,7 +13,7 @@ if __name__ == "__main__":
     time.sleep(10) # Simple espera para que el contenedor de la BD se inicie
 
     # Crear directorio de datos si no existe
-    os.makedirs("sitio_web/data", exist_ok=True)
+    os.makedirs("web/data", exist_ok=True)
 
     # --- FASE 1: INFRAESTRUCTURA ---
     run_script("infraestructura/extract_infra.py")

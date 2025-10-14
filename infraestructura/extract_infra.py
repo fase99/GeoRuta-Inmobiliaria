@@ -1,5 +1,8 @@
 import osmnx as ox
 import geopandas as gpd
+import os
+import sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from config import DATA_DIR
 
 print("Descargando red vial de Providencia desde OpenStreetMap...")
@@ -12,6 +15,9 @@ nodes_gdf, edges_gdf = ox.graph_to_gdfs(G)
 # Asegurar que el índice (ID del nodo) sea una columna
 nodes_gdf.reset_index(inplace=True)
 nodes_gdf = nodes_gdf.rename(columns={'osmid': 'id'})
+
+# Reset index for edges to make u, v columns
+edges_gdf.reset_index(inplace=True)
 
 # Guardar como GeoJSON
 nodes_output_path = f"{DATA_DIR}/nodes.geojson"

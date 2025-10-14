@@ -67,6 +67,54 @@ def load_health(conn):
     cur.close()
     print(f'Inserted {inserted} health centers')
 
+def load_paraderos(conn):
+    # Try known locations for the paraderos file
+    candidates = []
+    try:
+        from config import DATA_DIR as CD
+        candidates.append(f"{CD}/Paraderos_Transantiago.geojson")
+    except Exception:
+        pass
+    candidates.append('web/data/Paraderos_Transantiago.geojson')
+    candidates.append('web/data/Paraderos_Transantiago.geo.json')
+
+    p = None
+    for c in candidates:
+        from pathlib import Path
+        if Path(c).exists():
+            p = Path(c)
+            break
+    if p is None:
+        print('Paraderos geojson not found in candidates:', candidates)
+        return
+
+    import geojson
+    cur = conn.cursor()
+    inserted = 0
+    with p.open('r', encoding='utf-8') as f:
+        gj = geojson.load(f)
+        features = gj.get('features', [])
+        for feat in features:
+            props = feat.get('properties') or {}
+            geom = feat.get('geometry')
+            if geom is None:
+                continue
+            codigo = props.get('codigo') or props.get('CODIGO') or None
+            simt = props.get('simt') or props.get('SIMT') or None
+            tipo = props.get('tipo') or props.get('TIPO') or None
+            comuna = props.get('comuna') or props.get('COMUNA') or None
+            nombre = props.get('nombre_ust') or props.get('NOMBRE') or None
+            try:
+                geom_str = geojson.dumps(geom)
+                cur.execute("INSERT INTO bus_stops (codigo, simt, tipo, clasificac, comuna, nombre, geom) VALUES (%s,%s,%s,%s,%s,%s, ST_SetSRID(ST_GeomFromGeoJSON(%s),4326));",
+                            (codigo, simt, tipo, props.get('clasificac'), comuna, nombre, geom_str))
+                inserted += 1
+            except Exception as e:
+                print('Failed to insert paradero', codigo, e)
+    conn.commit()
+    cur.close()
+    print(f'Inserted {inserted} paraderos')
+
 def load_metro(conn):
     p = DATA_DIR / 'Estaciones_actuales_Metro_de_Santiago.csv'
     if not p.exists():
@@ -104,13 +152,23 @@ def create_tables(conn):
         id serial PRIMARY KEY,
         name text,
         comuna text,
-        geom geometry(Point,4326)
+        geom geometry(Point,4326),
         nearest_node bigint
     );
     CREATE TABLE IF NOT EXISTS metro_stations (
         id serial PRIMARY KEY,
         name text,
         linea text,
+        geom geometry(Point,4326)
+    );
+    CREATE TABLE IF NOT EXISTS bus_stops (
+        id serial PRIMARY KEY,
+        codigo text,
+        simt text,
+        tipo text,
+        clasificac text,
+        comuna text,
+        nombre text,
         geom geometry(Point,4326)
     );
     ''')
@@ -130,6 +188,7 @@ def main():
     create_tables(conn)
     load_houses(conn)
     load_health(conn)
+    load_paraderos(conn)
     load_metro(conn)
     conn.close()
 
