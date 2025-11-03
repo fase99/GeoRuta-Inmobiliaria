@@ -229,7 +229,15 @@
             return r.json();
         }).then(gj => {
             const features = gj.features || [];
-            paraderos = features.map(f => {
+            // Filtrar por comuna: sólo paraderos dentro de la comuna PROVIDENCIA
+            const targetComuna = 'PROVIDENCIA';
+            const filtered = features.filter(f => {
+                const props = f.properties || {};
+                const comuna = (props.comuna || props.COMUNA || '').toString().toUpperCase();
+                return comuna === targetComuna;
+            });
+
+            paraderos = filtered.map(f => {
                 const props = f.properties || {};
                 const coords = f.geometry && f.geometry.coordinates;
                 if (!coords) return null;
@@ -239,7 +247,8 @@
                 paraderosLayer.addLayer(marker);
                 return p;
             }).filter(Boolean);
-            setText('debug-paraderos', `paraderos cargados: ${paraderos.length}`);
+
+            setText('debug-paraderos', `paraderos cargados (Providencia): ${paraderos.length} / ${features.length}`);
         }).catch(e => { console.warn('paraderos load error', e); const d=document.getElementById('debug-paraderos'); if(d)d.textContent='paraderos load error'; });
     }
 
