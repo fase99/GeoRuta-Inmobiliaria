@@ -68,6 +68,12 @@
     let metroPois = [];
     let startPointMarker = null;
     let paraderos = [];
+    
+    // Filter UI elements (initialized after DOM queries)
+    const filterTypeCasaCb = document.getElementById('filter-type-casa');
+    const filterTypeDeptoCb = document.getElementById('filter-type-depto');
+    const filterOpVentaCb = document.getElementById('filter-op-venta');
+    const filterOpArriendoCb = document.getElementById('filter-op-arriendo');
 
     // Controls (some are optional depending on index.html version)
     // Controls
@@ -107,19 +113,40 @@
 
     // Load and merge houses
     function loadHouses() {
+        // Load multiple sources: primary casas + toctoc casas + depto venta + depto arriendo
         const primary = fetch('data/casas.json').then(r => r.json()).catch(e => { console.error('casas.json load error', e); return []; });
         const secondary = fetch('data/casa-venta-toctoc.json').then(r => r.json()).catch(e => { console.warn('casa-venta-toctoc.json missing', e); return []; });
-        return Promise.all([primary, secondary]).then(([p, s]) => {
+        const deptoVenta = fetch('data/depto-venta-toctoc.json').then(r => r.json()).catch(e => { console.warn('depto-venta-toctoc.json missing', e); return []; });
+        const deptoArriendo = fetch('data/depto-arriendo-toctoc.json').then(r => r.json()).catch(e => { console.warn('depto-arriendo-toctoc.json missing', e); return []; });
+
+        return Promise.all([primary, secondary, deptoVenta, deptoArriendo]).then(([p, s, dv, da]) => {
             housesData = p || [];
-            additionalHouses = s || [];
+            // annotate and merge additional sources
+            const annotateSource = (items, sourceName, propertyType, operation) => (items || []).map(item => {
+                // prefer existing id or generate one
+                if (!item.id && item._id) item.id = item._id;
+                // annotate for filtering
+                item._source = sourceName;
+                if (propertyType) item._propertyType = propertyType; // 'casa'|'departamento'
+                if (operation) item._operation = operation; // 'venta'|'arriendo'
+                return item;
+            });
+
+            const sAnnotated = annotateSource(s, 'casa-toctoc', 'casa', 'venta');
+            const dvAnnotated = annotateSource(dv, 'depto-venta-toctoc', 'departamento', 'venta');
+            const daAnnotated = annotateSource(da, 'depto-arriendo-toctoc', 'departamento', 'arriendo');
+
+            additionalHouses = [].concat(sAnnotated, dvAnnotated, daAnnotated);
+
             // Merge by id, prefer primary
             const byId = new Map();
             housesData.forEach(h => byId.set(h.id, h));
             additionalHouses.forEach(h => { if (!byId.has(h.id)) byId.set(h.id, h); });
             housesData = Array.from(byId.values());
-                setText('debug-casas', `casas cargadas: ${housesData.length}`);
-                populateComunas(housesData);
-                displayHouses(housesData);
+
+            setText('debug-casas', `casas cargadas: ${housesData.length}`);
+            populateComunas(housesData);
+            displayHouses(housesData);
         });
     }
 
@@ -132,6 +159,9 @@
         houseMarkers = [];
         houses.forEach(house => {
             if (house.lat && house.lon) {
+                // Apply type/operation filters (if UI present)
+                if (typeof matchesTypeOperation === 'function' && !matchesTypeOperation(house)) return;
+
                 const marker = L.marker([house.lat, house.lon], { icon: icons.home });
                 const formattedPrice = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(house.precio_peso || house.precio_uf || 0);
                 const popup = `\n                    <div style="width:220px">\n                        <img src="${house.imagen || ''}" style="width:100%;height:auto;border-radius:4px"/>\n                        <h4 style="margin:6px 0">${house.titulo || ''}</h4>\n                        <p style="margin:2px 0"><b>Precio:</b> ${formattedPrice}</p>\n                        <p style="margin:2px 0"><b>Comuna:</b> ${house.comuna || ''}</p>\n                        <a href="${house.url || '#'}" target="_blank">Ver</a>\n                    </div>\n                `;
@@ -142,6 +172,35 @@
             }
         });
         setText('houses-filtered-count', houseMarkers.length);
+    }
+
+    function matchesTypeOperation(house) {
+        // If no filter UI present, allow
+        if (!filterTypeCasaCb && !filterTypeDeptoCb && !filterOpVentaCb && !filterOpArriendoCb) return true;
+
+        const casaChecked = filterTypeCasaCb ? filterTypeCasaCb.checked : true;
+        const deptoChecked = filterTypeDeptoCb ? filterTypeDeptoCb.checked : true;
+        const ventaChecked = filterOpVentaCb ? filterOpVentaCb.checked : true;
+        const arriendoChecked = filterOpArriendoCb ? filterOpArriendoCb.checked : true;
+
+        // Determine property type
+        let propType = (house._propertyType || house.tipo_inmueble || house.tipo || house.property_type || '').toString().toLowerCase();
+        const isDepto = propType.includes('depart') || propType.includes('dpto') || propType.includes('depto') || propType === 'departamento';
+        const isCasa = !isDepto;
+
+        if ((isCasa && !casaChecked) || (isDepto && !deptoChecked)) return false;
+
+        // Determine operation
+        const op = (house._operation || house.operacion || house.operation || house.tipo_anuncio || '').toString().toLowerCase();
+        if (op) {
+            if ((op.includes('venta') || op === 'venta') && !ventaChecked) return false;
+            if ((op.includes('arri') || op === 'arriendo' || op === 'arriendo') && !arriendoChecked) return false;
+        } else {
+            // If operation unknown, include if at least one operation checkbox is true
+            if (!ventaChecked && !arriendoChecked) return false;
+        }
+
+        return true;
     }
 
     // Unified proximity filtering: houses must satisfy all enabled proximity checks (AND logic)
@@ -177,6 +236,12 @@
     if (filterByMetroCb) filterByMetroCb.addEventListener('change', applyProximityFilters);
     if (filterByHealthCb) filterByHealthCb.addEventListener('change', applyProximityFilters);
     if (metroRadiusInput) metroRadiusInput.addEventListener('change', applyProximityFilters);
+
+    // Type/operation filters should re-run the current filtering pipeline
+    if (filterTypeCasaCb) filterTypeCasaCb.addEventListener('change', () => applyProximityFilters());
+    if (filterTypeDeptoCb) filterTypeDeptoCb.addEventListener('change', () => applyProximityFilters());
+    if (filterOpVentaCb) filterOpVentaCb.addEventListener('change', () => applyProximityFilters());
+    if (filterOpArriendoCb) filterOpArriendoCb.addEventListener('change', () => applyProximityFilters());
 
     // CSV parsing (pipe-delimited)
     function parsePipeCSV(text) {
