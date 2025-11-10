@@ -38,7 +38,24 @@
     </div>
 
     <div class="control-group">
-      <button id="start-point-btn">Usar mi ubicación como partida</button>
+      <label for="start-select" class="small">Punto de partida</label>
+      <select id="start-select">
+        <option value="user">Usar mi ubicación</option>
+      </select>
+      <div style="margin-top:6px;display:flex;gap:6px">
+        <button id="pick-start-btn" style="flex:1">Elegir en el mapa</button>
+        <button id="start-point-btn" style="flex:1">Usar mi ubicación</button>
+      </div>
+    </div>
+
+    <div class="control-group">
+      <h3 class="small">Itinerario del día</h3>
+      <p class="small">Selecciona propiedades en el mapa (clic) o usa los botones.</p>
+      <div id="itinerary-list" style="max-height:200px;overflow:auto;border:1px solid #eee;padding:6px;margin-bottom:6px"></div>
+      <div style="display:flex;gap:6px">
+        <button id="clear-selection-btn" style="flex:1;background:#6c757d">Limpiar selección</button>
+        <button id="calc-route-selected-btn" style="flex:1">Calcular ruta selección</button>
+      </div>
     </div>
 
     <div class="control-group">
@@ -57,8 +74,11 @@
       <label><input type="checkbox" id="show-paraderos-layer" checked /> Mostrar paraderos</label>
       <br/>
       <label><input type="checkbox" id="show-edges-layer" checked /> Mostrar calles (aristas OSM)</label>
+      <br/>
+      <label><input type="checkbox" id="show-route-osm" /> Mostrar ruta OSM (ordenada por grafo)</label>
       <p class="debug">Paraderos: <span id="debug-paraderos">-</span></p>
       <p class="debug">Aristas: <span id="debug-edges">-</span></p>
+      <p class="debug">Ruta OSM: <span id="debug-route">-</span></p>
     </div>
 
     <div class="control-group">

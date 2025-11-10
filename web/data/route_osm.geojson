@@ -1,0 +1,853 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6100537,
+            -33.4366715
+          ],
+          [
+            -70.6099625,
+            -33.4366535
+          ],
+          [
+            -70.6093062,
+            -33.4365157
+          ]
+        ]
+      },
+      "properties": {
+        "u": 5257974726,
+        "v": 429990972,
+        "length": 71.49345632823952,
+        "name": "Avenida Pocuro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6093062,
+            -33.4365157
+          ],
+          [
+            -70.6087415,
+            -33.4363964
+          ],
+          [
+            -70.6084032,
+            -33.4363231
+          ],
+          [
+            -70.608183,
+            -33.4362774
+          ],
+          [
+            -70.6080316,
+            -33.436246
+          ]
+        ]
+      },
+      "properties": {
+        "u": 429990972,
+        "v": 2934694893,
+        "length": 122.01654680515887,
+        "name": "Avenida Pocuro"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.608222,
+            -33.4355974
+          ],
+          [
+            -70.608151,
+            -33.4358385
+          ],
+          [
+            -70.6080646,
+            -33.4361314
+          ],
+          [
+            -70.6080523,
+            -33.4361732
+          ],
+          [
+            -70.6080316,
+            -33.436246
+          ]
+        ]
+      },
+      "properties": {
+        "u": 133864064,
+        "v": 2934694893,
+        "length": 74.25390537492466,
+        "name": "Avenida Pedro de Valdivia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.608222,
+            -33.4355974
+          ],
+          [
+            -70.6083791,
+            -33.4350646
+          ]
+        ]
+      },
+      "properties": {
+        "u": 133864064,
+        "v": 133864099,
+        "length": 61.01190010315557,
+        "name": "Avenida Pedro de Valdivia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6083791,
+            -33.4350646
+          ],
+          [
+            -70.6083851,
+            -33.4350444
+          ]
+        ]
+      },
+      "properties": {
+        "u": 133864099,
+        "v": 5366826843,
+        "length": 2.3141155738946524,
+        "name": "Avenida Pedro de Valdivia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6085142,
+            -33.4346066
+          ],
+          [
+            -70.6083851,
+            -33.4350444
+          ]
+        ]
+      },
+      "properties": {
+        "u": 133864125,
+        "v": 5366826843,
+        "length": 50.133547299582844,
+        "name": "Avenida Pedro de Valdivia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6085142,
+            -33.4346066
+          ],
+          [
+            -70.6085459,
+            -33.4344989
+          ]
+        ]
+      },
+      "properties": {
+        "u": 133864125,
+        "v": 429990990,
+        "length": 12.331686183487527,
+        "name": "Avenida Pedro de Valdivia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6085459,
+            -33.4344989
+          ],
+          [
+            -70.6087138,
+            -33.4339295
+          ]
+        ]
+      },
+      "properties": {
+        "u": 429990990,
+        "v": 429990991,
+        "length": 65.20326306102264,
+        "name": "Avenida Pedro de Valdivia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6089629,
+            -33.433131
+          ],
+          [
+            -70.6089444,
+            -33.4331897
+          ],
+          [
+            -70.6087138,
+            -33.4339295
+          ]
+        ]
+      },
+      "properties": {
+        "u": 133864158,
+        "v": 429990991,
+        "length": 91.7488698306704,
+        "name": "Avenida Pedro de Valdivia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6089629,
+            -33.433131
+          ],
+          [
+            -70.6089852,
+            -33.4330461
+          ],
+          [
+            -70.6091283,
+            -33.4325276
+          ]
+        ]
+      },
+      "properties": {
+        "u": 133864158,
+        "v": 610414282,
+        "length": 68.82872204151563,
+        "name": "Avenida Pedro de Valdivia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.609252,
+            -33.4321175
+          ],
+          [
+            -70.6092085,
+            -33.4322636
+          ],
+          [
+            -70.6091821,
+            -33.4323491
+          ],
+          [
+            -70.6091283,
+            -33.4325276
+          ]
+        ]
+      },
+      "properties": {
+        "u": 133864212,
+        "v": 610414282,
+        "length": 47.02390964955603,
+        "name": "Avenida Pedro de Valdivia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6094531,
+            -33.4314512
+          ],
+          [
+            -70.6094341,
+            -33.4315167
+          ],
+          [
+            -70.6092964,
+            -33.4319709
+          ],
+          [
+            -70.609252,
+            -33.4321175
+          ]
+        ]
+      },
+      "properties": {
+        "u": 130954845,
+        "v": 133864212,
+        "length": 76.40371050534091,
+        "name": "Avenida Pedro de Valdivia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6094531,
+            -33.4314512
+          ],
+          [
+            -70.6094899,
+            -33.4313499
+          ],
+          [
+            -70.6097156,
+            -33.4306864
+          ]
+        ]
+      },
+      "properties": {
+        "u": 130954845,
+        "v": 133864241,
+        "length": 88.46359389524434,
+        "name": "Avenida Pedro de Valdivia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6097156,
+            -33.4306864
+          ],
+          [
+            -70.6099678,
+            -33.4299956
+          ]
+        ]
+      },
+      "properties": {
+        "u": 133864241,
+        "v": 133864271,
+        "length": 80.29982059499027,
+        "name": "Avenida Pedro de Valdivia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6099678,
+            -33.4299956
+          ],
+          [
+            -70.6101416,
+            -33.4295193
+          ]
+        ]
+      },
+      "properties": {
+        "u": 133864271,
+        "v": 133864315,
+        "length": 55.3635708507205,
+        "name": "Avenida Pedro de Valdivia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6104293,
+            -33.4287685
+          ],
+          [
+            -70.6104058,
+            -33.4288288
+          ],
+          [
+            -70.6101416,
+            -33.4295193
+          ]
+        ]
+      },
+      "properties": {
+        "u": 13882291,
+        "v": 133864315,
+        "length": 87.65053906902996,
+        "name": "Avenida Pedro de Valdivia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6104293,
+            -33.4287685
+          ],
+          [
+            -70.6104578,
+            -33.4286915
+          ],
+          [
+            -70.6107464,
+            -33.4279106
+          ]
+        ]
+      },
+      "properties": {
+        "u": 13882291,
+        "v": 338176183,
+        "length": 99.82995335293926,
+        "name": "Avenida Pedro de Valdivia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6107835,
+            -33.4278104
+          ],
+          [
+            -70.6107464,
+            -33.4279106
+          ]
+        ]
+      },
+      "properties": {
+        "u": 133864342,
+        "v": 338176183,
+        "length": 11.661572144615475,
+        "name": "Avenida Pedro de Valdivia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6107835,
+            -33.4278104
+          ],
+          [
+            -70.6111318,
+            -33.42687
+          ],
+          [
+            -70.6111567,
+            -33.4268012
+          ]
+        ]
+      },
+      "properties": {
+        "u": 133864342,
+        "v": 1742362471,
+        "length": 117.44114220774013,
+        "name": "Avenida Pedro de Valdivia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6111567,
+            -33.4268012
+          ],
+          [
+            -70.6111891,
+            -33.4267131
+          ]
+        ]
+      },
+      "properties": {
+        "u": 1742362471,
+        "v": 4786929827,
+        "length": 10.247344334475075,
+        "name": "Avenida Pedro de Valdivia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6116152,
+            -33.4255604
+          ],
+          [
+            -70.6112109,
+            -33.4266541
+          ],
+          [
+            -70.6111891,
+            -33.4267131
+          ]
+        ]
+      },
+      "properties": {
+        "u": 133864388,
+        "v": 4786929827,
+        "length": 134.13575179171076,
+        "name": "Avenida Pedro de Valdivia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6116152,
+            -33.4255604
+          ],
+          [
+            -70.6116925,
+            -33.4253471
+          ]
+        ]
+      },
+      "properties": {
+        "u": 133864388,
+        "v": 247289361,
+        "length": 24.77905866408454,
+        "name": "Avenida Pedro de Valdivia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6119911,
+            -33.4245966
+          ],
+          [
+            -70.6119382,
+            -33.4247279
+          ],
+          [
+            -70.6117665,
+            -33.4251623
+          ],
+          [
+            -70.6116925,
+            -33.4253471
+          ]
+        ]
+      },
+      "properties": {
+        "u": 130954699,
+        "v": 247289361,
+        "length": 87.93284079372356,
+        "name": "Avenida Pedro de Valdivia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6119911,
+            -33.4245966
+          ],
+          [
+            -70.6118989,
+            -33.424526
+          ],
+          [
+            -70.6115804,
+            -33.4242616
+          ],
+          [
+            -70.6113849,
+            -33.4241027
+          ],
+          [
+            -70.6108733,
+            -33.4236868
+          ],
+          [
+            -70.6106003,
+            -33.4234664
+          ]
+        ]
+      },
+      "properties": {
+        "u": 130954699,
+        "v": 224569616,
+        "length": 180.1565513887798,
+        "name": "Avenida Nueva Providencia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6106003,
+            -33.4234664
+          ],
+          [
+            -70.6102788,
+            -33.4232377
+          ],
+          [
+            -70.6097258,
+            -33.4228532
+          ],
+          [
+            -70.6096016,
+            -33.4227668
+          ],
+          [
+            -70.6095231,
+            -33.4227122
+          ]
+        ]
+      },
+      "properties": {
+        "u": 224569616,
+        "v": 1857422080,
+        "length": 130.49022232640795,
+        "name": "Avenida Nueva Providencia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6095231,
+            -33.4227122
+          ],
+          [
+            -70.6092796,
+            -33.4225443
+          ],
+          [
+            -70.6087821,
+            -33.4222071
+          ],
+          [
+            -70.6087612,
+            -33.422193
+          ],
+          [
+            -70.6084967,
+            -33.4220038
+          ],
+          [
+            -70.6083015,
+            -33.4218739
+          ],
+          [
+            -70.6082835,
+            -33.4218611
+          ],
+          [
+            -70.6077608,
+            -33.4214905
+          ],
+          [
+            -70.6077185,
+            -33.4214605
+          ],
+          [
+            -70.6076067,
+            -33.4213806
+          ]
+        ]
+      },
+      "properties": {
+        "u": 1857422080,
+        "v": 13882190,
+        "length": 231.44155184665203,
+        "name": "Avenida Nueva Providencia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6076067,
+            -33.4213806
+          ],
+          [
+            -70.6075017,
+            -33.4213038
+          ],
+          [
+            -70.6071118,
+            -33.4210113
+          ],
+          [
+            -70.6070193,
+            -33.4209386
+          ],
+          [
+            -70.6069529,
+            -33.4208731
+          ]
+        ]
+      },
+      "properties": {
+        "u": 13882190,
+        "v": 306452979,
+        "length": 82.94429045126026,
+        "name": "Avenida Nueva Providencia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6069529,
+            -33.4208731
+          ],
+          [
+            -70.6069013,
+            -33.420811
+          ],
+          [
+            -70.6068241,
+            -33.4207182
+          ]
+        ]
+      },
+      "properties": {
+        "u": 306452979,
+        "v": 12489440733,
+        "length": 20.965754247753534,
+        "name": "Avenida Nueva Providencia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6068241,
+            -33.4207182
+          ],
+          [
+            -70.6068034,
+            -33.4206889
+          ],
+          [
+            -70.6066398,
+            -33.4204679
+          ],
+          [
+            -70.6065723,
+            -33.4203836
+          ]
+        ]
+      },
+      "properties": {
+        "u": 12489440733,
+        "v": 2598380080,
+        "length": 43.94313014573769,
+        "name": "Avenida Nueva Providencia"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -70.6065723,
+            -33.4203836
+          ],
+          [
+            -70.6064674,
+            -33.4202642
+          ],
+          [
+            -70.6063675,
+            -33.4201735
+          ],
+          [
+            -70.6062931,
+            -33.4201198
+          ],
+          [
+            -70.6062173,
+            -33.4200727
+          ],
+          [
+            -70.6061409,
+            -33.4200347
+          ],
+          [
+            -70.60599,
+            -33.4199647
+          ],
+          [
+            -70.6058502,
+            -33.4199045
+          ]
+        ]
+      },
+      "properties": {
+        "u": 2598380080,
+        "v": 334697380,
+        "length": 86.93907345104537,
+        "name": "Avenida Nueva Providencia"
+      }
+    }
+  ]
+}

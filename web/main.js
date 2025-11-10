@@ -34,6 +34,15 @@
     const metroLayer = L.layerGroup().addTo(map);
     const paraderosLayer = L.layerGroup().addTo(map);
     const edgesLayer = L.layerGroup().addTo(map);
+    const routeOSMLayer = L.layerGroup(); // not added by default
+    let routeOSMGeoJson = null; // hold L.geoJSON layer when loaded
+
+    // Graph data (loaded from data/nodes.geojson and data/edges.geojson)
+    let nodesGeoJSON = null;
+    let edgesGeoJSON = null;
+    const nodeIndex = new Map(); // nodeId -> {lat, lon}
+    const adj = new Map(); // nodeId -> Array<{to, weight}>
+    const edgeLookup = new Map(); // "u-v" -> feature
 
     // Icons
     const icons = {
@@ -53,6 +62,11 @@
             iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
         })
     };
+    icons.selectedHome = L.icon({
+        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-yellow.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+        iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+    });
     // paradero icon
     icons.paradero = L.icon({
         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
@@ -68,6 +82,7 @@
     let metroPois = [];
     let startPointMarker = null;
     let paraderos = [];
+    let selectedProperties = [];
     
     // Filter UI elements (initialized after DOM queries)
     const filterTypeCasaCb = document.getElementById('filter-type-casa');
@@ -166,12 +181,52 @@
                 const formattedPrice = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(house.precio_peso || house.precio_uf || 0);
                 const popup = `\n                    <div style="width:220px">\n                        <img src="${house.imagen || ''}" style="width:100%;height:auto;border-radius:4px"/>\n                        <h4 style="margin:6px 0">${house.titulo || ''}</h4>\n                        <p style="margin:2px 0"><b>Precio:</b> ${formattedPrice}</p>\n                        <p style="margin:2px 0"><b>Comuna:</b> ${house.comuna || ''}</p>\n                        <a href="${house.url || '#'}" target="_blank">Ver</a>\n                    </div>\n                `;
                 marker.bindPopup(popup);
+                // toggle selection on click
+                marker.on('click', function(e){
+                    // toggle selected state
+                    const idx = selectedProperties.findIndex(s => s.id === house.id);
+                    if (idx === -1) {
+                        selectedProperties.push(house);
+                        marker.setIcon(icons.selectedHome);
+                    } else {
+                        selectedProperties.splice(idx,1);
+                        marker.setIcon(icons.home);
+                    }
+                    updateItineraryUI();
+                });
                 marker.houseData = house;
                 houseMarkers.push(marker);
                 housesLayer.addLayer(marker);
             }
         });
         setText('houses-filtered-count', houseMarkers.length);
+    }
+
+    function updateItineraryUI() {
+        const container = document.getElementById('itinerary-list');
+        if (!container) return;
+        container.innerHTML = '';
+        selectedProperties.forEach((h, i) => {
+            const div = document.createElement('div');
+            div.style.padding = '6px 4px';
+            div.style.borderBottom = '1px solid #f0f0f0';
+            div.innerHTML = `<b>${h.titulo || h.nombre || h.address || 'Propiedad'}</b><br/><span class="small">${h.comuna || ''} — ${h._operation||''}</span>`;
+            // remove button
+            const rm = document.createElement('button');
+            rm.textContent = 'Quitar'; rm.style.float='right'; rm.style.marginLeft='6px'; rm.style.background='#dc3545'; rm.style.color='#fff'; rm.style.border='none'; rm.style.padding='4px 6px';
+            rm.onclick = function(){
+                // deselect marker icon
+                const m = houseMarkers.find(mk => mk.houseData && mk.houseData.id === h.id);
+                if (m) m.setIcon(icons.home);
+                const idx = selectedProperties.findIndex(s => s.id === h.id);
+                if (idx!==-1) selectedProperties.splice(idx,1);
+                updateItineraryUI();
+            };
+            div.appendChild(rm);
+            container.appendChild(div);
+        });
+        // update counter
+        setText('houses-filtered-count', houseMarkers.filter(m => housesLayer.hasLayer(m)).length + ' (seleccionadas: ' + selectedProperties.length + ')');
     }
 
     function matchesTypeOperation(house) {
@@ -326,6 +381,73 @@
         return { lat, lon };
     }
 
+    // Snap lat/lon to nearest graph node id
+    function snapToNearestNode(lat, lon) {
+        let bestId = null;
+        let bestDist = Infinity;
+        nodeIndex.forEach((v, id) => {
+            const d = haversineDistance({lat, lon}, {lat: v.lat, lon: v.lon});
+            if (d < bestDist) { bestDist = d; bestId = id; }
+        });
+        return { id: bestId, distance: bestDist };
+    }
+
+    // Simple Dijkstra on the adjacency map. Returns array of node ids or null
+    function dijkstra(startId, goalId) {
+        if (startId === undefined || goalId === undefined) return null;
+        const pq = new Map(); // id -> dist (we'll use naive map as PQ)
+        const dist = new Map();
+        const prev = new Map();
+        // init
+        nodeIndex.forEach((_, id) => { dist.set(id, Infinity); });
+        dist.set(startId, 0);
+        pq.set(startId, 0);
+        while (pq.size) {
+            // extract min
+            let u = null; let ud = Infinity;
+            pq.forEach((val, key) => { if (val < ud) { ud = val; u = key; } });
+            pq.delete(u);
+            if (u === goalId) break;
+            const neighbors = adj.get(u) || [];
+            for (const nb of neighbors) {
+                const alt = dist.get(u) + (nb.weight || 1);
+                if (alt < (dist.get(nb.to) || Infinity)) {
+                    dist.set(nb.to, alt);
+                    prev.set(nb.to, u);
+                    pq.set(nb.to, alt);
+                }
+            }
+        }
+        if (!prev.has(goalId) && startId !== goalId) return null;
+        const path = [];
+        let cur = goalId;
+        path.push(cur);
+        while (cur !== startId) {
+            cur = prev.get(cur);
+            if (cur === undefined) break;
+            path.push(cur);
+        }
+        return path.reverse();
+    }
+
+    function nodesPathToEdgeFeatures(path) {
+        const features = [];
+        for (let i = 0; i < path.length - 1; i++) {
+            const a = path[i], b = path[i+1];
+            const key = `${a}-${b}`;
+            const f = edgeLookup.get(key);
+            if (f) features.push(f);
+            else {
+                // try to find any edge between a and b
+                const found = (edgesGeoJSON && edgesGeoJSON.features || []).find(ff => {
+                    const p = ff.properties || {}; return (p.u==a && p.v==b) || (p.u==b && p.v==a);
+                });
+                if (found) features.push(found);
+            }
+        }
+        return features;
+    }
+
     function loadMetro() {
         return fetch('data/Estaciones_actuales_Metro_de_Santiago.csv').then(r => r.text()).then(t => {
             const parsed = parseCSV(t);
@@ -342,6 +464,19 @@
             });
             setText('debug-metro', `metro cargados: ${metroPois.length}`);
             setText('metro-count', metroPois.length);
+            // populate start-select with stations inside Providencia bbox
+            try {
+                const startSelect = document.getElementById('start-select');
+                if (startSelect) {
+                    const minLon = -70.625, maxLon = -70.580, minLat = -33.440, maxLat = -33.410;
+                    metroPois.filter(p => p.lon >= minLon && p.lon <= maxLon && p.lat >= minLat && p.lat <= maxLat).forEach((p, i) => {
+                        const opt = document.createElement('option');
+                        opt.value = JSON.stringify({lat:p.lat,lon:p.lon,name:p.name});
+                        opt.text = p.name + (p.linea?(' ('+p.linea+')'):'');
+                        startSelect.appendChild(opt);
+                    });
+                }
+            } catch(e){console.warn('start-select populate failed', e)}
         }).catch(e => { console.error('failed parse metro csv', e); const d=document.getElementById('debug-metro'); if(d)d.textContent='metro load error'; });
     }
 
@@ -351,6 +486,37 @@
             if (!r.ok) throw new Error('edges not found');
             return r.json();
         }).then(gj => {
+            // keep copy for routing
+            edgesGeoJSON = gj;
+
+            // Build adjacency and edge lookup for quick path finding
+            try {
+                (gj.features || []).forEach(f => {
+                    const props = f.properties || {};
+                    const u = props.u, v = props.v;
+                    // length fallback
+                    const length = (props.length && Number(props.length)) || (() => {
+                        // attempt to compute from geometry's coordinates last-first
+                        try {
+                            const coords = f.geometry && f.geometry.coordinates;
+                            if (coords && coords.length) {
+                                const a = coords[0], b = coords[coords.length-1];
+                                return haversineDistance({lat: a[1], lon: a[0]}, {lat: b[1], lon: b[0]});
+                            }
+                        } catch(e){}
+                        return 1;
+                    })();
+                    if (u !== undefined && v !== undefined) {
+                        if (!adj.has(u)) adj.set(u, []);
+                        if (!adj.has(v)) adj.set(v, []);
+                        adj.get(u).push({ to: v, weight: Number(length) });
+                        adj.get(v).push({ to: u, weight: Number(length) });
+                        edgeLookup.set(`${u}-${v}`, f);
+                        edgeLookup.set(`${v}-${u}`, f);
+                    }
+                });
+            } catch(e) { console.warn('build adjacency failed', e); }
+
             const geojsonLayer = L.geoJSON(gj, {
                 style: function(feature) {
                     return { color: '#3388ff', weight: 2, opacity: 0.6 };
@@ -364,6 +530,26 @@
             edgesLayer.addLayer(geojsonLayer);
             setText('debug-edges', `aristas cargadas: ${ (gj.features && gj.features.length) || 0}`);
         }).catch(e => { console.warn('edges load error', e); const d=document.getElementById('debug-edges'); if(d)d.textContent='edges load error'; });
+    }
+
+    function loadNodes() {
+        return fetch('data/nodes.geojson').then(r => {
+            if (!r.ok) throw new Error('nodes not found');
+            return r.json();
+        }).then(gj => {
+            nodesGeoJSON = gj;
+            try {
+                (gj.features || []).forEach(f => {
+                    const props = f.properties || {};
+                    const id = props.id || props.osm_id || props.node_id || props.nid;
+                    const coords = f.geometry && f.geometry.coordinates;
+                    if (id !== undefined && coords && coords.length) {
+                        nodeIndex.set(Number(id), { lat: coords[1], lon: coords[0] });
+                    }
+                });
+            } catch(e) { console.warn('build node index failed', e); }
+            setText('debug-nodes', `nodos cargados: ${(gj.features && gj.features.length) || 0}`);
+        }).catch(e => { console.warn('nodes load error', e); const d=document.getElementById('debug-nodes'); if(d)d.textContent='nodes load error'; });
     }
 
     // Apply POI filters
@@ -398,33 +584,158 @@
     if (showParaderosCb) showParaderosCb.addEventListener('change', e => { if (e.target.checked) paraderosLayer.addTo(map); else map.removeLayer(paraderosLayer); });
     if (showEdgesCb) showEdgesCb.addEventListener('change', e => { if (e.target.checked) edgesLayer.addTo(map); else map.removeLayer(edgesLayer); });
 
+    // Route OSM toggle
+    const showRouteOSMCb = document.getElementById('show-route-osm');
+    async function loadRouteOSM() {
+        const debugEl = document.getElementById('debug-route');
+        try {
+            const res = await fetch('data/route_osm.geojson');
+            if (!res.ok) throw new Error('route_osm.geojson not found');
+            const gj = await res.json();
+            // remove previous if exists
+            if (routeOSMGeoJson) routeOSMLayer.removeLayer(routeOSMGeoJson);
+            routeOSMGeoJson = L.geoJSON(gj, {
+                style: function(feature) {
+                    return { color: '#d9534f', weight: 4, opacity: 0.9 };
+                },
+                onEachFeature: function(feature, layer) {
+                    const props = feature.properties || {};
+                    const info = [];
+                    if (props && props.u !== undefined && props.v !== undefined) info.push('u:'+props.u+' v:'+props.v);
+                    if (props && props.length) info.push('len:'+Math.round(props.length)+'m');
+                    if (info.length) layer.bindPopup(info.join(' — '));
+                }
+            });
+            routeOSMLayer.clearLayers();
+            routeOSMLayer.addLayer(routeOSMGeoJson);
+            if (showRouteOSMCb && showRouteOSMCb.checked) routeOSMLayer.addTo(map);
+            if (debugEl) debugEl.textContent = (gj.features && gj.features.length) || 0;
+        } catch (err) {
+            console.warn('loadRouteOSM error', err);
+            if (debugEl) debugEl.textContent = 'error';
+        }
+    }
+    if (showRouteOSMCb) {
+        showRouteOSMCb.addEventListener('change', e => {
+            if (e.target.checked) {
+                // ensure layer loaded
+                if (!routeOSMGeoJson) loadRouteOSM().then(() => routeOSMLayer.addTo(map));
+                else routeOSMLayer.addTo(map);
+            } else {
+                map.removeLayer(routeOSMLayer);
+            }
+        });
+    }
+
     if (applyPoiFiltersBtn) applyPoiFiltersBtn.addEventListener('click', () => applyPoiFilters());
 
     // Start point
-    startPointBtn.addEventListener('click', () => {
+    // Use start-select value or geolocation
+    const startSelectEl = document.getElementById('start-select');
+    const pickStartBtn = document.getElementById('pick-start-btn');
+    if (startPointBtn) startPointBtn.addEventListener('click', () => {
         navigator.geolocation.getCurrentPosition(position => {
             const { latitude, longitude } = position.coords;
-            if (startPointMarker) map.removeLayer(startPointMarker);
-            startPointMarker = L.marker([latitude, longitude], { icon: L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25,41], iconAnchor:[12,41] }) }).addTo(map);
-            startPointMarker.bindPopup('<b>Tu ubicación</b>').openPopup();
-            map.setView([latitude, longitude], 14);
+            setStartPoint(latitude, longitude, 'Tu ubicación');
         }, err => { console.error('geolocation err', err); alert('No se pudo obtener ubicación.'); });
     });
 
-    // Placeholder for route calculation button
-    calculateRouteBtn.addEventListener('click', () => {
-        if (!startPointMarker) return alert('Define punto de partida');
-        const visible = houseMarkers.filter(m => housesLayer.hasLayer(m));
-        if (visible.length === 0) return alert('No hay casas visibles para calcular ruta');
-        // For now just draw polylines connecting start -> houses in order
-        const start = startPointMarker.getLatLng();
-        const latlngs = [start].concat(visible.map(m => m.getLatLng()));
-        L.polyline(latlngs, { color: 'green' }).addTo(map);
-        alert('Ruta dibujada en orden de visualización (temporal)');
+    if (startSelectEl) startSelectEl.addEventListener('change', (e) => {
+        const v = e.target.value;
+        if (!v || v === 'user') return; // user handled by button
+        try {
+            const obj = JSON.parse(v);
+            setStartPoint(obj.lat, obj.lon, obj.name || 'Estación');
+        } catch(ex){ console.warn('invalid start select', ex); }
     });
 
-    // Load everything (including paraderos and edges if present)
-    Promise.all([loadHouses(), loadHealth(), loadMetro(), loadParaderos(), loadEdges()]).then(() => {
+    if (pickStartBtn) {
+        let picking = false;
+        pickStartBtn.addEventListener('click', () => {
+            picking = !picking;
+            pickStartBtn.textContent = picking ? 'Clic en mapa para fijar' : 'Elegir en el mapa';
+            if (picking) {
+                map.once('click', function(ev){ setStartPoint(ev.latlng.lat, ev.latlng.lng, 'Punto elegido'); picking=false; pickStartBtn.textContent='Elegir en el mapa'; });
+            }
+        });
+    }
+
+    function setStartPoint(lat, lon, label) {
+        if (startPointMarker) map.removeLayer(startPointMarker);
+        startPointMarker = L.marker([lat, lon], { icon: L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25,41], iconAnchor:[12,41] }) }).addTo(map);
+        startPointMarker.bindPopup('<b>' + (label||'Inicio') + '</b>').openPopup();
+        map.setView([lat, lon], 14);
+    }
+
+    // Placeholder for route calculation button
+    calculateRouteBtn.addEventListener('click', async () => {
+        // Graph-aware routing: snap start & waypoints to nearest graph node and compute shortest path across edges
+        if (!startPointMarker) return alert('Define punto de partida');
+        const toVisit = selectedProperties.length ? selectedProperties : houseMarkers.filter(m => housesLayer.hasLayer(m)).map(m => m.houseData);
+        if (toVisit.length === 0) return alert('No hay propiedades seleccionadas o visibles para calcular ruta');
+
+        // ensure graph loaded
+        if (!nodesGeoJSON) await loadNodes();
+        if (!edgesGeoJSON) await loadEdges();
+
+        // snap start & each target to node
+        const start = startPointMarker.getLatLng();
+        const snapped = snapToNearestNode(start.lat, start.lng);
+        if (!snapped || snapped.id === null) return alert('No se pudo ubicar nodo cercano al inicio');
+        const startNode = snapped.id;
+
+        // collect waypoint node ids (preserve order)
+        const waypointNodes = [];
+        for (const h of toVisit) {
+            const s = snapToNearestNode(h.lat, h.lon);
+            if (!s || s.id===null) {
+                console.warn('could not snap', h); continue;
+            }
+            waypointNodes.push({ house: h, nodeId: s.id });
+        }
+        if (waypointNodes.length === 0) return alert('No se pudo snapear ninguna propiedad a la red');
+
+        // compute concatenated path across sequence: start -> wp1 -> wp2 -> ...
+        let current = startNode;
+        let allEdgeFeatures = [];
+        for (const wp of waypointNodes) {
+            const pathNodes = dijkstra(current, wp.nodeId);
+            if (!pathNodes) { console.warn('no path between', current, wp.nodeId); continue; }
+            const feats = nodesPathToEdgeFeatures(pathNodes);
+            allEdgeFeatures = allEdgeFeatures.concat(feats);
+            current = wp.nodeId;
+        }
+
+        if (allEdgeFeatures.length === 0) return alert('No se pudo generar la ruta en la red (revisa aristas/nodos)');
+
+        // render
+        if (window._generatedRouteLayer) map.removeLayer(window._generatedRouteLayer);
+        const fc = { type: 'FeatureCollection', features: allEdgeFeatures };
+        window._generatedRouteLayer = L.geoJSON(fc, { style: { color: '#28a745', weight: 4, opacity: 0.9 } }).addTo(map);
+        // zoom to route
+        try { map.fitBounds(window._generatedRouteLayer.getBounds(), { padding: [20,20] }); } catch(e){}
+        setText('debug-route', (allEdgeFeatures && allEdgeFeatures.length) || 0);
+    });
+
+    // Clear selection and calculate selected buttons
+    const clearSelBtn = document.getElementById('clear-selection-btn');
+    const calcSelBtn = document.getElementById('calc-route-selected-btn');
+    if (clearSelBtn) clearSelBtn.addEventListener('click', () => {
+        selectedProperties = [];
+        houseMarkers.forEach(m => m.setIcon(icons.home));
+        updateItineraryUI();
+    });
+    if (calcSelBtn) calcSelBtn.addEventListener('click', () => {
+        if (!startPointMarker) return alert('Define punto de partida');
+        if (selectedProperties.length === 0) return alert('No hay propiedades seleccionadas');
+        const start = startPointMarker.getLatLng();
+        const latlngs = [start].concat(selectedProperties.map(h => L.latLng(h.lat, h.lon)));
+        L.polyline(latlngs, { color: 'orange' }).addTo(map);
+        alert('Ruta para selección dibujada (temporal)');
+    });
+
+    // Load everything (including paraderos, nodes and edges if present)
+    Promise.all([loadHouses(), loadHealth(), loadMetro(), loadParaderos(), loadNodes(), loadEdges()]).then(() => {
         const dm = debugMain('debug-mainjs'); if (dm) dm.textContent = 'main.js ejecutado';
     });
 })();

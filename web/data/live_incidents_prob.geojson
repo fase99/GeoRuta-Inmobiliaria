@@ -1,0 +1,50 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -70.6105,
+          -33.4365
+        ]
+      },
+      "properties": {
+        "type": "ACCIDENTE",
+        "description": "Accidente menor, precaución",
+        "probability": 0.25
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -70.6075,
+          -33.428
+        ]
+      },
+      "properties": {
+        "type": "CONGESTION",
+        "description": "Alta congestión vehicular",
+        "probability": 0.12
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -70.618,
+          -33.433
+        ]
+      },
+      "properties": {
+        "type": "CIERRE VIAL",
+        "description": "Calle cerrada por evento",
+        "probability": 0.08
+      }
+    }
+  ]
+}
