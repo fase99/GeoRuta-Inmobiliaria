@@ -174,11 +174,28 @@
     let universidadesPois = [];
     let colegiosPois = [];
     
+    // Smart Search Filters State
+    let smartSearchFilters = {
+        enabled: false,
+        tipoCasa: true,
+        tipoDepto: true,
+        opVenta: true,
+        opArriendo: true,
+        dormitoriosMin: 0,
+        banosMin: 0,
+        precioMin: 0,
+        precioMax: null,
+        m2ConstruidoMin: 0,
+        m2TerrenoMin: 0,
+        m2SuperficieMin: 0,
+        conTerraza: false
+    };
+    
     // Filter UI elements (initialized after DOM queries)
-    const filterTypeCasaCb = document.getElementById('filter-type-casa');
-    const filterTypeDeptoCb = document.getElementById('filter-type-depto');
-    const filterOpVentaCb = document.getElementById('filter-op-venta');
-    const filterOpArriendoCb = document.getElementById('filter-op-arriendo');
+    const filterTypeCasaCb = document.getElementById('search-type-casa');
+    const filterTypeDeptoCb = document.getElementById('search-type-depto');
+    const filterOpVentaCb = document.getElementById('search-op-venta');
+    const filterOpArriendoCb = document.getElementById('search-op-arriendo');
 
     // Controls (some are optional depending on index.html version)
     // Controls
@@ -195,6 +212,18 @@
     const showMetroCb = document.getElementById('show-metro-layer'); // optional
     const showHousesCb = document.getElementById('show-houses-layer'); // optional
     const poiRadiusInput = document.getElementById('poi-radius'); // optional
+
+    // Smart Search Controls
+    const applySmartSearchBtn = document.getElementById('apply-smart-search-btn');
+    const clearSmartSearchBtn = document.getElementById('clear-smart-search-btn');
+    const searchDormitoriosMin = document.getElementById('search-dormitorios-min');
+    const searchBanosMin = document.getElementById('search-banos-min');
+    const searchPrecioMin = document.getElementById('search-precio-min');
+    const searchPrecioMax = document.getElementById('search-precio-max');
+    const searchM2ConstruidoMin = document.getElementById('search-m2-construido-min');
+    const searchM2TerrenoMin = document.getElementById('search-m2-terreno-min');
+    const searchM2SuperficieMin = document.getElementById('search-m2-superficie-min');
+    const searchConTerraza = document.getElementById('search-con-terraza');
 
     // Safe DOM helpers
     function setText(id, text) { const el = document.getElementById(id); if (el) el.textContent = text; }
@@ -347,14 +376,40 @@
                 // Determinar el icono según tipo y operación
                 const icon = getPropertyIcon(house);
                 const marker = L.marker([house.lat, house.lon], { icon: icon });
+                
+                // Determinar tipo de propiedad
+                let propType = (house._propertyType || house.tipo_inmueble || house.tipo || house.property_type || '').toString().toLowerCase();
+                const isDepto = propType.includes('depart') || propType.includes('dpto') || propType.includes('depto') || propType === 'departamento';
+                
+                // Construir información específica según tipo
+                let detailsHTML = '';
+                if (isDepto) {
+                    // Información para departamentos
+                    detailsHTML = `
+                        <p style="margin:2px 0"><b>🛏️ Dormitorios:</b> ${house.dormitorios || 'N/A'}</p>
+                        <p style="margin:2px 0"><b>🚿 Baños:</b> ${house.baños || house.banos || 'N/A'}</p>
+                        <p style="margin:2px 0"><b>📏 M² Superficie:</b> ${house.m2_superficie || 'N/A'} m²</p>
+                        <p style="margin:2px 0"><b>🌿 Terraza:</b> ${(house.m2_terraza && house.m2_terraza > 0) ? house.m2_terraza + ' m²' : 'No tiene'}</p>
+                    `;
+                } else {
+                    // Información para casas
+                    detailsHTML = `
+                        <p style="margin:2px 0"><b>🛏️ Dormitorios:</b> ${house.dormitorios || 'N/A'}</p>
+                        <p style="margin:2px 0"><b>🚿 Baños:</b> ${house.baños || house.banos || 'N/A'}</p>
+                        <p style="margin:2px 0"><b>📐 M² Construidos:</b> ${house.m2_construido || 'N/A'} m²</p>
+                        <p style="margin:2px 0"><b>🏞️ M² Terreno:</b> ${house.m2_terreno || 'N/A'} m²</p>
+                    `;
+                }
+                
                 const formattedPrice = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(house.precio_peso || house.precio_uf || 0);
                 const popupBase = `
-                    <div style="width:220px">
+                    <div style="width:240px">
                         <img src="${house.imagen || ''}" style="width:100%;height:auto;border-radius:4px"/>
                         <h4 style="margin:6px 0">${house.titulo || ''}</h4>
-                        <p style="margin:2px 0"><b>Precio:</b> ${formattedPrice}</p>
-                        <p style="margin:2px 0"><b>Comuna:</b> ${house.comuna || ''}</p>
-                        <a href="${house.url || '#'}" target="_blank">Ver</a>
+                        <p style="margin:2px 0"><b>💰 Precio:</b> ${formattedPrice}</p>
+                        <p style="margin:2px 0"><b>📍 Comuna:</b> ${house.comuna || ''}</p>
+                        ${detailsHTML}
+                        <a href="${house.url || '#'}" target="_blank" style="display:inline-block;margin-top:8px;color:#7C3AED;font-weight:600;">Ver más detalles →</a>
                         <div id="trafico-casa-${house.id}" style="margin-top:8px;font-size:13px;color:#333">Cargando tráfico...</div>
                     </div>
                 `;
@@ -425,7 +480,7 @@
             container.appendChild(div);
         });
         // update counter
-        setText('houses-filtered-count', houseMarkers.filter(m => housesLayer.hasLayer(m)).length + ' (seleccionadas: ' + selectedProperties.length + ')');
+        // setText('houses-filtered-count', houseMarkers.filter(m => housesLayer.hasLayer(m)).length + ' (seleccionadas: ' + selectedProperties.length + ')');
     }
 
     function matchesTypeOperation(house) {
@@ -454,6 +509,43 @@
             if (!ventaChecked && !arriendoChecked) return false;
         }
 
+        // Apply smart search filters if enabled
+        if (smartSearchFilters.enabled) {
+            // Check dormitorios
+            const dormitorios = parseInt(house.dormitorios || 0);
+            if (dormitorios < smartSearchFilters.dormitoriosMin) return false;
+
+            // Check baños
+            const banos = parseInt(house.baños || house.banos || 0);
+            if (banos < smartSearchFilters.banosMin) return false;
+
+            // Check precio (use precio_uf preferably)
+            const precio = parseFloat(house.precio_uf || house.precio_peso || 0);
+            if (precio < smartSearchFilters.precioMin) return false;
+            if (smartSearchFilters.precioMax !== null && precio > smartSearchFilters.precioMax) return false;
+
+            // Casa-specific filters
+            if (isCasa) {
+                const m2Construido = parseFloat(house.m2_construido || 0);
+                if (m2Construido < smartSearchFilters.m2ConstruidoMin) return false;
+
+                const m2Terreno = parseFloat(house.m2_terreno || 0);
+                if (m2Terreno < smartSearchFilters.m2TerrenoMin) return false;
+            }
+
+            // Depto-specific filters
+            if (isDepto) {
+                const m2Superficie = parseFloat(house.m2_superficie || 0);
+                if (m2Superficie < smartSearchFilters.m2SuperficieMin) return false;
+
+                // Check terraza
+                if (smartSearchFilters.conTerraza) {
+                    const m2Terraza = parseFloat(house.m2_terraza || 0);
+                    if (m2Terraza <= 0) return false;
+                }
+            }
+        }
+
         return true;
     }
 
@@ -461,17 +553,26 @@
     function applyProximityFilters() {
         const metroEnabled = filterByMetroCb && filterByMetroCb.checked;
         const healthEnabled = filterByHealthCb && filterByHealthCb.checked;
-        // if neither enabled, show all
-        if (!metroEnabled && !healthEnabled) { displayHouses(housesData); return; }
+        
+        // if neither proximity filter enabled, redisplay all houses (respecting smart search filters)
+        if (!metroEnabled && !healthEnabled) { 
+            displayHouses(housesData); 
+            return; 
+        }
 
         const radius = metroRadiusInput ? parseFloat(metroRadiusInput.value) : 500;
         const metroPoints = metroPois.map(m => ({ lat: m.lat, lon: m.lon }));
         const healthPoints = healthPois.map(h => ({ lat: h.lat, lon: h.lon }));
 
+        // First, regenerate all markers with current filters
+        displayHouses(housesData);
+
+        // Then apply proximity filtering
         const matched = [];
         housesLayer.clearLayers();
         houseMarkers.forEach(marker => {
             const h = marker.houseData;
+            if (!h) return; // skip if no data
             const point = { lat: h.lat, lon: h.lon };
             let ok = true;
             if (metroEnabled) {
@@ -496,6 +597,65 @@
     if (filterTypeDeptoCb) filterTypeDeptoCb.addEventListener('change', () => applyProximityFilters());
     if (filterOpVentaCb) filterOpVentaCb.addEventListener('change', () => applyProximityFilters());
     if (filterOpArriendoCb) filterOpArriendoCb.addEventListener('change', () => applyProximityFilters());
+
+    // Smart Search Event Listeners
+    if (applySmartSearchBtn) {
+        applySmartSearchBtn.addEventListener('click', () => {
+            smartSearchFilters.enabled = true;
+            smartSearchFilters.tipoCasa = filterTypeCasaCb ? filterTypeCasaCb.checked : true;
+            smartSearchFilters.tipoDepto = filterTypeDeptoCb ? filterTypeDeptoCb.checked : true;
+            smartSearchFilters.opVenta = filterOpVentaCb ? filterOpVentaCb.checked : true;
+            smartSearchFilters.opArriendo = filterOpArriendoCb ? filterOpArriendoCb.checked : true;
+            smartSearchFilters.dormitoriosMin = parseInt(searchDormitoriosMin?.value || 0);
+            smartSearchFilters.banosMin = parseInt(searchBanosMin?.value || 0);
+            smartSearchFilters.precioMin = parseFloat(searchPrecioMin?.value || 0);
+            smartSearchFilters.precioMax = searchPrecioMax?.value ? parseFloat(searchPrecioMax.value) : null;
+            smartSearchFilters.m2ConstruidoMin = parseFloat(searchM2ConstruidoMin?.value || 0);
+            smartSearchFilters.m2TerrenoMin = parseFloat(searchM2TerrenoMin?.value || 0);
+            smartSearchFilters.m2SuperficieMin = parseFloat(searchM2SuperficieMin?.value || 0);
+            smartSearchFilters.conTerraza = searchConTerraza ? searchConTerraza.checked : false;
+            
+            applyProximityFilters();
+            console.log('Búsqueda inteligente aplicada:', smartSearchFilters);
+        });
+    }
+
+    if (clearSmartSearchBtn) {
+        clearSmartSearchBtn.addEventListener('click', () => {
+            // Disable smart search filters
+            smartSearchFilters.enabled = false;
+            smartSearchFilters.tipoCasa = true;
+            smartSearchFilters.tipoDepto = true;
+            smartSearchFilters.opVenta = true;
+            smartSearchFilters.opArriendo = true;
+            smartSearchFilters.dormitoriosMin = 0;
+            smartSearchFilters.banosMin = 0;
+            smartSearchFilters.precioMin = 0;
+            smartSearchFilters.precioMax = null;
+            smartSearchFilters.m2ConstruidoMin = 0;
+            smartSearchFilters.m2TerrenoMin = 0;
+            smartSearchFilters.m2SuperficieMin = 0;
+            smartSearchFilters.conTerraza = false;
+            
+            // Reset UI elements
+            if (filterTypeCasaCb) filterTypeCasaCb.checked = true;
+            if (filterTypeDeptoCb) filterTypeDeptoCb.checked = true;
+            if (filterOpVentaCb) filterOpVentaCb.checked = true;
+            if (filterOpArriendoCb) filterOpArriendoCb.checked = true;
+            if (searchDormitoriosMin) searchDormitoriosMin.value = '0';
+            if (searchBanosMin) searchBanosMin.value = '0';
+            if (searchPrecioMin) searchPrecioMin.value = '0';
+            if (searchPrecioMax) searchPrecioMax.value = '';
+            if (searchM2ConstruidoMin) searchM2ConstruidoMin.value = '0';
+            if (searchM2TerrenoMin) searchM2TerrenoMin.value = '0';
+            if (searchM2SuperficieMin) searchM2SuperficieMin.value = '0';
+            if (searchConTerraza) searchConTerraza.checked = false;
+            
+            // Reapply filters to show all properties
+            applyProximityFilters();
+            console.log('✅ Filtros de búsqueda inteligente limpiados. Mostrando todas las propiedades.');
+        });
+    }
 
     // CSV parsing (pipe-delimited)
     function parsePipeCSV(text) {

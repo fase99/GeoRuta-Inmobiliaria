@@ -505,3 +505,64 @@ button:disabled {
   background: #DC2626;
   transform: translateY(-50%) scale(1.05);
 }
+
+/* Smart Search Styles */
+#casa-filters,
+#depto-filters {
+  transition: opacity 0.3s, max-height 0.3s;
+}
+
+.small {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* Input number styling */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Help text */
+.help-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* Stats grid for 2 columns */
+.stats-grid-2col {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 1024px) {
+  #map {
+    right: 300px;
+  }
+  
+  #controls {
+    width: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  #map {
+    right: 0;
+    bottom: 50vh;
+  }
+  
+  #controls {
+    top: 50vh;
+    right: 0;
+    width: 100%;
+    max-height: 50vh;
+  }
+}

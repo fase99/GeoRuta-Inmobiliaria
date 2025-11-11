@@ -13,11 +13,100 @@
   <div id="controls">
     <div class="header">
       <h1>🏘️ GeoRuta Inmobiliaria</h1>
-      <p class="subtitle">Encuentra tu propiedad ideal</p>
+      <p class="subtitle">⭐️ <i>La <b>resiliencia</b> te guía hacia tu propiedad perfecta</i></p>
     </div>
     
     <div class="control-group card">
-      <h3 class="section-title">🔍 Filtros de Búsqueda</h3>
+      <h3 class="section-title">🔍 Búsqueda Inteligente</h3>
+      
+      <!-- Filtros básicos de tipo y operación -->
+      <div style="margin-bottom: 16px;">
+        <h4 style="margin: 8px 0 6px; font-size: 13px; font-weight: 600; color: #555;">Tipo de Propiedad</h4>
+        <label class="checkbox-label">
+          <input type="checkbox" id="search-type-casa" checked />
+          <span>🏠 Casas</span>
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="search-type-depto" checked />
+          <span>🏢 Departamentos</span>
+        </label>
+      </div>
+
+      <div style="margin-bottom: 16px;">
+        <h4 style="margin: 8px 0 6px; font-size: 13px; font-weight: 600; color: #555;">Operación</h4>
+        <label class="checkbox-label">
+          <input type="checkbox" id="search-op-venta" checked />
+          <span>💰 Venta</span>
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="search-op-arriendo" checked />
+          <span>🏘️ Arriendo</span>
+        </label>
+      </div>
+
+      <!-- Filtros comunes -->
+      <div style="margin-bottom: 16px; padding: 12px; background: #f8f9fa; border-radius: 6px;">
+        <h4 style="margin: 0 0 12px; font-size: 13px; font-weight: 600; color: #333;">Filtros Generales</h4>
+        
+        <div class="input-group" style="margin-bottom: 8px;">
+          <label for="search-dormitorios-min" class="input-label">🛏️ Dormitorios (mín.)</label>
+          <input type="number" id="search-dormitorios-min" value="0" min="0" max="10" class="input-field" />
+        </div>
+        
+        <div class="input-group" style="margin-bottom: 8px;">
+          <label for="search-banos-min" class="input-label">🚿 Baños (mín.)</label>
+          <input type="number" id="search-banos-min" value="0" min="0" max="10" class="input-field" />
+        </div>
+
+        <div class="input-group" style="margin-bottom: 8px;">
+          <label for="search-precio-min" class="input-label">💵 Precio mín. (UF)</label>
+          <input type="number" id="search-precio-min" value="0" min="0" step="100" class="input-field" placeholder="0" />
+        </div>
+
+        <div class="input-group" style="margin-bottom: 8px;">
+          <label for="search-precio-max" class="input-label">💵 Precio máx. (UF)</label>
+          <input type="number" id="search-precio-max" value="" min="0" step="100" class="input-field" placeholder="Sin límite" />
+        </div>
+      </div>
+
+      <!-- Filtros específicos para casas -->
+      <div id="casa-filters" style="margin-bottom: 16px; padding: 12px; background: #fff3e0; border-radius: 6px; border-left: 3px solid #FFA500;">
+        <h4 style="margin: 0 0 12px; font-size: 13px; font-weight: 600; color: #333;">🏠 Filtros para Casas</h4>
+        
+        <div class="input-group" style="margin-bottom: 8px;">
+          <label for="search-m2-construido-min" class="input-label">📐 M² Construidos (mín.)</label>
+          <input type="number" id="search-m2-construido-min" value="0" min="0" step="10" class="input-field" />
+        </div>
+
+        <div class="input-group" style="margin-bottom: 8px;">
+          <label for="search-m2-terreno-min" class="input-label">🏞️ M² Terreno (mín.)</label>
+          <input type="number" id="search-m2-terreno-min" value="0" min="0" step="10" class="input-field" />
+        </div>
+      </div>
+
+      <!-- Filtros específicos para departamentos -->
+      <div id="depto-filters" style="margin-bottom: 16px; padding: 12px; background: #e3f2fd; border-radius: 6px; border-left: 3px solid #2A81CB;">
+        <h4 style="margin: 0 0 12px; font-size: 13px; font-weight: 600; color: #333;">🏢 Filtros para Departamentos</h4>
+        
+        <div class="input-group" style="margin-bottom: 8px;">
+          <label for="search-m2-superficie-min" class="input-label">📏 M² Superficie (mín.)</label>
+          <input type="number" id="search-m2-superficie-min" value="0" min="0" step="5" class="input-field" />
+        </div>
+
+        <label class="checkbox-label">
+          <input type="checkbox" id="search-con-terraza" />
+          <span>🌿 Con Terraza</span>
+        </label>
+      </div>
+
+      <div class="button-group">
+        <button id="apply-smart-search-btn" class="btn btn-primary">🔍 Aplicar Búsqueda</button>
+        <button id="clear-smart-search-btn" class="btn btn-outline">🔄 Limpiar Filtros</button>
+      </div>
+    </div>
+
+    <div class="control-group card">
+      <h3 class="section-title">📍 Filtros de Proximidad</h3>
       <label class="checkbox-label">
         <input type="checkbox" id="filter-by-metro" />
         <span>Estaciones de metro cercanas</span>
@@ -58,7 +147,7 @@
     </div>
 
     <div class="control-group card">
-      <h3 class="section-title">📊 Estadísticas</h3>
+      <h3 class="section-title">📊 Cantidad de Elementos Registrados</h3>
       <div class="stats-grid stats-grid-2col">
         <div class="stat-item">
           <span class="stat-label">Propiedades</span>
@@ -96,8 +185,8 @@
     </div>
 
     <div class="control-group card">
-      <h3 class="section-title">� Simbología de Marcadores</h3>
-      <p class="help-text" style="margin-bottom: 12px; font-size: 12px;">Los marcadores están divididos en dos colores:</p>
+      <h3 class="section-title">📣 Simbología de Marcadores Inmobiliario</h3>
+      <p class="help-text" style="margin-bottom: 12px; font-size: 12px;">Los marcadores están divididos en dos colores</p>
       
       <div style="margin-bottom: 16px;">
         <h4 style="margin: 8px 0 6px; font-size: 13px; font-weight: 600; color: #555;">Lado Izquierdo = Tipo de Propiedad</h4>
@@ -149,30 +238,6 @@
           <span style="font-size: 12px; font-weight: 600; color: #28a745;">✓ Propiedad Seleccionada (borde verde)</span>
         </div>
       </div>
-    </div>
-
-    <div class="control-group card">
-      <h3 class="section-title">🏠 Filtrar por Tipo</h3>
-      <label class="checkbox-label">
-        <input type="checkbox" id="filter-type-casa" checked />
-        <span>🏠 Casas</span>
-      </label>
-      <label class="checkbox-label">
-        <input type="checkbox" id="filter-type-depto" checked />
-        <span>🏢 Departamentos</span>
-      </label>
-    </div>
-
-    <div class="control-group card">
-      <h3 class="section-title">💰 Filtrar por Operación</h3>
-      <label class="checkbox-label">
-        <input type="checkbox" id="filter-op-venta" checked />
-        <span>💰 Venta</span>
-      </label>
-      <label class="checkbox-label">
-        <input type="checkbox" id="filter-op-arriendo" checked />
-        <span>🏘️ Arriendo</span>
-      </label>
     </div>
 
     <div class="control-group card">
