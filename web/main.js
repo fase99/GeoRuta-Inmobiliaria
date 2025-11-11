@@ -227,6 +227,45 @@
         }
     }
 
+
+    // Consulta tráfico TomTom y retorna promesa con resultados para varias horas
+    async function getTrafficLevelTomTom(lat, lon, hoursArray) {
+        const apiKey = "pg1U3ZBt90bqfmOe4J6vTV2OegHIsz1X";
+        // La API Traffic Flow solo da tráfico actual, pero intentamos para cada hora (si soporta future)
+        // Si no soporta hora, solo muestra el tráfico actual
+        const results = [];
+        for (const hour of hoursArray) {
+            // TomTom Traffic Flow no permite hora futura en free tier, así que solo actual
+            const url = `https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json?point=${lat},${lon}&key=${apiKey}`;
+            try {
+                const resp = await fetch(url);
+                const data = await resp.json();
+                if (data && data.flowSegmentData) {
+                    const currentSpeed = data.flowSegmentData.currentSpeed;
+                    const freeFlowSpeed = data.flowSegmentData.freeFlowSpeed;
+                    const jamFactor = data.flowSegmentData.jamFactor;
+                    // jamFactor: 0-10 (0=fluido, 10=congestion total)
+                    let nivel = "Desconocido";
+                    if (jamFactor < 4) nivel = "Fluido";
+                    else if (jamFactor < 7) nivel = "Moderado";
+                    else nivel = "Congestionado";
+                    results.push({
+                        hour,
+                        nivel,
+                        currentSpeed,
+                        freeFlowSpeed,
+                        jamFactor
+                    });
+                } else {
+                    results.push({ hour, nivel: "Sin datos" });
+                }
+            } catch (err) {
+                results.push({ hour, nivel: "Error" });
+            }
+        }
+        return results;
+    }
+
     function displayHouses(houses) {
         housesLayer.clearLayers();
         houseMarkers = [];
@@ -239,10 +278,19 @@
                 const icon = getPropertyIcon(house);
                 const marker = L.marker([house.lat, house.lon], { icon: icon });
                 const formattedPrice = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(house.precio_peso || house.precio_uf || 0);
-                const popup = `\n                    <div style="width:220px">\n                        <img src="${house.imagen || ''}" style="width:100%;height:auto;border-radius:4px"/>\n                        <h4 style="margin:6px 0">${house.titulo || ''}</h4>\n                        <p style="margin:2px 0"><b>Precio:</b> ${formattedPrice}</p>\n                        <p style="margin:2px 0"><b>Comuna:</b> ${house.comuna || ''}</p>\n                        <a href="${house.url || '#'}" target="_blank">Ver</a>\n                    </div>\n                `;
-                marker.bindPopup(popup);
+                const popupBase = `
+                    <div style="width:220px">
+                        <img src="${house.imagen || ''}" style="width:100%;height:auto;border-radius:4px"/>
+                        <h4 style="margin:6px 0">${house.titulo || ''}</h4>
+                        <p style="margin:2px 0"><b>Precio:</b> ${formattedPrice}</p>
+                        <p style="margin:2px 0"><b>Comuna:</b> ${house.comuna || ''}</p>
+                        <a href="${house.url || '#'}" target="_blank">Ver</a>
+                        <div id="trafico-casa-${house.id}" style="margin-top:8px;font-size:13px;color:#333">Cargando tráfico...</div>
+                    </div>
+                `;
+                marker.bindPopup(popupBase);
                 // toggle selection on click
-                marker.on('click', function(e){
+                marker.on('click', async function(e){
                     // toggle selected state
                     const idx = selectedProperties.findIndex(s => s.id === house.id);
                     if (idx === -1) {
@@ -253,6 +301,22 @@
                         marker.setIcon(getPropertyIcon(house));
                     }
                     updateItineraryUI();
+
+                    // Consultar tráfico y mostrar en popup
+                    marker.openPopup();
+                    const horas = ["07:00", "08:00", "13:00", "16:00", "20:00"];
+                    const traficoDivId = `trafico-casa-${house.id}`;
+                    const traficoDiv = document.getElementById(traficoDivId);
+                    if (traficoDiv) {
+                        traficoDiv.textContent = "Consultando tráfico...";
+                        const trafico = await getTrafficLevelTomTom(house.lat, house.lon, horas);
+                        let html = "<b>Tráfico (actual, por limitación API):</b><ul style='padding-left:16px;'>";
+                        trafico.forEach(t => {
+                            html += `<li>${t.hour}: <span style='color:${t.nivel=="Fluido"?"green":t.nivel=="Moderado"?"orange":"red"}'>${t.nivel}</span> (Velocidad: ${t.currentSpeed||"-"} km/h)</li>`;
+                        });
+                        html += "</ul>";
+                        traficoDiv.innerHTML = html;
+                    }
                 });
                 marker.houseData = house;
                 houseMarkers.push(marker);
