@@ -39,6 +39,8 @@
     const carabinerosLayer = L.layerGroup().addTo(map);
     const feriasLayer = L.layerGroup().addTo(map);
     const bomberosLayer = L.layerGroup().addTo(map);
+    const universidadesLayer = L.layerGroup().addTo(map);
+    const colegiosLayer = L.layerGroup().addTo(map);
 
     // Graph data (loaded from data/nodes.geojson and data/edges.geojson)
     let nodesGeoJSON = null;
@@ -96,6 +98,16 @@
             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
             iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        }),
+        universidad: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-violet.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        }),
+        colegio: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
         })
     };
     icons.selectedHome = L.icon({
@@ -122,6 +134,8 @@
     let carabinerosPois = [];
     let feriasPois = [];
     let bomberosPois = [];
+    let universidadesPois = [];
+    let colegiosPois = [];
     
     // Filter UI elements (initialized after DOM queries)
     const filterTypeCasaCb = document.getElementById('filter-type-casa');
@@ -634,6 +648,136 @@
         }).catch(e => { console.warn('bomberos load error', e); const d=document.getElementById('debug-bomberos'); if(d)d.textContent='error'; });
     }
 
+    function loadUniversidades() {
+        return fetch('data/Instituciones_Educacion_Superior_providencia.json').then(r => r.json()).then(data => {
+            // Agrupar por ubicación para evitar marcadores duplicados en la misma dirección
+            const grouped = new Map();
+            data.forEach(item => {
+                const key = `${item.LATITUD}_${item.LONGITUD}`;
+                if (!grouped.has(key)) {
+                    grouped.set(key, {
+                        instituciones: [],
+                        lat: parseFloat(item.LATITUD),
+                        lon: parseFloat(item.LONGITUD),
+                        direccion: `${item.DIRECCION} ${item.NUMERO_DI}`,
+                        comuna: item.COMUNA
+                    });
+                }
+                grouped.get(key).instituciones.push({
+                    nombre: item.NOMBRE_INS,
+                    tipo: item.TIPO_INST,
+                    inmueble: item.NOMBRE_INM,
+                    direccion: `${item.DIRECCION} ${item.NUMERO_DI}`,
+                    referencia: item.LUGAR_REFE
+                });
+            });
+            
+            universidadesPois = Array.from(grouped.values()).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+            
+            universidadesPois.forEach(p => {
+                // Crear lista de instituciones en esta ubicación
+                const instList = p.instituciones.map(inst => {
+                    return `<div style="margin-bottom:8px; padding:6px; background:#f5f3ff; border-radius:4px;">
+                        <b>${inst.nombre}</b><br/>
+                        <span style="font-size:11px; color:#6D28D9;">
+                            📚 ${inst.tipo}<br/>
+                            🏢 ${inst.inmueble}${inst.referencia ? '<br/>📍 ' + inst.referencia : ''}
+                        </span>
+                    </div>`;
+                }).join('');
+                
+                const popupContent = `
+                    <div style="width:280px; max-height:300px; overflow-y:auto;">
+                        <h4 style="margin:0 0 10px 0; color:#7C3AED; font-size:14px;">
+                            🎓 Educación Superior
+                        </h4>
+                        <p style="margin:0 0 10px 0; font-size:12px;">
+                            <b>📍 ${p.direccion}</b><br/>
+                            <span style="color:#666;">${p.comuna}</span>
+                        </p>
+                        <div style="font-size:12px;">
+                            <b>${p.instituciones.length} Institución${p.instituciones.length > 1 ? 'es' : ''}:</b>
+                        </div>
+                        <div style="margin-top:8px; max-height:200px; overflow-y:auto;">
+                            ${instList}
+                        </div>
+                    </div>
+                `;
+                const m = L.marker([p.lat, p.lon], { icon: icons.universidad }).bindPopup(popupContent);
+                universidadesLayer.addLayer(m);
+            });
+            
+            setText('debug-universidades', `universidades cargadas: ${universidadesPois.length} ubicaciones (${data.length} inmuebles)`);
+            setText('universidades-count', universidadesPois.length);
+        }).catch(e => { console.warn('universidades load error', e); const d=document.getElementById('debug-universidades'); if(d)d.textContent='error'; });
+    }
+
+    function loadColegios() {
+        return fetch('data/Establecimientos_Educacionales_providencia.json').then(r => r.json()).then(data => {
+            colegiosPois = data.map(item => {
+                // Convertir coordenadas con coma a punto
+                const lat = parseFloat(item.LATITUD.replace(',', '.'));
+                const lon = parseFloat(item.LONGITUD.replace(',', '.'));
+                
+                // Determinar tipo de establecimiento
+                let tipoEstab = 'Establecimiento Educacional';
+                if (item.COD_DEPE === '1' || item.COD_DEPE === '2') {
+                    tipoEstab = 'Colegio Municipal/Público';
+                } else if (item.COD_DEPE === '3') {
+                    tipoEstab = 'Colegio Particular Subvencionado';
+                } else if (item.COD_DEPE === '4') {
+                    tipoEstab = 'Colegio Particular Pagado';
+                } else if (item.COD_DEPE === '5') {
+                    tipoEstab = 'Corporación de Administración Delegada';
+                }
+                
+                // Determinar niveles educativos
+                const niveles = [];
+                if (item.ENS_01 && item.ENS_01 !== '0') niveles.push('Parvularia');
+                if (item.ENS_02 && item.ENS_02 !== '0') niveles.push('Básica');
+                if (item.ENS_03 && item.ENS_03 !== '0') niveles.push('Media');
+                
+                return {
+                    nombre: item.NOM_RBD,
+                    rbd: item.RBD,
+                    lat: lat,
+                    lon: lon,
+                    comuna: item.NOM_COM_RBD,
+                    tipo: tipoEstab,
+                    niveles: niveles.join(', ') || 'N/D',
+                    matricula: item.MAT_TOTAL || '0',
+                    religiosa: item.ORI_RELIGIOSA === '1' ? 'Sí' : 'No',
+                    rural: item.RURAL_RBD === '1' ? 'Rural' : 'Urbano',
+                    estado: item.ESTADO_ESTAB === '1' ? 'Activo' : 'Inactivo'
+                };
+            }).filter(p => !isNaN(p.lat) && !isNaN(p.lon) && p.estado === 'Activo');
+            
+            colegiosPois.forEach(p => {
+                const popupContent = `
+                    <div style="width:260px;">
+                        <h4 style="margin:0 0 10px 0; color:#10B981; font-size:14px;">
+                            🏫 ${p.nombre}
+                        </h4>
+                        <div style="font-size:12px; line-height:1.6;">
+                            <p style="margin:4px 0;">
+                                <b>🏷️ RBD:</b> ${p.rbd}<br/>
+                                <b>📚 Niveles:</b> ${p.niveles}<br/>
+                                <b>🎓 Tipo:</b> ${p.tipo}<br/>
+                                <b>👥 Matrícula:</b> ${p.matricula} estudiantes<br/>
+                                <b>📍 ${p.comuna}</b>
+                            </p>
+                        </div>
+                    </div>
+                `;
+                const m = L.marker([p.lat, p.lon], { icon: icons.colegio }).bindPopup(popupContent);
+                colegiosLayer.addLayer(m);
+            });
+            
+            setText('debug-colegios', `colegios cargados: ${colegiosPois.length}`);
+            setText('colegios-count', colegiosPois.length);
+        }).catch(e => { console.warn('colegios load error', e); const d=document.getElementById('debug-colegios'); if(d)d.textContent='error'; });
+    }
+
     function loadEdges() {
         // Load edges geojson (linestrings) if generated by ETL
         return fetch('data/edges.geojson').then(r => {
@@ -738,12 +882,16 @@
     const showCarabinerosCb = document.getElementById('show-carabineros-layer');
     const showFeriasCb = document.getElementById('show-ferias-layer');
     const showBomberosCb = document.getElementById('show-bomberos-layer');
+    const showUniversidadesCb = document.getElementById('show-universidades-layer');
+    const showColegiosCb = document.getElementById('show-colegios-layer');
     
     if (showParaderosCb) showParaderosCb.addEventListener('change', e => { if (e.target.checked) paraderosLayer.addTo(map); else map.removeLayer(paraderosLayer); });
     if (showEdgesCb) showEdgesCb.addEventListener('change', e => { if (e.target.checked) edgesLayer.addTo(map); else map.removeLayer(edgesLayer); });
     if (showCarabinerosCb) showCarabinerosCb.addEventListener('change', e => { if (e.target.checked) carabinerosLayer.addTo(map); else map.removeLayer(carabinerosLayer); });
     if (showFeriasCb) showFeriasCb.addEventListener('change', e => { if (e.target.checked) feriasLayer.addTo(map); else map.removeLayer(feriasLayer); });
     if (showBomberosCb) showBomberosCb.addEventListener('change', e => { if (e.target.checked) bomberosLayer.addTo(map); else map.removeLayer(bomberosLayer); });
+    if (showUniversidadesCb) showUniversidadesCb.addEventListener('change', e => { if (e.target.checked) universidadesLayer.addTo(map); else map.removeLayer(universidadesLayer); });
+    if (showColegiosCb) showColegiosCb.addEventListener('change', e => { if (e.target.checked) colegiosLayer.addTo(map); else map.removeLayer(colegiosLayer); });
 
 
     // Route OSM toggle
@@ -909,6 +1057,8 @@
         loadCarabineros(),
         loadFerias(),
         loadBomberos(),
+        loadUniversidades(),
+        loadColegios(),
         loadNodes(), 
         loadEdges()
     ]).then(() => {
