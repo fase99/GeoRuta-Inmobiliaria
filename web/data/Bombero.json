@@ -1,0 +1,13 @@
+{
+  "id": 283,
+  "ciudad": "Santiago",
+  "region": "Metropolitana de Santiago",
+  "provincia": "Santiago",
+  "comuna": "Santiago",
+  "direccion": "El Golf 130",
+  "telefono": "(2) 6721204",
+  "comunas_servidas": "Estacion Central, Independencia, Las Condes, Lo Barnechea, Providencia, Recoleta, Renca, Santiago, Vitacura",
+  "longitud": -70.65109303399998,
+  "latitud": -33.43624300399995,
+  "codigo": 13101
+}

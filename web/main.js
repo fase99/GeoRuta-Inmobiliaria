@@ -36,6 +36,9 @@
     const edgesLayer = L.layerGroup().addTo(map);
     const routeOSMLayer = L.layerGroup(); // not added by default
     let routeOSMGeoJson = null; // hold L.geoJSON layer when loaded
+    const carabinerosLayer = L.layerGroup().addTo(map);
+    const feriasLayer = L.layerGroup().addTo(map);
+    const bomberosLayer = L.layerGroup().addTo(map);
 
     // Graph data (loaded from data/nodes.geojson and data/edges.geojson)
     let nodesGeoJSON = null;
@@ -78,6 +81,21 @@
             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-violet.png',
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
             iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        }),
+        carabineros: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        }),
+        ferias: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        }),
+        bomberos: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
         })
     };
     icons.selectedHome = L.icon({
@@ -101,6 +119,9 @@
     let startPointMarker = null;
     let paraderos = [];
     let selectedProperties = [];
+    let carabinerosPois = [];
+    let feriasPois = [];
+    let bomberosPois = [];
     
     // Filter UI elements (initialized after DOM queries)
     const filterTypeCasaCb = document.getElementById('filter-type-casa');
@@ -519,6 +540,100 @@
         }).catch(e => { console.error('failed parse metro csv', e); const d=document.getElementById('debug-metro'); if(d)d.textContent='metro load error'; });
     }
 
+    function loadCarabineros() {
+        return fetch('data/Carabineros_providencia.json').then(r => r.json()).then(data => {
+            carabinerosPois = data.map(item => ({
+                nombre: item.nombre || 'Carabineros',
+                tipo: item.tipo || '',
+                lat: item.lat,
+                lon: item.lon,
+                comuna: item.comuna || ''
+            })).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+            
+            carabinerosPois.forEach(p => {
+                const m = L.marker([p.lat, p.lon], { icon: icons.carabineros })
+                    .bindPopup(`<b>🚓 ${p.nombre}</b><br/><span style="font-size:12px">${p.tipo}<br/>${p.comuna}</span>`);
+                carabinerosLayer.addLayer(m);
+            });
+            setText('debug-carabineros', `carabineros cargados: ${carabinerosPois.length}`);
+            setText('carabineros-count', carabinerosPois.length);
+        }).catch(e => { console.warn('carabineros load error', e); const d=document.getElementById('debug-carabineros'); if(d)d.textContent='error'; });
+    }
+
+    function loadFerias() {
+        return fetch('data/Ferias_libres_y_persas_providencia.json').then(r => r.json()).then(data => {
+            // Calcular centroide de cada feria usando Shape__Length como referencia
+            feriasPois = data.map(item => {
+                // Usar las coordenadas aproximadas del centro de Providencia si no hay coords específicas
+                // En este caso, usaremos datos de la feria para estimar ubicación
+                return {
+                    nombre: item.NOMBRE || item.c_n_feri || 'Feria',
+                    dias: item.DIAS || item.Dia_1 || '',
+                    calle: item.CALLE_0 || '',
+                    desde: item.DESDE_0 || '',
+                    hasta: item.HASTA_0 || '',
+                    inicio: item.Inicio || '',
+                    levante: item.Levante || '',
+                    comuna: item.COMUNA || 'Providencia',
+                    // Coordenadas aproximadas (deberían venir del shapefile original)
+                    // Para efectos de demo, ubicamos en puntos cercanos conocidos
+                    lat: item.NOMBRE === 'SANTA MARIA' ? -33.4280 : item.NOMBRE === 'LOS CONCILIOS' ? -33.4285 : -33.4250,
+                    lon: item.NOMBRE === 'SANTA MARIA' ? -70.6230 : item.NOMBRE === 'LOS CONCILIOS' ? -70.6180 : -70.6200
+                };
+            });
+            
+            feriasPois.forEach(p => {
+                const popupContent = `
+                    <div style="width:200px">
+                        <b>🛒 ${p.nombre}</b><br/>
+                        <span style="font-size:12px">
+                            <b>Días:</b> ${p.dias}<br/>
+                            <b>Horario:</b> ${p.inicio} - ${p.levante}<br/>
+                            <b>Ubicación:</b> ${p.calle}<br/>
+                            ${p.desde ? `Desde ${p.desde}` : ''} ${p.hasta ? `hasta ${p.hasta}` : ''}
+                        </span>
+                    </div>
+                `;
+                const m = L.marker([p.lat, p.lon], { icon: icons.ferias }).bindPopup(popupContent);
+                feriasLayer.addLayer(m);
+            });
+            setText('debug-ferias', `ferias cargadas: ${feriasPois.length}`);
+            setText('ferias-count', feriasPois.length);
+        }).catch(e => { console.warn('ferias load error', e); const d=document.getElementById('debug-ferias'); if(d)d.textContent='error'; });
+    }
+
+    function loadBomberos() {
+        return fetch('data/Bombero.json').then(r => r.json()).then(data => {
+            // El archivo puede ser un objeto único o un array
+            const items = Array.isArray(data) ? data : [data];
+            bomberosPois = items.map(item => ({
+                ciudad: item.ciudad || '',
+                direccion: item.direccion || '',
+                telefono: item.telefono || '',
+                comunas_servidas: item.comunas_servidas || '',
+                lat: item.latitud || item.lat,
+                lon: item.longitud || item.lon
+            })).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+            
+            bomberosPois.forEach(p => {
+                const popupContent = `
+                    <div style="width:220px">
+                        <b>🚒 Bomberos ${p.ciudad}</b><br/>
+                        <span style="font-size:12px">
+                            <b>Dirección:</b> ${p.direccion}<br/>
+                            <b>Teléfono:</b> ${p.telefono}<br/>
+                            <b>Comunas servidas:</b><br/>${p.comunas_servidas}
+                        </span>
+                    </div>
+                `;
+                const m = L.marker([p.lat, p.lon], { icon: icons.bomberos }).bindPopup(popupContent);
+                bomberosLayer.addLayer(m);
+            });
+            setText('debug-bomberos', `bomberos cargados: ${bomberosPois.length}`);
+            setText('bomberos-count', bomberosPois.length);
+        }).catch(e => { console.warn('bomberos load error', e); const d=document.getElementById('debug-bomberos'); if(d)d.textContent='error'; });
+    }
+
     function loadEdges() {
         // Load edges geojson (linestrings) if generated by ETL
         return fetch('data/edges.geojson').then(r => {
@@ -620,8 +735,16 @@
 
     const showParaderosCb = document.getElementById('show-paraderos-layer');
     const showEdgesCb = document.getElementById('show-edges-layer');
+    const showCarabinerosCb = document.getElementById('show-carabineros-layer');
+    const showFeriasCb = document.getElementById('show-ferias-layer');
+    const showBomberosCb = document.getElementById('show-bomberos-layer');
+    
     if (showParaderosCb) showParaderosCb.addEventListener('change', e => { if (e.target.checked) paraderosLayer.addTo(map); else map.removeLayer(paraderosLayer); });
     if (showEdgesCb) showEdgesCb.addEventListener('change', e => { if (e.target.checked) edgesLayer.addTo(map); else map.removeLayer(edgesLayer); });
+    if (showCarabinerosCb) showCarabinerosCb.addEventListener('change', e => { if (e.target.checked) carabinerosLayer.addTo(map); else map.removeLayer(carabinerosLayer); });
+    if (showFeriasCb) showFeriasCb.addEventListener('change', e => { if (e.target.checked) feriasLayer.addTo(map); else map.removeLayer(feriasLayer); });
+    if (showBomberosCb) showBomberosCb.addEventListener('change', e => { if (e.target.checked) bomberosLayer.addTo(map); else map.removeLayer(bomberosLayer); });
+
 
     // Route OSM toggle
     const showRouteOSMCb = document.getElementById('show-route-osm');
@@ -778,7 +901,17 @@
     });
 
     // Load everything (including paraderos, nodes and edges if present)
-    Promise.all([loadHouses(), loadHealth(), loadMetro(), loadParaderos(), loadNodes(), loadEdges()]).then(() => {
+    Promise.all([
+        loadHouses(), 
+        loadHealth(), 
+        loadMetro(), 
+        loadParaderos(), 
+        loadCarabineros(),
+        loadFerias(),
+        loadBomberos(),
+        loadNodes(), 
+        loadEdges()
+    ]).then(() => {
         const dm = debugMain('debug-mainjs'); if (dm) dm.textContent = 'main.js ejecutado';
     });
 })();

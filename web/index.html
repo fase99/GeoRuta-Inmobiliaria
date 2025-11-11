@@ -72,6 +72,18 @@
           <span class="stat-label">Metro</span>
           <span class="stat-value" id="metro-count">0</span>
         </div>
+        <div class="stat-item">
+          <span class="stat-label">Carabineros</span>
+          <span class="stat-value" id="carabineros-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Ferias</span>
+          <span class="stat-value" id="ferias-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Bomberos</span>
+          <span class="stat-value" id="bomberos-count">0</span>
+        </div>
       </div>
     </div>
 
@@ -115,18 +127,33 @@
       <h3 class="section-title">🗺️ Capas Adicionales</h3>
       <label class="checkbox-label">
         <input type="checkbox" id="show-paraderos-layer" checked />
-        <span>Paraderos de bus</span>
+        <span>🚏 Paraderos de bus</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-carabineros-layer" checked />
+        <span>🚓 Carabineros</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-ferias-layer" checked />
+        <span>🛒 Ferias libres</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-bomberos-layer" checked />
+        <span>🚒 Bomberos</span>
       </label>
       <label class="checkbox-label">
         <input type="checkbox" id="show-edges-layer" checked />
-        <span>Calles (aristas OSM)</span>
+        <span>🛣️ Calles (aristas OSM)</span>
       </label>
       <label class="checkbox-label">
         <input type="checkbox" id="show-route-osm" />
-        <span>Ruta OSM</span>
+        <span>📍 Ruta OSM</span>
       </label>
       <div class="debug-info">
         <p class="debug">Paraderos: <span id="debug-paraderos">-</span></p>
+        <p class="debug">Carabineros: <span id="debug-carabineros">-</span></p>
+        <p class="debug">Ferias: <span id="debug-ferias">-</span></p>
+        <p class="debug">Bomberos: <span id="debug-bomberos">-</span></p>
         <p class="debug">Aristas: <span id="debug-edges">-</span></p>
         <p class="debug">Ruta OSM: <span id="debug-route">-</span></p>
       </div>
