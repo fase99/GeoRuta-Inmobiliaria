@@ -242,42 +242,33 @@
     }
 
 
-    // Consulta tráfico TomTom y retorna promesa con resultados para varias horas
-    async function getTrafficLevelTomTom(lat, lon, hoursArray) {
+    // Consulta tráfico TomTom y retorna promesa con resultado actual
+    async function getTrafficLevelTomTomActual(lat, lon) {
         const apiKey = "pg1U3ZBt90bqfmOe4J6vTV2OegHIsz1X";
-        // La API Traffic Flow solo da tráfico actual, pero intentamos para cada hora (si soporta future)
-        // Si no soporta hora, solo muestra el tráfico actual
-        const results = [];
-        for (const hour of hoursArray) {
-            // TomTom Traffic Flow no permite hora futura en free tier, así que solo actual
-            const url = `https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json?point=${lat},${lon}&key=${apiKey}`;
-            try {
-                const resp = await fetch(url);
-                const data = await resp.json();
-                if (data && data.flowSegmentData) {
-                    const currentSpeed = data.flowSegmentData.currentSpeed;
-                    const freeFlowSpeed = data.flowSegmentData.freeFlowSpeed;
-                    const jamFactor = data.flowSegmentData.jamFactor;
-                    // jamFactor: 0-10 (0=fluido, 10=congestion total)
-                    let nivel = "Desconocido";
-                    if (jamFactor < 4) nivel = "Fluido";
-                    else if (jamFactor < 7) nivel = "Moderado";
-                    else nivel = "Congestionado";
-                    results.push({
-                        hour,
-                        nivel,
-                        currentSpeed,
-                        freeFlowSpeed,
-                        jamFactor
-                    });
-                } else {
-                    results.push({ hour, nivel: "Sin datos" });
-                }
-            } catch (err) {
-                results.push({ hour, nivel: "Error" });
+        const url = `https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/10/json?point=${lat},${lon}&key=${apiKey}`;
+        try {
+            const resp = await fetch(url);
+            const data = await resp.json();
+            if (data && data.flowSegmentData) {
+                const currentSpeed = data.flowSegmentData.currentSpeed;
+                const freeFlowSpeed = data.flowSegmentData.freeFlowSpeed;
+                const jamFactor = data.flowSegmentData.jamFactor;
+                let nivel = "Desconocido";
+                if (jamFactor < 4) nivel = "Fluido";
+                else if (jamFactor < 7) nivel = "Moderado";
+                else nivel = "Congestionado";
+                return {
+                    nivel,
+                    currentSpeed,
+                    freeFlowSpeed,
+                    jamFactor
+                };
+            } else {
+                return { nivel: "Sin datos" };
             }
+        } catch (err) {
+            return { nivel: "Error" };
         }
-        return results;
     }
 
     function displayHouses(houses) {
@@ -316,19 +307,15 @@
                     }
                     updateItineraryUI();
 
-                    // Consultar tráfico y mostrar en popup
+                    // Consultar tráfico actual y mostrar en popup
                     marker.openPopup();
-                    const horas = ["07:00", "08:00", "13:00", "16:00", "20:00"];
                     const traficoDivId = `trafico-casa-${house.id}`;
                     const traficoDiv = document.getElementById(traficoDivId);
                     if (traficoDiv) {
-                        traficoDiv.textContent = "Consultando tráfico...";
-                        const trafico = await getTrafficLevelTomTom(house.lat, house.lon, horas);
-                        let html = "<b>Tráfico (actual, por limitación API):</b><ul style='padding-left:16px;'>";
-                        trafico.forEach(t => {
-                            html += `<li>${t.hour}: <span style='color:${t.nivel=="Fluido"?"green":t.nivel=="Moderado"?"orange":"red"}'>${t.nivel}</span> (Velocidad: ${t.currentSpeed||"-"} km/h)</li>`;
-                        });
-                        html += "</ul>";
+                        traficoDiv.textContent = "Consultando tráfico actual...";
+                        const trafico = await getTrafficLevelTomTomActual(house.lat, house.lon);
+                        let html = `<b>Tráfico actual:</b> <span style='color:${trafico.nivel=="Fluido"?"green":trafico.nivel=="Moderado"?"orange":"red"}'>${trafico.nivel}</span><br>`;
+                        html += `<b>Velocidad:</b> ${trafico.currentSpeed||"-"} km/h`;
                         traficoDiv.innerHTML = html;
                     }
                 });
