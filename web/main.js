@@ -46,18 +46,36 @@
 
     // Icons
     const icons = {
-        home: L.icon({
+        // Casas
+        casaVenta: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        }),
+        casaArriendo: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        }),
+        // Departamentos
+        deptoVenta: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        }),
+        deptoArriendo: L.icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        }),
+        // Iconos auxiliares
+        health: L.icon({
             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
             iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
         }),
-        health: L.icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-violet.png',
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
-        }),
         metro: L.icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-violet.png',
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
             iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
         })
@@ -169,6 +187,25 @@
         // comuna UI removed - no-op
     }
 
+    // Determina el icono correcto según el tipo de propiedad y operación
+    function getPropertyIcon(house) {
+        // Determinar tipo de propiedad
+        let propType = (house._propertyType || house.tipo_inmueble || house.tipo || house.property_type || '').toString().toLowerCase();
+        const isDepto = propType.includes('depart') || propType.includes('dpto') || propType.includes('depto') || propType === 'departamento';
+        
+        // Determinar operación
+        const op = (house._operation || house.operacion || house.operation || house.tipo_anuncio || '').toString().toLowerCase();
+        const isVenta = op.includes('venta') || op === 'venta';
+        const isArriendo = op.includes('arri') || op === 'arriendo';
+        
+        // Retornar el icono apropiado
+        if (isDepto) {
+            return isArriendo ? icons.deptoArriendo : icons.deptoVenta;
+        } else {
+            return isArriendo ? icons.casaArriendo : icons.casaVenta;
+        }
+    }
+
     function displayHouses(houses) {
         housesLayer.clearLayers();
         houseMarkers = [];
@@ -177,7 +214,9 @@
                 // Apply type/operation filters (if UI present)
                 if (typeof matchesTypeOperation === 'function' && !matchesTypeOperation(house)) return;
 
-                const marker = L.marker([house.lat, house.lon], { icon: icons.home });
+                // Determinar el icono según tipo y operación
+                const icon = getPropertyIcon(house);
+                const marker = L.marker([house.lat, house.lon], { icon: icon });
                 const formattedPrice = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(house.precio_peso || house.precio_uf || 0);
                 const popup = `\n                    <div style="width:220px">\n                        <img src="${house.imagen || ''}" style="width:100%;height:auto;border-radius:4px"/>\n                        <h4 style="margin:6px 0">${house.titulo || ''}</h4>\n                        <p style="margin:2px 0"><b>Precio:</b> ${formattedPrice}</p>\n                        <p style="margin:2px 0"><b>Comuna:</b> ${house.comuna || ''}</p>\n                        <a href="${house.url || '#'}" target="_blank">Ver</a>\n                    </div>\n                `;
                 marker.bindPopup(popup);
@@ -190,7 +229,7 @@
                         marker.setIcon(icons.selectedHome);
                     } else {
                         selectedProperties.splice(idx,1);
-                        marker.setIcon(icons.home);
+                        marker.setIcon(getPropertyIcon(house));
                     }
                     updateItineraryUI();
                 });
@@ -217,7 +256,7 @@
             rm.onclick = function(){
                 // deselect marker icon
                 const m = houseMarkers.find(mk => mk.houseData && mk.houseData.id === h.id);
-                if (m) m.setIcon(icons.home);
+                if (m) m.setIcon(getPropertyIcon(h));
                 const idx = selectedProperties.findIndex(s => s.id === h.id);
                 if (idx!==-1) selectedProperties.splice(idx,1);
                 updateItineraryUI();
@@ -596,7 +635,7 @@
             if (routeOSMGeoJson) routeOSMLayer.removeLayer(routeOSMGeoJson);
             routeOSMGeoJson = L.geoJSON(gj, {
                 style: function(feature) {
-                    return { color: '#d9534f', weight: 4, opacity: 0.9 };
+                    return { color: '#7C3AED', weight: 4, opacity: 0.9 };
                 },
                 onEachFeature: function(feature, layer) {
                     const props = feature.properties || {};
@@ -722,7 +761,11 @@
     const calcSelBtn = document.getElementById('calc-route-selected-btn');
     if (clearSelBtn) clearSelBtn.addEventListener('click', () => {
         selectedProperties = [];
-        houseMarkers.forEach(m => m.setIcon(icons.home));
+        houseMarkers.forEach(m => {
+            if (m.houseData) {
+                m.setIcon(getPropertyIcon(m.houseData));
+            }
+        });
         updateItineraryUI();
     });
     if (calcSelBtn) calcSelBtn.addEventListener('click', () => {
@@ -730,7 +773,7 @@
         if (selectedProperties.length === 0) return alert('No hay propiedades seleccionadas');
         const start = startPointMarker.getLatLng();
         const latlngs = [start].concat(selectedProperties.map(h => L.latLng(h.lat, h.lon)));
-        L.polyline(latlngs, { color: 'orange' }).addTo(map);
+        L.polyline(latlngs, { color: '#7C3AED', weight: 4, opacity: 0.8 }).addTo(map);
         alert('Ruta para selección dibujada (temporal)');
     });
 

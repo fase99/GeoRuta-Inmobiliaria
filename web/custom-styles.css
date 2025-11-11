@@ -1,0 +1,506 @@
+/* Variables de color - Paleta Morada */
+:root {
+  --primary-purple: #7C3AED;
+  --primary-purple-dark: #6D28D9;
+  --primary-purple-light: #A78BFA;
+  --secondary-purple: #C4B5FD;
+  --accent-purple: #DDD6FE;
+  
+  --casa-venta: #F97316;
+  --casa-arriendo: #FB923C;
+  --depto-venta: #3B82F6;
+  --depto-arriendo: #60A5FA;
+  
+  --bg-white: #FFFFFF;
+  --bg-gray: #F9FAFB;
+  --bg-gray-dark: #F3F4F6;
+  --text-primary: #111827;
+  --text-secondary: #6B7280;
+  --border-color: #E5E7EB;
+  --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Reset y base */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: var(--text-primary);
+  background: var(--bg-gray);
+}
+
+/* Layout principal */
+#map {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 360px;
+  bottom: 0;
+  z-index: 1;
+}
+
+#controls {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 360px;
+  height: 100vh;
+  background: var(--bg-white);
+  padding: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border-left: 2px solid var(--primary-purple-light);
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+}
+
+/* Scrollbar personalizado */
+#controls::-webkit-scrollbar {
+  width: 8px;
+}
+
+#controls::-webkit-scrollbar-track {
+  background: var(--bg-gray);
+}
+
+#controls::-webkit-scrollbar-thumb {
+  background: var(--primary-purple-light);
+  border-radius: 4px;
+}
+
+#controls::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-purple);
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, var(--primary-purple) 0%, var(--primary-purple-dark) 100%);
+  padding: 24px 20px;
+  color: white;
+  border-bottom: 3px solid var(--primary-purple-dark);
+  box-shadow: var(--shadow-md);
+}
+
+.header h1 {
+  margin: 0 0 8px 0;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.95;
+  font-weight: 400;
+}
+
+/* Cards y grupos de control */
+.control-group {
+  margin-bottom: 16px;
+}
+
+.card {
+  background: var(--bg-white);
+  padding: 16px 20px;
+  margin: 0;
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+}
+
+.card:hover {
+  background: var(--bg-gray);
+}
+
+/* Títulos de sección */
+.section-title {
+  margin: 0 0 16px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--primary-purple-dark);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Inputs y selects */
+.input-group {
+  margin-top: 12px;
+}
+
+.input-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.input-field,
+.select-field {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: all 0.2s;
+  background: var(--bg-white);
+}
+
+.input-field:focus,
+.select-field:focus {
+  outline: none;
+  border-color: var(--primary-purple);
+  box-shadow: 0 0 0 3px var(--accent-purple);
+}
+
+.input-field:hover,
+.select-field:hover {
+  border-color: var(--primary-purple-light);
+}
+
+/* Checkboxes */
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 8px 0;
+  font-size: 14px;
+  color: var(--text-primary);
+  transition: color 0.2s;
+}
+
+.checkbox-label.compact {
+  padding: 4px 0;
+  margin: 0;
+}
+
+.checkbox-label:hover {
+  color: var(--primary-purple);
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--primary-purple);
+}
+
+/* Botones */
+.btn {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background: var(--primary-purple);
+  color: white;
+  box-shadow: var(--shadow);
+}
+
+.btn-primary:hover {
+  background: var(--primary-purple-dark);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: var(--bg-gray-dark);
+  color: var(--text-primary);
+  border: 2px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+  background: var(--border-color);
+  border-color: var(--primary-purple-light);
+  color: var(--primary-purple-dark);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 2px solid var(--border-color);
+}
+
+.btn-outline:hover {
+  background: var(--bg-gray);
+  border-color: var(--primary-purple);
+  color: var(--primary-purple-dark);
+}
+
+.btn-large {
+  padding: 16px 20px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+/* Grupos de botones */
+.button-group {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.button-group .btn {
+  flex: 1;
+}
+
+/* Itinerario */
+.help-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0 0 12px 0;
+  line-height: 1.5;
+}
+
+.itinerary-container {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 12px;
+  background: var(--bg-gray);
+}
+
+.itinerary-container:empty::before {
+  content: 'No hay propiedades seleccionadas';
+  display: block;
+  text-align: center;
+  padding: 20px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+/* Estadísticas */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.stat-item {
+  background: var(--bg-gray);
+  padding: 12px;
+  border-radius: 8px;
+  text-align: center;
+  border: 2px solid var(--border-color);
+  transition: all 0.2s;
+}
+
+.stat-item:hover {
+  border-color: var(--primary-purple-light);
+  transform: translateY(-2px);
+}
+
+.stat-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  display: block;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary-purple);
+}
+
+/* Leyenda de colores */
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 8px;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.legend-item:hover {
+  background: var(--bg-gray);
+}
+
+.legend-marker {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: var(--shadow);
+  flex-shrink: 0;
+}
+
+.legend-marker.casa-venta {
+  background: var(--casa-venta);
+}
+
+.legend-marker.casa-arriendo {
+  background: var(--casa-arriendo);
+}
+
+.legend-marker.depto-venta {
+  background: var(--depto-venta);
+}
+
+.legend-marker.depto-arriendo {
+  background: var(--depto-arriendo);
+}
+
+.legend-marker.venta {
+  background: linear-gradient(135deg, var(--casa-venta) 50%, var(--depto-venta) 50%);
+}
+
+.legend-marker.arriendo {
+  background: linear-gradient(135deg, var(--casa-arriendo) 50%, var(--depto-arriendo) 50%);
+}
+
+/* Debug info */
+.debug-info {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+}
+
+.debug {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin: 4px 0;
+  font-family: 'Courier New', monospace;
+}
+
+/* Textos auxiliares */
+.small {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  #map {
+    right: 300px;
+  }
+  
+  #controls {
+    width: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  #map {
+    right: 0;
+    bottom: 50%;
+  }
+  
+  #controls {
+    width: 100%;
+    height: 50vh;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    border-left: none;
+    border-top: 2px solid var(--primary-purple-light);
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Animaciones */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.card {
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Mejoras de accesibilidad */
+.btn:focus,
+.input-field:focus,
+.select-field:focus {
+  outline: 2px solid var(--primary-purple);
+  outline-offset: 2px;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Estilos para items del itinerario */
+#itinerary-list > div {
+  background: var(--bg-white);
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  position: relative;
+  transition: all 0.2s;
+}
+
+#itinerary-list > div:hover {
+  border-color: var(--primary-purple-light);
+  box-shadow: var(--shadow);
+}
+
+#itinerary-list > div b {
+  color: var(--primary-purple-dark);
+  font-weight: 600;
+}
+
+#itinerary-list button {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #EF4444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+#itinerary-list button:hover {
+  background: #DC2626;
+  transform: translateY(-50%) scale(1.05);
+}

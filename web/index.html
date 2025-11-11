@@ -5,96 +5,133 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GeoRuta Inmobiliaria</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-  <style>
-    html,body{height:100%;margin:0}
-    #map{position:absolute;left:0;top:0;right:300px;bottom:0}
-    #controls{position:absolute;right:0;top:0;width:300px;height:100vh;background:#fff;padding:12px;box-sizing:border-box;overflow:auto;border-left:1px solid #ddd}
-    h1{font-size:18px;margin:0 0 10px}
-    .control-group{margin-bottom:12px}
-    select,button{width:100%;padding:8px;box-sizing:border-box}
-    button{background:#007bff;color:#fff;border:none;cursor:pointer}
-    button:hover{background:#0056b3}
-    .small{font-size:13px;color:#444}
-    .debug{font-size:13px;color:#666}
-  </style>
+  <link rel="stylesheet" href="custom-styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div id="map"></div>
   <div id="controls">
-    <h1>GeoRuta Inmobiliaria</h1>
-    <div class="control-group">
-      <label>
-        <input type="checkbox" id="filter-by-metro" /> Filtrar por estaciones de metro cercanas
-      </label>
-      <div style="margin-top:6px">
-        <label>
-          <input type="checkbox" id="filter-by-health" /> Filtrar por centros de salud cercanos
-        </label>
-      </div>
-      <div style="margin-top:6px">
-        <label for="metro-radius" class="small">Radio (metros)</label>
-        <input type="number" id="metro-radius" value="500" min="50" max="5000" style="width:100%;padding:6px;box-sizing:border-box" />
-      </div>
-    </div>
-
-    <div class="control-group">
-      <label for="start-select" class="small">Punto de partida</label>
-      <select id="start-select">
-        <option value="user">Usar mi ubicación</option>
-      </select>
-      <div style="margin-top:6px;display:flex;gap:6px">
-        <button id="pick-start-btn" style="flex:1">Elegir en el mapa</button>
-        <button id="start-point-btn" style="flex:1">Usar mi ubicación</button>
-      </div>
-    </div>
-
-    <div class="control-group">
-      <h3 class="small">Itinerario del día</h3>
-      <p class="small">Selecciona propiedades en el mapa (clic) o usa los botones.</p>
-      <div id="itinerary-list" style="max-height:200px;overflow:auto;border:1px solid #eee;padding:6px;margin-bottom:6px"></div>
-      <div style="display:flex;gap:6px">
-        <button id="clear-selection-btn" style="flex:1;background:#6c757d">Limpiar selección</button>
-        <button id="calc-route-selected-btn" style="flex:1">Calcular ruta selección</button>
-      </div>
-    </div>
-
-    <div class="control-group">
-      <button id="calculate-route-btn">Calcular Ruta Óptima</button>
-    </div>
-
-    <div class="control-group">
-      <h3 class="small">Contadores</h3>
-      <p class="small">Casas visibles: <b><span id="houses-filtered-count">0</span></b></p>
-      <p class="small">Centros de salud: <b><span id="health-count">0</span></b></p>
-      <p class="small">Estaciones metro: <b><span id="metro-count">0</span></b></p>
-    </div>
-
-    <div class="control-group">
-      <h3 class="small">Capas adicionales</h3>
-      <label><input type="checkbox" id="show-paraderos-layer" checked /> Mostrar paraderos</label>
-      <br/>
-      <label><input type="checkbox" id="show-edges-layer" checked /> Mostrar calles (aristas OSM)</label>
-      <br/>
-      <label><input type="checkbox" id="show-route-osm" /> Mostrar ruta OSM (ordenada por grafo)</label>
-      <p class="debug">Paraderos: <span id="debug-paraderos">-</span></p>
-      <p class="debug">Aristas: <span id="debug-edges">-</span></p>
-      <p class="debug">Ruta OSM: <span id="debug-route">-</span></p>
-    </div>
-
-    <div class="control-group">
-      <h3 class="small">Tipo de inmueble</h3>
-      <label><input type="checkbox" id="filter-type-casa" checked /> Casa</label>
-      <br />
-      <label><input type="checkbox" id="filter-type-depto" checked /> Departamento</label>
-    </div>
-
-    <div class="control-group">
-      <h3 class="small">Operación</h3>
-      <label><input type="checkbox" id="filter-op-venta" checked /> Venta</label>
-      <br />
-      <label><input type="checkbox" id="filter-op-arriendo" checked /> Arriendo</label>
+    <div class="header">
+      <h1>🏘️ GeoRuta Inmobiliaria</h1>
+      <p class="subtitle">Encuentra tu propiedad ideal</p>
     </div>
     
+    <div class="control-group card">
+      <h3 class="section-title">🔍 Filtros de Búsqueda</h3>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-metro" />
+        <span>Estaciones de metro cercanas</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-health" />
+        <span>Centros de salud cercanos</span>
+      </label>
+      <div class="input-group">
+        <label for="metro-radius" class="input-label">Radio de búsqueda (metros)</label>
+        <input type="number" id="metro-radius" value="500" min="50" max="5000" class="input-field" />
+      </div>
+    </div>
+
+    <div class="control-group card">
+      <h3 class="section-title">📍 Punto de Partida</h3>
+      <select id="start-select" class="select-field">
+        <option value="user">Usar mi ubicación</option>
+      </select>
+      <div class="button-group">
+        <button id="pick-start-btn" class="btn btn-secondary">📍 Elegir en mapa</button>
+        <button id="start-point-btn" class="btn btn-secondary">🧭 Mi ubicación</button>
+      </div>
+    </div>
+
+    <div class="control-group card">
+      <h3 class="section-title">🗓️ Itinerario del Día</h3>
+      <p class="help-text">Selecciona propiedades en el mapa haciendo clic sobre ellas</p>
+      <div id="itinerary-list" class="itinerary-container"></div>
+      <div class="button-group">
+        <button id="clear-selection-btn" class="btn btn-outline">🗑️ Limpiar</button>
+        <button id="calc-route-selected-btn" class="btn btn-primary">🚗 Ruta</button>
+      </div>
+    </div>
+
+    <div class="control-group card">
+      <button id="calculate-route-btn" class="btn btn-primary btn-large">🎯 Calcular Ruta Óptima</button>
+    </div>
+
+    <div class="control-group card">
+      <h3 class="section-title">📊 Estadísticas</h3>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <span class="stat-label">Propiedades</span>
+          <span class="stat-value" id="houses-filtered-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Salud</span>
+          <span class="stat-value" id="health-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Metro</span>
+          <span class="stat-value" id="metro-count">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="control-group card">
+      <h3 class="section-title">🏠 Tipo de Propiedad</h3>
+      <div class="legend-item">
+        <span class="legend-marker casa-venta"></span>
+        <label class="checkbox-label compact">
+          <input type="checkbox" id="filter-type-casa" checked />
+          <span>Casa</span>
+        </label>
+      </div>
+      <div class="legend-item">
+        <span class="legend-marker depto-venta"></span>
+        <label class="checkbox-label compact">
+          <input type="checkbox" id="filter-type-depto" checked />
+          <span>Departamento</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="control-group card">
+      <h3 class="section-title">💰 Tipo de Operación</h3>
+      <div class="legend-item">
+        <span class="legend-marker venta"></span>
+        <label class="checkbox-label compact">
+          <input type="checkbox" id="filter-op-venta" checked />
+          <span>Venta</span>
+        </label>
+      </div>
+      <div class="legend-item">
+        <span class="legend-marker arriendo"></span>
+        <label class="checkbox-label compact">
+          <input type="checkbox" id="filter-op-arriendo" checked />
+          <span>Arriendo</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="control-group card">
+      <h3 class="section-title">🗺️ Capas Adicionales</h3>
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-paraderos-layer" checked />
+        <span>Paraderos de bus</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-edges-layer" checked />
+        <span>Calles (aristas OSM)</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-route-osm" />
+        <span>Ruta OSM</span>
+      </label>
+      <div class="debug-info">
+        <p class="debug">Paraderos: <span id="debug-paraderos">-</span></p>
+        <p class="debug">Aristas: <span id="debug-edges">-</span></p>
+        <p class="debug">Ruta OSM: <span id="debug-route">-</span></p>
+      </div>
+    </div>
+  </div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
