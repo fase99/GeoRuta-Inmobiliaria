@@ -59,7 +59,7 @@
 
     <div class="control-group card">
       <h3 class="section-title">📊 Estadísticas</h3>
-      <div class="stats-grid">
+      <div class="stats-grid stats-grid-2col">
         <div class="stat-item">
           <span class="stat-label">Propiedades</span>
           <span class="stat-value" id="houses-filtered-count">0</span>
@@ -83,6 +83,14 @@
         <div class="stat-item">
           <span class="stat-label">Bomberos</span>
           <span class="stat-value" id="bomberos-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Universidades</span>
+          <span class="stat-value" id="universidades-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Colegios</span>
+          <span class="stat-value" id="colegios-count">0</span>
         </div>
       </div>
     </div>
@@ -142,6 +150,14 @@
         <span>🚒 Bomberos</span>
       </label>
       <label class="checkbox-label">
+        <input type="checkbox" id="show-universidades-layer" checked />
+        <span>🎓 Universidades</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-colegios-layer" checked />
+        <span>🏫 Colegios y Liceos</span>
+      </label>
+      <label class="checkbox-label">
         <input type="checkbox" id="show-edges-layer" checked />
         <span>🛣️ Calles (aristas OSM)</span>
       </label>
@@ -154,6 +170,8 @@
         <p class="debug">Carabineros: <span id="debug-carabineros">-</span></p>
         <p class="debug">Ferias: <span id="debug-ferias">-</span></p>
         <p class="debug">Bomberos: <span id="debug-bomberos">-</span></p>
+        <p class="debug">Universidades: <span id="debug-universidades">-</span></p>
+        <p class="debug">Colegios: <span id="debug-colegios">-</span></p>
         <p class="debug">Aristas: <span id="debug-edges">-</span></p>
         <p class="debug">Ruta OSM: <span id="debug-route">-</span></p>
       </div>
