@@ -51,27 +51,64 @@
 
     // Icons
     const icons = {
-        // Casas
-        casaVenta: L.icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        // Casas - Orange (tipo) + Red/Gold (operación)
+        casaVenta: L.divIcon({
+            html: '<div style="width: 24px; height: 24px; background: linear-gradient(90deg, #FFA500 50%, #DC143C 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4);"></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
         }),
-        casaArriendo: L.icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png',
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        casaArriendo: L.divIcon({
+            html: '<div style="width: 24px; height: 24px; background: linear-gradient(90deg, #FFA500 50%, #FFD700 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4);"></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
         }),
-        // Departamentos
-        deptoVenta: L.icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        // Departamentos - Blue (tipo) + Red/Gold (operación)
+        deptoVenta: L.divIcon({
+            html: '<div style="width: 24px; height: 24px; background: linear-gradient(90deg, #2A81CB 50%, #DC143C 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4);"></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
         }),
-        deptoArriendo: L.icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        deptoArriendo: L.divIcon({
+            html: '<div style="width: 24px; height: 24px; background: linear-gradient(90deg, #2A81CB 50%, #FFD700 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4);"></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
+        }),
+        // Iconos seleccionados (con borde verde)
+        casaVentaSelected: L.divIcon({
+            html: '<div style="width: 24px; height: 24px; background: linear-gradient(90deg, #FFA500 50%, #DC143C 50%); border-radius: 50%; border: 4px solid #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.6), 0 2px 5px rgba(0,0,0,0.4);"></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
+        }),
+        casaArriendoSelected: L.divIcon({
+            html: '<div style="width: 24px; height: 24px; background: linear-gradient(90deg, #FFA500 50%, #FFD700 50%); border-radius: 50%; border: 4px solid #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.6), 0 2px 5px rgba(0,0,0,0.4);"></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
+        }),
+        deptoVentaSelected: L.divIcon({
+            html: '<div style="width: 24px; height: 24px; background: linear-gradient(90deg, #2A81CB 50%, #DC143C 50%); border-radius: 50%; border: 4px solid #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.6), 0 2px 5px rgba(0,0,0,0.4);"></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
+        }),
+        deptoArriendoSelected: L.divIcon({
+            html: '<div style="width: 24px; height: 24px; background: linear-gradient(90deg, #2A81CB 50%, #FFD700 50%); border-radius: 50%; border: 4px solid #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.6), 0 2px 5px rgba(0,0,0,0.4);"></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
         }),
         // Iconos auxiliares
         health: L.icon({
@@ -223,7 +260,7 @@
     }
 
     // Determina el icono correcto según el tipo de propiedad y operación
-    function getPropertyIcon(house) {
+    function getPropertyIcon(house, isSelected = false) {
         // Determinar tipo de propiedad
         let propType = (house._propertyType || house.tipo_inmueble || house.tipo || house.property_type || '').toString().toLowerCase();
         const isDepto = propType.includes('depart') || propType.includes('dpto') || propType.includes('depto') || propType === 'departamento';
@@ -234,10 +271,18 @@
         const isArriendo = op.includes('arri') || op === 'arriendo';
         
         // Retornar el icono apropiado
-        if (isDepto) {
-            return isArriendo ? icons.deptoArriendo : icons.deptoVenta;
+        if (isSelected) {
+            if (isDepto) {
+                return isArriendo ? icons.deptoArriendoSelected : icons.deptoVentaSelected;
+            } else {
+                return isArriendo ? icons.casaArriendoSelected : icons.casaVentaSelected;
+            }
         } else {
-            return isArriendo ? icons.casaArriendo : icons.casaVenta;
+            if (isDepto) {
+                return isArriendo ? icons.deptoArriendo : icons.deptoVenta;
+            } else {
+                return isArriendo ? icons.casaArriendo : icons.casaVenta;
+            }
         }
     }
 
@@ -320,10 +365,10 @@
                     const idx = selectedProperties.findIndex(s => s.id === house.id);
                     if (idx === -1) {
                         selectedProperties.push(house);
-                        marker.setIcon(icons.selectedHome);
+                        marker.setIcon(getPropertyIcon(house, true)); // Usar versión seleccionada
                     } else {
                         selectedProperties.splice(idx,1);
-                        marker.setIcon(getPropertyIcon(house));
+                        marker.setIcon(getPropertyIcon(house, false)); // Usar versión normal
                     }
                     updateItineraryUI();
 
@@ -371,7 +416,7 @@
             rm.onclick = function(){
                 // deselect marker icon
                 const m = houseMarkers.find(mk => mk.houseData && mk.houseData.id === h.id);
-                if (m) m.setIcon(getPropertyIcon(h));
+                if (m) m.setIcon(getPropertyIcon(h, false)); // Usar versión normal
                 const idx = selectedProperties.findIndex(s => s.id === h.id);
                 if (idx!==-1) selectedProperties.splice(idx,1);
                 updateItineraryUI();
@@ -1114,7 +1159,7 @@
         selectedProperties = [];
         houseMarkers.forEach(m => {
             if (m.houseData) {
-                m.setIcon(getPropertyIcon(m.houseData));
+                m.setIcon(getPropertyIcon(m.houseData, false)); // Usar versión normal
             }
         });
         updateItineraryUI();

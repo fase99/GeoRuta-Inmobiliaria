@@ -96,39 +96,83 @@
     </div>
 
     <div class="control-group card">
-      <h3 class="section-title">🏠 Tipo de Propiedad</h3>
-      <div class="legend-item">
-        <span class="legend-marker casa-venta"></span>
-        <label class="checkbox-label compact">
-          <input type="checkbox" id="filter-type-casa" checked />
-          <span>Casa</span>
-        </label>
+      <h3 class="section-title">� Simbología de Marcadores</h3>
+      <p class="help-text" style="margin-bottom: 12px; font-size: 12px;">Los marcadores están divididos en dos colores:</p>
+      
+      <div style="margin-bottom: 16px;">
+        <h4 style="margin: 8px 0 6px; font-size: 13px; font-weight: 600; color: #555;">Lado Izquierdo = Tipo de Propiedad</h4>
+        <div class="legend-item" style="margin-bottom: 6px;">
+          <div style="width: 20px; height: 20px; background: #FFA500; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>
+          <span style="font-size: 13px; font-weight: 500;">🏠 Casa (Orange)</span>
+        </div>
+        <div class="legend-item" style="margin-bottom: 6px;">
+          <div style="width: 20px; height: 20px; background: #2A81CB; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>
+          <span style="font-size: 13px; font-weight: 500;">🏢 Departamento (Blue)</span>
+        </div>
       </div>
-      <div class="legend-item">
-        <span class="legend-marker depto-venta"></span>
-        <label class="checkbox-label compact">
-          <input type="checkbox" id="filter-type-depto" checked />
-          <span>Departamento</span>
-        </label>
+
+      <div style="margin-bottom: 16px;">
+        <h4 style="margin: 8px 0 6px; font-size: 13px; font-weight: 600; color: #555;">Lado Derecho = Tipo de Operación</h4>
+        <div class="legend-item" style="margin-bottom: 6px;">
+          <div style="width: 20px; height: 20px; background: #DC143C; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>
+          <span style="font-size: 13px; font-weight: 500;">💰 Venta (Red)</span>
+        </div>
+        <div class="legend-item" style="margin-bottom: 6px;">
+          <div style="width: 20px; height: 20px; background: #FFD700; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>
+          <span style="font-size: 13px; font-weight: 500;">🏘️ Arriendo (Gold)</span>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 12px; padding: 8px; background: #f8f9fa; border-radius: 6px; border-left: 3px solid #2A81CB;">
+        <h4 style="margin: 0 0 8px; font-size: 13px; font-weight: 600; color: #333;">Ejemplos de Combinaciones:</h4>
+        <div class="legend-item" style="margin-bottom: 6px;">
+          <div style="width: 24px; height: 24px; background: linear-gradient(90deg, #FFA500 50%, #DC143C 50%); border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>
+          <span style="font-size: 12px;">Casa en Venta</span>
+        </div>
+        <div class="legend-item" style="margin-bottom: 6px;">
+          <div style="width: 24px; height: 24px; background: linear-gradient(90deg, #FFA500 50%, #FFD700 50%); border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>
+          <span style="font-size: 12px;">Casa en Arriendo</span>
+        </div>
+        <div class="legend-item" style="margin-bottom: 6px;">
+          <div style="width: 24px; height: 24px; background: linear-gradient(90deg, #2A81CB 50%, #DC143C 50%); border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>
+          <span style="font-size: 12px;">Depto en Venta</span>
+        </div>
+        <div class="legend-item" style="margin-bottom: 6px;">
+          <div style="width: 24px; height: 24px; background: linear-gradient(90deg, #2A81CB 50%, #FFD700 50%); border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>
+          <span style="font-size: 12px;">Depto en Arriendo</span>
+        </div>
+      </div>
+
+      <div style="padding: 8px; background: #e8f5e9; border-radius: 6px; border-left: 3px solid #28a745;">
+        <div class="legend-item" style="margin-bottom: 0;">
+          <div style="width: 24px; height: 24px; background: linear-gradient(90deg, #FFA500 50%, #DC143C 50%); border-radius: 50%; border: 3px solid #28a745; box-shadow: 0 0 8px rgba(40,167,69,0.5);"></div>
+          <span style="font-size: 12px; font-weight: 600; color: #28a745;">✓ Propiedad Seleccionada (borde verde)</span>
+        </div>
       </div>
     </div>
 
     <div class="control-group card">
-      <h3 class="section-title">💰 Tipo de Operación</h3>
-      <div class="legend-item">
-        <span class="legend-marker venta"></span>
-        <label class="checkbox-label compact">
-          <input type="checkbox" id="filter-op-venta" checked />
-          <span>Venta</span>
-        </label>
-      </div>
-      <div class="legend-item">
-        <span class="legend-marker arriendo"></span>
-        <label class="checkbox-label compact">
-          <input type="checkbox" id="filter-op-arriendo" checked />
-          <span>Arriendo</span>
-        </label>
-      </div>
+      <h3 class="section-title">🏠 Filtrar por Tipo</h3>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-type-casa" checked />
+        <span>🏠 Casas</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-type-depto" checked />
+        <span>🏢 Departamentos</span>
+      </label>
+    </div>
+
+    <div class="control-group card">
+      <h3 class="section-title">💰 Filtrar por Operación</h3>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-op-venta" checked />
+        <span>💰 Venta</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-op-arriendo" checked />
+        <span>🏘️ Arriendo</span>
+      </label>
     </div>
 
     <div class="control-group card">
