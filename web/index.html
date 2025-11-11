@@ -185,63 +185,7 @@
     </div>
 
     <div class="control-group card">
-      <h3 class="section-title">📣 Simbología de Marcadores Inmobiliario</h3>
-      <p class="help-text" style="margin-bottom: 12px; font-size: 12px;">Los marcadores están divididos en dos colores</p>
-      
-      <div style="margin-bottom: 16px;">
-        <h4 style="margin: 8px 0 6px; font-size: 13px; font-weight: 600; color: #555;">Lado Izquierdo = Tipo de Propiedad</h4>
-        <div class="legend-item" style="margin-bottom: 6px;">
-          <div style="width: 20px; height: 20px; background: #FFA500; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>
-          <span style="font-size: 13px; font-weight: 500;">🏠 Casa (Orange)</span>
-        </div>
-        <div class="legend-item" style="margin-bottom: 6px;">
-          <div style="width: 20px; height: 20px; background: #2A81CB; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>
-          <span style="font-size: 13px; font-weight: 500;">🏢 Departamento (Blue)</span>
-        </div>
-      </div>
-
-      <div style="margin-bottom: 16px;">
-        <h4 style="margin: 8px 0 6px; font-size: 13px; font-weight: 600; color: #555;">Lado Derecho = Tipo de Operación</h4>
-        <div class="legend-item" style="margin-bottom: 6px;">
-          <div style="width: 20px; height: 20px; background: #DC143C; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>
-          <span style="font-size: 13px; font-weight: 500;">💰 Venta (Red)</span>
-        </div>
-        <div class="legend-item" style="margin-bottom: 6px;">
-          <div style="width: 20px; height: 20px; background: #FFD700; border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>
-          <span style="font-size: 13px; font-weight: 500;">🏘️ Arriendo (Gold)</span>
-        </div>
-      </div>
-
-      <div style="margin-bottom: 12px; padding: 8px; background: #f8f9fa; border-radius: 6px; border-left: 3px solid #2A81CB;">
-        <h4 style="margin: 0 0 8px; font-size: 13px; font-weight: 600; color: #333;">Ejemplos de Combinaciones:</h4>
-        <div class="legend-item" style="margin-bottom: 6px;">
-          <div style="width: 24px; height: 24px; background: linear-gradient(90deg, #FFA500 50%, #DC143C 50%); border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>
-          <span style="font-size: 12px;">Casa en Venta</span>
-        </div>
-        <div class="legend-item" style="margin-bottom: 6px;">
-          <div style="width: 24px; height: 24px; background: linear-gradient(90deg, #FFA500 50%, #FFD700 50%); border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>
-          <span style="font-size: 12px;">Casa en Arriendo</span>
-        </div>
-        <div class="legend-item" style="margin-bottom: 6px;">
-          <div style="width: 24px; height: 24px; background: linear-gradient(90deg, #2A81CB 50%, #DC143C 50%); border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>
-          <span style="font-size: 12px;">Depto en Venta</span>
-        </div>
-        <div class="legend-item" style="margin-bottom: 6px;">
-          <div style="width: 24px; height: 24px; background: linear-gradient(90deg, #2A81CB 50%, #FFD700 50%); border-radius: 50%; border: 2px solid white; box-shadow: 0 1px 3px rgba(0,0,0,0.3);"></div>
-          <span style="font-size: 12px;">Depto en Arriendo</span>
-        </div>
-      </div>
-
-      <div style="padding: 8px; background: #e8f5e9; border-radius: 6px; border-left: 3px solid #28a745;">
-        <div class="legend-item" style="margin-bottom: 0;">
-          <div style="width: 24px; height: 24px; background: linear-gradient(90deg, #FFA500 50%, #DC143C 50%); border-radius: 50%; border: 3px solid #28a745; box-shadow: 0 0 8px rgba(40,167,69,0.5);"></div>
-          <span style="font-size: 12px; font-weight: 600; color: #28a745;">✓ Propiedad Seleccionada (borde verde)</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="control-group card">
-      <h3 class="section-title">🗺️ Capas Adicionales</h3>
+      <h3 class="section-title">️ Capas Adicionales</h3>
       <label class="checkbox-label">
         <input type="checkbox" id="show-paraderos-layer" checked />
         <span>🚏 Paraderos de bus</span>
@@ -283,6 +227,143 @@
         <p class="debug">Colegios: <span id="debug-colegios">-</span></p>
         <p class="debug">Aristas: <span id="debug-edges">-</span></p>
         <p class="debug">Ruta OSM: <span id="debug-route">-</span></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botón flotante para simbología -->
+  <button id="legend-button" class="floating-legend-btn" title="Ver simbología de marcadores">
+    📣
+  </button>
+
+  <!-- Modal de simbología -->
+  <div id="legend-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #7C3AED;">📣 Simbología de Marcadores Inmobiliario</h3>
+        <button id="close-modal" class="close-modal">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <p class="help-text" style="margin-bottom: 16px; font-size: 13px; color: #6B7280;">Los marcadores están divididos en dos colores para identificar el tipo de propiedad y operación</p>
+        
+        <div style="margin-bottom: 20px;">
+          <h4 style="margin: 0 0 10px; font-size: 14px; font-weight: 600; color: #374151; border-bottom: 2px solid #E5E7EB; padding-bottom: 6px;">
+            Lado Izquierdo = Tipo de Propiedad
+          </h4>
+          <div class="legend-item" style="margin-bottom: 10px; display: flex; align-items: center; gap: 12px;">
+            <div style="width: 28px; height: 28px; background: #FFA500; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
+            <span style="font-size: 14px; font-weight: 500;">🏠 Casa (Orange/Naranja)</span>
+          </div>
+          <div class="legend-item" style="margin-bottom: 10px; display: flex; align-items: center; gap: 12px;">
+            <div style="width: 28px; height: 28px; background: #2A81CB; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
+            <span style="font-size: 14px; font-weight: 500;">🏢 Departamento (Blue/Azul)</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+          <h4 style="margin: 0 0 10px; font-size: 14px; font-weight: 600; color: #374151; border-bottom: 2px solid #E5E7EB; padding-bottom: 6px;">
+            Lado Derecho = Tipo de Operación
+          </h4>
+          <div class="legend-item" style="margin-bottom: 10px; display: flex; align-items: center; gap: 12px;">
+            <div style="width: 28px; height: 28px; background: #DC143C; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
+            <span style="font-size: 14px; font-weight: 500;">💰 Venta (Red/Rojo)</span>
+          </div>
+          <div class="legend-item" style="margin-bottom: 10px; display: flex; align-items: center; gap: 12px;">
+            <div style="width: 28px; height: 28px; background: #FFD700; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
+            <span style="font-size: 14px; font-weight: 500;">🏘️ Arriendo (Gold/Dorado)</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 20px; padding: 16px; background: #F9FAFB; border-radius: 8px; border: 1px solid #E5E7EB;">
+          <h4 style="margin: 0 0 12px; font-size: 14px; font-weight: 600; color: #374151;">
+            📌 Ejemplos de Combinaciones:
+          </h4>
+          <div class="legend-item" style="margin-bottom: 10px; display: flex; align-items: center; gap: 12px;">
+            <div style="width: 32px; height: 32px; background: linear-gradient(90deg, #FFA500 50%, #DC143C 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
+            <span style="font-size: 14px;">🏠 + 💰 = Casa en Venta</span>
+          </div>
+          <div class="legend-item" style="margin-bottom: 10px; display: flex; align-items: center; gap: 12px;">
+            <div style="width: 32px; height: 32px; background: linear-gradient(90deg, #FFA500 50%, #FFD700 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
+            <span style="font-size: 14px;">🏠 + 🏘️ = Casa en Arriendo</span>
+          </div>
+          <div class="legend-item" style="margin-bottom: 10px; display: flex; align-items: center; gap: 12px;">
+            <div style="width: 32px; height: 32px; background: linear-gradient(90deg, #2A81CB 50%, #DC143C 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
+            <span style="font-size: 14px;">🏢 + 💰 = Depto en Venta</span>
+          </div>
+          <div class="legend-item" style="margin-bottom: 10px; display: flex; align-items: center; gap: 12px;">
+            <div style="width: 32px; height: 32px; background: linear-gradient(90deg, #2A81CB 50%, #FFD700 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
+            <span style="font-size: 14px;">🏢 + 🏘️ = Depto en Arriendo</span>
+          </div>
+        </div>
+
+        <div style="padding: 16px; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-radius: 8px; border: 2px solid #28a745;">
+          <div class="legend-item" style="margin-bottom: 0; display: flex; align-items: center; gap: 12px;">
+            <div style="width: 32px; height: 32px; background: linear-gradient(90deg, #FFA500 50%, #DC143C 50%); border-radius: 50%; border: 4px solid #28a745; box-shadow: 0 0 12px rgba(40,167,69,0.6); flex-shrink: 0;"></div>
+            <span style="font-size: 14px; font-weight: 600; color: #28a745;">✓ Propiedad Seleccionada (borde verde brillante)</span>
+          </div>
+        </div>
+
+        <!-- Capas Adicionales -->
+        <div style="margin-top: 24px; padding-top: 20px; border-top: 3px solid #7C3AED;">
+          <h4 style="margin: 0 0 16px; font-size: 16px; font-weight: 700; color: #7C3AED;">
+            🗺️ Capas Adicionales del Mapa
+          </h4>
+          
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+            <!-- Paraderos -->
+            <div class="legend-item" style="display: flex; align-items: center; gap: 8px;">
+              <div style="width: 20px; height: 28px; background: #28a745; clip-path: polygon(50% 0%, 100% 35%, 100% 100%, 0% 100%, 0% 35%); box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
+              <span style="font-size: 13px;">🚏 Paraderos (Verde)</span>
+            </div>
+
+            <!-- Metro -->
+            <div class="legend-item" style="display: flex; align-items: center; gap: 8px;">
+              <div style="width: 20px; height: 28px; background: #DC143C; clip-path: polygon(50% 0%, 100% 35%, 100% 100%, 0% 100%, 0% 35%); box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
+              <span style="font-size: 13px;">🚇 Metro (Rojo)</span>
+            </div>
+
+            <!-- Salud -->
+            <div class="legend-item" style="display: flex; align-items: center; gap: 8px;">
+              <div style="width: 20px; height: 28px; background: #2196F3; clip-path: polygon(50% 0%, 100% 35%, 100% 100%, 0% 100%, 0% 35%); box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
+              <span style="font-size: 13px;">🏥 Salud (Azul)</span>
+            </div>
+
+            <!-- Carabineros -->
+            <div class="legend-item" style="display: flex; align-items: center; gap: 8px;">
+              <div style="width: 20px; height: 28px; background: #000000; clip-path: polygon(50% 0%, 100% 35%, 100% 100%, 0% 100%, 0% 35%); box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
+              <span style="font-size: 13px;">👮 Carabineros (Negro)</span>
+            </div>
+
+            <!-- Ferias -->
+            <div class="legend-item" style="display: flex; align-items: center; gap: 8px;">
+              <div style="width: 20px; height: 28px; background: #7F8C8D; clip-path: polygon(50% 0%, 100% 35%, 100% 100%, 0% 100%, 0% 35%); box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
+              <span style="font-size: 13px;">🥬 Ferias (Gris)</span>
+            </div>
+
+            <!-- Bomberos -->
+            <div class="legend-item" style="display: flex; align-items: center; gap: 8px;">
+              <div style="width: 20px; height: 28px; background: #FFD700; clip-path: polygon(50% 0%, 100% 35%, 100% 100%, 0% 100%, 0% 35%); box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
+              <span style="font-size: 13px;">🚒 Bomberos (Dorado)</span>
+            </div>
+
+            <!-- Universidades -->
+            <div class="legend-item" style="display: flex; align-items: center; gap: 8px;">
+              <div style="width: 20px; height: 28px; background: #FF6F00; clip-path: polygon(50% 0%, 100% 35%, 100% 100%, 0% 100%, 0% 35%); box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
+              <span style="font-size: 13px;">🎓 Universidades (Naranja)</span>
+            </div>
+
+            <!-- Colegios -->
+            <div class="legend-item" style="display: flex; align-items: center; gap: 8px;">
+              <div style="width: 20px; height: 28px; background: #FFEB3B; clip-path: polygon(50% 0%, 100% 35%, 100% 100%, 0% 100%, 0% 35%); box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
+              <span style="font-size: 13px;">🏫 Colegios (Amarillo)</span>
+            </div>
+          </div>
+
+          <p style="margin-top: 12px; font-size: 12px; color: #6B7280; font-style: italic; text-align: center;">
+            💡 Activa/desactiva estas capas desde el panel lateral "🗺️ Capas Adicionales"
+          </p>
+        </div>
       </div>
     </div>
   </div>
