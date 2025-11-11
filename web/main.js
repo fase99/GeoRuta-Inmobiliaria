@@ -252,16 +252,36 @@
             if (data && data.flowSegmentData) {
                 const currentSpeed = data.flowSegmentData.currentSpeed;
                 const freeFlowSpeed = data.flowSegmentData.freeFlowSpeed;
-                const jamFactor = data.flowSegmentData.jamFactor;
+                
+                // Calcular nivel de congestión: 1 - (currentSpeed / freeFlowSpeed)
+                let congestioRatio = 0;
                 let nivel = "Desconocido";
-                if (jamFactor < 4) nivel = "Fluido";
-                else if (jamFactor < 7) nivel = "Moderado";
-                else nivel = "Congestionado";
+                let emoji = "❓";
+                
+                if (freeFlowSpeed && currentSpeed) {
+                    congestioRatio = 1 - (currentSpeed / freeFlowSpeed);
+                    // Interpretar según rango
+                    if (congestioRatio <= 0.25) {
+                        nivel = "Bajo (Fluido)";
+                        emoji = "🟢";
+                    } else if (congestioRatio <= 0.50) {
+                        nivel = "Moderado (Algo lento)";
+                        emoji = "🟡";
+                    } else if (congestioRatio <= 0.75) {
+                        nivel = "Alto (Congestionado)";
+                        emoji = "🔴";
+                    } else {
+                        nivel = "Crítico (Muy congestionado)";
+                        emoji = "⚫";
+                    }
+                }
+                
                 return {
                     nivel,
+                    emoji,
+                    congestioRatio,
                     currentSpeed,
-                    freeFlowSpeed,
-                    jamFactor
+                    freeFlowSpeed
                 };
             } else {
                 return { nivel: "Sin datos" };
@@ -314,8 +334,17 @@
                     if (traficoDiv) {
                         traficoDiv.textContent = "Consultando tráfico actual...";
                         const trafico = await getTrafficLevelTomTomActual(house.lat, house.lon);
-                        let html = `<b>Tráfico actual:</b> <span style='color:${trafico.nivel=="Fluido"?"green":trafico.nivel=="Moderado"?"orange":"red"}'>${trafico.nivel}</span><br>`;
-                        html += `<b>Velocidad:</b> ${trafico.currentSpeed||"-"} km/h`;
+                        let html = `<div style='font-size:12px; line-height:1.6;'>`;
+                        
+                        if (trafico.nivel) {
+                            const congestioPercent = (trafico.congestioRatio * 100).toFixed(1);
+                            html += `<p style='margin:4px 0;'><b>${trafico.emoji} Nivel de tráfico:</b> ${trafico.nivel}</p>`;
+                            html += `<p style='margin:4px 0;'><b>📊 Congestión:</b> ${congestioPercent}%</p>`;
+                        }
+                        
+                        html += `<p style='margin:4px 0;'><b>🚗 Velocidad actual:</b> ${trafico.currentSpeed||"-"} km/h</p>`;
+                        html += `<p style='margin:4px 0;'><b>✓ Velocidad sin congestión:</b> ${trafico.freeFlowSpeed||"-"} km/h</p>`;
+                        html += `</div>`;
                         traficoDiv.innerHTML = html;
                     }
                 });
