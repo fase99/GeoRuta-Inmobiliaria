@@ -272,23 +272,6 @@
         "estacionamientos": true
     },
     {
-        "id": 3966442,
-        "lat": -33.4401048,
-        "lon": -70.6072895,
-        "baños": 2,
-        "dormitorios": 2,
-        "comuna": "Providencia",
-        "fecha_publicacion": "07-10-2025 0:00:00",
-        "precio_uf": 30.39,
-        "precio_peso": 1200000.0,
-        "m2_superficie": 0.0,
-        "m2_terraza": 0.0,
-        "titulo": "Pedro de Valdivia / Bilbao",
-        "url": "https://www.toctoc.com/propiedades/arriendocorredorasr/departamento/providencia/pedro-de-valdivia-bilbao/3966442",
-        "imagen": "https://d1cfu8v5n1wsm.cloudfront.net/toctoc/fotos/20251007/3966442/s_wm_d8e59bb748bc74e2518552864c9b403d5712568c.jpg",
-        "estacionamientos": true
-    },
-    {
         "id": 3965815,
         "lat": -33.4411108,
         "lon": -70.6075646,
@@ -1136,23 +1119,6 @@
         "titulo": "2 DORM. Frente al Parque Bustamante, a pasos del Metro",
         "url": "https://www.toctoc.com/propiedades/arriendocorredorasr/departamento/providencia/2-dorm-frente-al-parque-bustamante-a-pasos-del-metro/3936735",
         "imagen": "https://d1cfu8v5n1wsm.cloudfront.net/toctoc/fotos/20250903/3936735/s_wm_c57c794cfb233c3a28c9e5039ff6e482480eb8d6.jpg",
-        "estacionamientos": true
-    },
-    {
-        "id": 3966947,
-        "lat": -33.4216557,
-        "lon": -70.6110814,
-        "baños": 2,
-        "dormitorios": 2,
-        "comuna": "Providencia",
-        "fecha_publicacion": "08-10-2025 0:00:00",
-        "precio_uf": 12.66,
-        "precio_peso": 500000.0,
-        "m2_superficie": 60.0,
-        "m2_terraza": 4.0,
-        "titulo": "Arriendo departamento Metro Los Leones 1 dorm. 2 baños",
-        "url": "https://www.toctoc.com/propiedades/arriendocorredorasr/departamento/providencia/arriendo-departamento-metro-los-leones-1-dorm-2-banos/3966947",
-        "imagen": "https://d1cfu8v5n1wsm.cloudfront.net/toctoc/fotos/20251008/3966947/s_wm_91f8b9f1bdd53b953d02ae211798e5a6a5add373.jpg",
         "estacionamientos": true
     },
     {
@@ -4196,23 +4162,6 @@
         "titulo": "Departamento en arriendo de 2 dorm 2 baño. en Providencia",
         "url": "https://www.toctoc.com/propiedades/arriendocorredorasr/departamento/providencia/departamento-en-arriendo-de-2-dorm-2-bano-en-providencia/3793524",
         "imagen": "https://d1cfu8v5n1wsm.cloudfront.net/toctoc/fotos/20250411/3793524/s_wm_69476d68394f1090b6f0b5afce9eef352973de1f.jpeg",
-        "estacionamientos": true
-    },
-    {
-        "id": 3930373,
-        "lat": -33.436452,
-        "lon": -70.602256,
-        "baños": 2,
-        "dormitorios": 2,
-        "comuna": "Providencia",
-        "fecha_publicacion": "27-08-2025 0:00:00",
-        "precio_uf": 21.53,
-        "precio_peso": 850000.0,
-        "m2_superficie": 70.0,
-        "m2_terraza": 5.0,
-        "titulo": "Departamento, Avenida Suecia 1818",
-        "url": "https://www.toctoc.com/propiedades/arriendocorredorasr/departamento/providencia/departamento-avenida-suecia-1818/3930373",
-        "imagen": "https://d1cfu8v5n1wsm.cloudfront.net/toctoc/fotos/20250827/3930373/s_wm_2025082739188439217.jpg",
         "estacionamientos": true
     },
     {
