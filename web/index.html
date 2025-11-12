@@ -152,6 +152,21 @@
         <button id="restore-selection-btn" class="btn btn-outline">⤴️ Restaurar todo</button>
       </div>
     </div>
+    
+    <div class="control-group card">
+      <div class="button-group" style="display:flex;gap:8px;flex-wrap:wrap">
+        <button id="optimize-order-btn" class="btn btn-secondary">🔀 Optimizar orden</button>
+        <button id="generate-recommended-route-btn" class="btn btn-primary">🚌 Ruta recomendada (bus + caminar)</button>
+      </div>
+    </div>
+    
+    <div class="control-group card">
+      <h3 class="section-title">📋 Instrucciones recomendadas</h3>
+      <div id="recommended-instructions" style="max-height:220px;overflow:auto;padding:8px;background:#fff; border:1px solid #eee;border-radius:6px">
+        <em id="instructions-placeholder">Genera una ruta recomendada para ver instrucciones paso a paso.</em>
+        <div id="instructions-content"></div>
+      </div>
+    </div>
 
     <div class="control-group card">
       <h3 class="section-title">📊 Cantidad de Elementos Registrados</h3>

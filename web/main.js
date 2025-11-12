@@ -1325,12 +1325,10 @@
         updateItineraryUI();
     });
     if (calcSelBtn) calcSelBtn.addEventListener('click', () => {
+        // Replace naive straight-line route with recommended multimodal route
         if (!startPointMarker) return alert('Define punto de partida');
         if (selectedProperties.length === 0) return alert('No hay propiedades seleccionadas');
-        const start = startPointMarker.getLatLng();
-        const latlngs = [start].concat(selectedProperties.map(h => L.latLng(h.lat, h.lon)));
-        L.polyline(latlngs, { color: '#7C3AED', weight: 4, opacity: 0.8 }).addTo(map);
-        alert('Ruta para selección dibujada (temporal)');
+        generateRecommendedRoute();
     });
 
     // Completar selección: ocultar todas las propiedades no seleccionadas
@@ -1374,6 +1372,345 @@
             setText('houses-filtered-count', houseMarkers.filter(m => housesLayer.hasLayer(m)).length + ' (seleccionadas: ' + selectedProperties.length + ')');
         });
     }
+
+    // =====================
+    // Orden óptimo (TSP heurístico)
+    // =====================
+    function pathLengthFromNodes(pathNodes) {
+        if (!pathNodes || pathNodes.length < 2) return 0;
+        let total = 0;
+        for (let i = 0; i < pathNodes.length - 1; i++) {
+            const a = pathNodes[i], b = pathNodes[i+1];
+            const f = edgeLookup.get(`${a}-${b}`) || edgeLookup.get(`${b}-${a}`);
+            if (f && f.properties && f.properties.length) total += Number(f.properties.length);
+            else {
+                const na = nodeIndex.get(a), nb = nodeIndex.get(b);
+                if (na && nb) total += haversineDistance({lat: na.lat, lon: na.lon}, {lat: nb.lat, lon: nb.lon});
+            }
+        }
+        return total;
+    }
+
+    function distanceBetweenNodes(a, b) {
+        // compute dijkstra path then length
+        const path = dijkstra(a, b);
+        if (!path) return Infinity;
+        return pathLengthFromNodes(path);
+    }
+
+    async function computeDistanceMatrix(nodeIds) {
+        const n = nodeIds.length;
+        const mat = Array.from({length:n}, () => Array(n).fill(Infinity));
+        for (let i=0;i<n;i++) {
+            for (let j=0;j<n;j++) {
+                if (i===j) { mat[i][j]=0; continue; }
+                mat[i][j] = distanceBetweenNodes(nodeIds[i], nodeIds[j]);
+            }
+        }
+        return mat;
+    }
+
+    function nearestNeighborOrder(distMat) {
+        const n = distMat.length;
+        const visited = Array(n).fill(false);
+        const order = [0]; // assume 0 is start
+        visited[0]=true;
+        for (let k=1;k<n;k++) {
+            const last = order[order.length-1];
+            let best = -1, bd = Infinity;
+            for (let j=1;j<n;j++) if (!visited[j]) {
+                if (distMat[last][j] < bd) { bd = distMat[last][j]; best=j; }
+            }
+            if (best===-1) break;
+            order.push(best); visited[best]=true;
+        }
+        return order;
+    }
+
+    function twoOpt(order, distMat) {
+        const n = order.length;
+        let improved = true;
+        while (improved) {
+            improved = false;
+            for (let i=1;i<n-2;i++) {
+                for (let k=i+1;k<n-1;k++) {
+                    const a = order[i-1], b = order[i];
+                    const c = order[k], d = order[k+1];
+                    const delta = (distMat[a][c] + distMat[b][d]) - (distMat[a][b] + distMat[c][d]);
+                    if (delta < -1e-6) {
+                        // reverse segment [i..k]
+                        const newSeg = order.slice(i, k+1).reverse();
+                        order.splice(i, k-i+1, ...newSeg);
+                        improved = true;
+                    }
+                    if (improved) break;
+                }
+                if (improved) break;
+            }
+        }
+        return order;
+    }
+
+    async function optimizeVisitOrder() {
+        if (!startPointMarker) return alert('Define punto de partida antes de optimizar');
+        if (selectedProperties.length < 1) return alert('Selecciona al menos una propiedad');
+        // ensure graph loaded
+        if (!nodesGeoJSON) await loadNodes();
+        if (!edgesGeoJSON) await loadEdges();
+
+        const startLatLng = startPointMarker.getLatLng();
+        const startSnap = snapToNearestNode(startLatLng.lat, startLatLng.lng);
+        if (!startSnap || startSnap.id===null) return alert('No se pudo snapear el punto de inicio a la red');
+        const startNode = startSnap.id;
+
+        // snap each property to nearest node
+        const waypoints = selectedProperties.map(h => ({ house: h, snap: snapToNearestNode(h.lat, h.lon) }));
+        const nodeIds = [startNode].concat(waypoints.map(w => w.snap.id));
+
+        const distMat = await computeDistanceMatrix(nodeIds);
+        let order = nearestNeighborOrder(distMat);
+        order = twoOpt(order, distMat);
+
+        // order[0] is start index 0; subsequent indices correspond to waypoints array indexes
+        const orderedProps = [];
+        for (let idx=1; idx<order.length; idx++) {
+            const wpIdx = order[idx]-1; // because waypoints start at position 1
+            if (wpIdx>=0 && waypoints[wpIdx]) orderedProps.push(waypoints[wpIdx].house);
+        }
+        // replace selectedProperties with ordered version
+        selectedProperties = orderedProps;
+        updateItineraryUI();
+        alert('Orden optimizado. Revisa el itinerario.');
+    }
+
+    // =====================
+    // Ruta recomendada: combinar paraderos + caminar
+    // =====================
+    const recommendedLayer = L.layerGroup().addTo(map);
+    function nearestParadero(lat, lon) {
+        if (!paraderos || paraderos.length===0) return null;
+        let best = null; let bd = Infinity;
+        paraderos.forEach(p => {
+            const d = haversineDistance({lat, lon}, {lat: p.lat, lon: p.lon});
+            if (d < bd) { bd = d; best = p; }
+        });
+        return { paradero: best, distance: bd };
+    }
+
+    async function generateRecommendedRoute() {
+        if (!startPointMarker) return alert('Define punto de partida');
+        if (selectedProperties.length === 0) return alert('Selecciona propiedades primero');
+        // ensure graph loaded
+        if (!nodesGeoJSON) await loadNodes();
+        if (!edgesGeoJSON) await loadEdges();
+
+        recommendedLayer.clearLayers();
+        const instrContainer = document.getElementById('instructions-content');
+        const placeholder = document.getElementById('instructions-placeholder');
+        if (instrContainer) instrContainer.innerHTML = '';
+        if (placeholder) placeholder.style.display = 'none';
+
+        const walkSpeed = 83.333; // m per min (~5km/h)
+        const busSpeed = 416.667; // m per min (~25km/h)
+
+        let currentLatLng = startPointMarker.getLatLng();
+        const legs = []; // sequence of {type:'walk'|'transit', distanceM, timeMin, desc, from:{lat,lon,name}, to:{lat,lon,name}, transport}
+
+        function stopLatLon(s) {
+            if (!s) return null;
+            if (s.lat !== undefined && s.lon !== undefined) return { lat: s.lat, lon: s.lon };
+            if (s.station && s.station.lat !== undefined && s.station.lon !== undefined) return { lat: s.station.lat, lon: s.station.lon };
+            if (s.paradero && s.paradero.lat !== undefined && s.paradero.lon !== undefined) return { lat: s.paradero.lat, lon: s.paradero.lon };
+            return null;
+        }
+
+        for (let i = 0; i < selectedProperties.length; i++) {
+            const target = selectedProperties[i];
+
+            // If no paraderos loaded, fallback to walking
+            if (!paraderos || paraderos.length === 0) {
+                const walkM = haversineDistance({ lat: currentLatLng.lat, lon: currentLatLng.lng }, { lat: target.lat, lon: target.lon });
+                const timeMin = walkM / walkSpeed;
+                legs.push({ type: 'walk', distanceM: walkM, timeMin, desc: `Camina ${Math.round(walkM)} m hasta la propiedad: ${target.titulo || ''}`, from: { lat: currentLatLng.lat, lon: currentLatLng.lng }, to: { lat: target.lat, lon: target.lon } });
+                recommendedLayer.addLayer(L.polyline([[currentLatLng.lat, currentLatLng.lng], [target.lat, target.lon]], { color: '#1E90FF', dashArray: '6 6', weight: 3, opacity: 0.8 }));
+                currentLatLng = L.latLng(target.lat, target.lon);
+                continue;
+            }
+
+            // candidate paraderos and metro stations: nearest K to origin and target
+            const K = 6;
+            function nearestKParaderos(lat, lon, k) {
+                if (!paraderos) return [];
+                return paraderos.map(p => ({ p, d: haversineDistance({ lat, lon }, { lat: p.lat, lon: p.lon }) })).sort((a, b) => a.d - b.d).slice(0, k).map(x => ({ paradero: x.p, distance: x.d }));
+            }
+            function nearestKMetro(lat, lon, k) {
+                if (!metroPois) return [];
+                return metroPois.map(s => ({ s, d: haversineDistance({ lat, lon }, { lat: s.lat, lon: s.lon }) })).sort((a, b) => a.d - b.d).slice(0, k).map(x => ({ station: x.s, distance: x.d }));
+            }
+            const fromParCandidates = nearestKParaderos(currentLatLng.lat, currentLatLng.lng, K);
+            const toParCandidates = nearestKParaderos(target.lat, target.lon, K);
+            const fromMetroCandidates = nearestKMetro(currentLatLng.lat, currentLatLng.lng, K);
+            const toMetroCandidates = nearestKMetro(target.lat, target.lon, K);
+
+            let bestOption = { type: 'walk', timeMin: Infinity, details: null };
+
+            const walkOnlyM = haversineDistance({ lat: currentLatLng.lat, lon: currentLatLng.lng }, { lat: target.lat, lon: target.lon });
+            const walkOnlyTime = walkOnlyM / walkSpeed;
+            bestOption = { type: 'walk', timeMin: walkOnlyTime, details: { walkM: walkOnlyM } };
+
+            // evaluate paradero-paradero (bus) pairs
+            for (const f of fromParCandidates) {
+                for (const t of toParCandidates) {
+                    const walkFrom = f.distance;
+                    const walkTo = t.distance;
+                    const fromNode = snapToNearestNode(f.paradero.lat, f.paradero.lon).id;
+                    const toNode = snapToNearestNode(t.paradero.lat, t.paradero.lon).id;
+                    if (fromNode === undefined || toNode === undefined) continue;
+                    const pathNodes = dijkstra(fromNode, toNode);
+                    if (!pathNodes) continue;
+                    const busMeters = pathLengthFromNodes(pathNodes);
+                    const timeMin = (walkFrom / walkSpeed) + (busMeters / busSpeed) + (walkTo / walkSpeed);
+                    if (timeMin < bestOption.timeMin) {
+                        bestOption = { type: 'transit', timeMin, details: { transport: 'bus', from: f.paradero, to: t.paradero, walkFrom, walkTo, transitMeters: busMeters, pathNodes } };
+                    }
+                }
+            }
+
+            // evaluate metro-metro pairs (metro ride)
+            for (const f of fromMetroCandidates) {
+                for (const t of toMetroCandidates) {
+                    const walkFrom = f.distance;
+                    const walkTo = t.distance;
+                    const fromNode = snapToNearestNode(f.station.lat, f.station.lon).id;
+                    const toNode = snapToNearestNode(t.station.lat, t.station.lon).id;
+                    if (fromNode === undefined || toNode === undefined) continue;
+                    const pathNodes = dijkstra(fromNode, toNode);
+                    if (!pathNodes) continue;
+                    const metroMeters = pathLengthFromNodes(pathNodes);
+                    const timeMin = (walkFrom / walkSpeed) + (metroMeters / busSpeed) + (walkTo / walkSpeed);
+                    if (timeMin < bestOption.timeMin) {
+                        bestOption = { type: 'transit', timeMin, details: { transport: 'metro', from: f.station, to: t.station, walkFrom, walkTo, transitMeters: metroMeters, pathNodes } };
+                    }
+                }
+            }
+
+            // evaluate mixed combos: paradero -> metro
+            for (const f of fromParCandidates) {
+                for (const t of toMetroCandidates) {
+                    const walkFrom = f.distance;
+                    const walkTo = t.distance;
+                    const fromNode = snapToNearestNode(f.paradero.lat, f.paradero.lon).id;
+                    const toNode = snapToNearestNode(t.station.lat, t.station.lon).id;
+                    if (fromNode === undefined || toNode === undefined) continue;
+                    const pathNodes = dijkstra(fromNode, toNode);
+                    if (!pathNodes) continue;
+                    const meters = pathLengthFromNodes(pathNodes);
+                    const timeMin = (walkFrom / walkSpeed) + (meters / busSpeed) + (walkTo / walkSpeed);
+                    if (timeMin < bestOption.timeMin) {
+                        bestOption = { type: 'transit', timeMin, details: { transport: 'bus', from: f.paradero, to: t.station, walkFrom, walkTo, transitMeters: meters, pathNodes } };
+                    }
+                }
+            }
+
+            // mixed combos: metro -> paradero
+            for (const f of fromMetroCandidates) {
+                for (const t of toParCandidates) {
+                    const walkFrom = f.distance;
+                    const walkTo = t.distance;
+                    const fromNode = snapToNearestNode(f.station.lat, f.station.lon).id;
+                    const toNode = snapToNearestNode(t.paradero.lat, t.paradero.lon).id;
+                    if (fromNode === undefined || toNode === undefined) continue;
+                    const pathNodes = dijkstra(fromNode, toNode);
+                    if (!pathNodes) continue;
+                    const meters = pathLengthFromNodes(pathNodes);
+                    const timeMin = (walkFrom / walkSpeed) + (meters / busSpeed) + (walkTo / walkSpeed);
+                    if (timeMin < bestOption.timeMin) {
+                        bestOption = { type: 'transit', timeMin, details: { transport: 'bus', from: f.station, to: t.paradero, walkFrom, walkTo, transitMeters: meters, pathNodes } };
+                    }
+                }
+            }
+
+            // Build legs & layers based on bestOption
+            if (bestOption.type === 'walk') {
+                const m = Math.round(bestOption.details.walkM);
+                const timeMin = bestOption.details.walkM / walkSpeed;
+                legs.push({ type: 'walk', distanceM: bestOption.details.walkM, timeMin, desc: `Camina ${Math.round(bestOption.details.walkM)} m hasta la propiedad: ${target.titulo || ''}`, from: { lat: currentLatLng.lat, lon: currentLatLng.lng }, to: { lat: target.lat, lon: target.lon } });
+                recommendedLayer.addLayer(L.polyline([[currentLatLng.lat, currentLatLng.lng], [target.lat, target.lon]], { color: '#1E90FF', dashArray: '6 6', weight: 3, opacity: 0.8 }));
+            } else if (bestOption.type === 'transit') {
+                const d = bestOption.details;
+                const transport = d.transport || 'bus';
+
+                // walk to origin stop
+                const fromCoords = stopLatLon(d.from) || { lat: (d.from && d.from.lat) || 0, lon: (d.from && d.from.lon) || 0 };
+                const toCoords = stopLatLon(d.to) || { lat: (d.to && d.to.lat) || 0, lon: (d.to && d.to.lon) || 0 };
+                const walkToFromM = d.walkFrom;
+                const walkToFromMin = walkToFromM / walkSpeed;
+                legs.push({ type: 'walk', distanceM: walkToFromM, timeMin: walkToFromMin, desc: `Camina ${Math.round(walkToFromM)} m hasta el ${transport === 'metro' ? 'andén/estación' : 'paradero'}: ${ (d.from && (d.from.nombre || d.from.codigo)) || '' }`, from: { lat: currentLatLng.lat, lon: currentLatLng.lng }, to: { lat: fromCoords.lat, lon: fromCoords.lon }, transport: transport });
+                recommendedLayer.addLayer(L.polyline([[currentLatLng.lat, currentLatLng.lng], [fromCoords.lat, fromCoords.lon]], { color: '#1E90FF', dashArray: '6 6', weight: 3, opacity: 0.8 }));
+                L.marker([fromCoords.lat, fromCoords.lon], { icon: transport === 'metro' ? icons.metro : icons.paradero }).bindPopup(`Toma aquí (${transport})`).addTo(recommendedLayer);
+
+                // transit leg along graph
+                const edgeFeats = nodesPathToEdgeFeatures(d.pathNodes || []);
+                const transitMeters = (d.transitMeters !== undefined) ? d.transitMeters : (edgeFeats && edgeFeats.length ? pathLengthFromNodes(d.pathNodes) : haversineDistance(fromCoords, toCoords));
+                const transitMin = transitMeters / busSpeed;
+                if (edgeFeats && edgeFeats.length) {
+                    const color = transport === 'metro' ? '#6f42c1' : '#FF4500';
+                    recommendedLayer.addLayer(L.geoJSON({ type: 'FeatureCollection', features: edgeFeats }, { style: { color: color, weight: 5, opacity: 0.9 } }));
+                    legs.push({ type: 'transit', transport: transport, distanceM: transitMeters, timeMin: transitMin, desc: `Toma ${transport} aprox. ${Math.round(transitMin)} min (${Math.round(transitMeters)} m) desde ${(d.from.nombre || '')} hasta ${(d.to.nombre || '')}`, from: { lat: fromCoords.lat, lon: fromCoords.lon, name: d.from && (d.from.nombre || d.from.codigo) }, to: { lat: toCoords.lat, lon: toCoords.lon, name: d.to && (d.to.nombre || d.to.codigo) } });
+                } else {
+                    const color = transport === 'metro' ? '#6f42c1' : '#FF4500';
+                    recommendedLayer.addLayer(L.polyline([[fromCoords.lat, fromCoords.lon], [toCoords.lat, toCoords.lon]], { color: color, weight: 4, opacity: 0.7 }));
+                    legs.push({ type: 'transit', transport: transport, distanceM: transitMeters, timeMin: transitMin, desc: `Toma ${transport} desde ${(d.from.nombre || '')} hasta ${(d.to.nombre || '')} (trayecto aproximado)`, from: { lat: fromCoords.lat, lon: fromCoords.lon }, to: { lat: toCoords.lat, lon: toCoords.lon } });
+                }
+                L.marker([toCoords.lat, toCoords.lon], { icon: transport === 'metro' ? icons.metro : icons.paradero }).bindPopup('Bájate aquí').addTo(recommendedLayer);
+
+                // walk from stop to property
+                const walkFromDestM = d.walkTo;
+                const walkFromDestMin = walkFromDestM / walkSpeed;
+                legs.push({ type: 'walk', distanceM: walkFromDestM, timeMin: walkFromDestMin, desc: `Camina ${Math.round(walkFromDestM)} m desde ${(d.to.nombre || '')} hasta la propiedad`, from: { lat: toCoords.lat, lon: toCoords.lon }, to: { lat: target.lat, lon: target.lon } });
+                recommendedLayer.addLayer(L.polyline([[toCoords.lat, toCoords.lon], [target.lat, target.lon]], { color: '#1E90FF', dashArray: '6 6', weight: 3, opacity: 0.8 }));
+            }
+
+            // mark property
+            recommendedLayer.addLayer(L.circleMarker([target.lat, target.lon], { radius: 6, color: '#2E8B57', fillColor: '#2E8B57', fillOpacity: 0.9 }).bindPopup(`<b>${target.titulo || 'Propiedad'}</b><br/>${target.comuna || ''}`));
+
+            currentLatLng = L.latLng(target.lat, target.lon);
+        }
+
+        // compute totals and render instructions with per-leg metrics
+        let totalMeters = 0, totalMinutes = 0;
+        legs.forEach(l => { totalMeters += (l.distanceM || 0); totalMinutes += (l.timeMin || 0); });
+
+        if (instrContainer) {
+            const summary = document.createElement('div');
+            summary.style.padding = '6px';
+            summary.style.borderBottom = '1px solid #eee';
+            summary.innerHTML = `<b>Total estimado:</b> ${Math.round(totalMinutes)} min — ${Math.round(totalMeters)} m`;
+            instrContainer.appendChild(summary);
+
+            const ol = document.createElement('ol');
+            legs.forEach(l => {
+                const li = document.createElement('li');
+                let txt = '';
+                if (l.type === 'walk') {
+                    txt = `${l.desc} (${Math.round(l.distanceM)} m — ${Math.round(l.timeMin)} min)`;
+                } else if (l.type === 'transit') {
+                    txt = `${l.desc} (${Math.round(l.distanceM)} m — ${Math.round(l.timeMin)} min)`;
+                }
+                li.textContent = txt;
+                ol.appendChild(li);
+            });
+            instrContainer.appendChild(ol);
+        }
+
+        try { map.fitBounds(recommendedLayer.getBounds(), { padding: [20, 20] }); } catch (e) { }
+    }
+
+    // Wire up optimize & recommended buttons
+    const optimizeBtn = document.getElementById('optimize-order-btn');
+    if (optimizeBtn) optimizeBtn.addEventListener('click', () => { optimizeVisitOrder(); });
+    const genRecBtn = document.getElementById('generate-recommended-route-btn');
+    if (genRecBtn) genRecBtn.addEventListener('click', () => { generateRecommendedRoute(); });
 
     // Load everything (including paraderos, nodes and edges if present)
     Promise.all([
