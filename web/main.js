@@ -203,7 +203,7 @@
     // Controls
     const comunaFilter = null; // comuna filter removed from UI
     const startPointBtn = document.getElementById('start-point-btn');
-    const calculateRouteBtn = document.getElementById('calculate-route-btn');
+    const calculateRouteBtn = document.getElementById('generate-recommended-route-btn');
     const filterByMetroCb = document.getElementById('filter-by-metro');
     const filterByHealthCb = document.getElementById('filter-by-health');
     const metroRadiusInput = document.getElementById('metro-radius');
@@ -1356,7 +1356,7 @@
 
     // Clear selection and calculate selected buttons
     const clearSelBtn = document.getElementById('clear-selection-btn');
-    const calcSelBtn = document.getElementById('calc-route-selected-btn');
+    const calcSelBtn = document.getElementById('optimize-order-btn');
     if (clearSelBtn) clearSelBtn.addEventListener('click', () => {
         selectedProperties = [];
         houseMarkers.forEach(m => {
