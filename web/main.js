@@ -1333,6 +1333,48 @@
         alert('Ruta para selección dibujada (temporal)');
     });
 
+    // Completar selección: ocultar todas las propiedades no seleccionadas
+    const completeSelBtn = document.getElementById('complete-selection-btn');
+    if (completeSelBtn) {
+        completeSelBtn.addEventListener('click', () => {
+            const selIds = new Set(selectedProperties.map(s => s.id));
+            houseMarkers.forEach(m => {
+                const id = m.houseData && m.houseData.id;
+                if (!selIds.has(id)) {
+                    try { housesLayer.removeLayer(m); } catch(e) {}
+                } else {
+                    if (!housesLayer.hasLayer(m)) housesLayer.addLayer(m);
+                    // keep the icon as it was at selection time; do not force-change it here
+                }
+            });
+            // update counters and UI
+            updateItineraryUI();
+            setText('houses-filtered-count', houseMarkers.filter(m => housesLayer.hasLayer(m)).length + ' (seleccionadas: ' + selectedProperties.length + ')');
+            // disable the button after completing selection to avoid accidental repeats
+            completeSelBtn.disabled = true;
+            completeSelBtn.textContent = 'Selección completada';
+        });
+    }
+
+    // Restaurar todo: volver a mostrar todas las propiedades ocultas
+    const restoreSelBtn = document.getElementById('restore-selection-btn');
+    if (restoreSelBtn) {
+        restoreSelBtn.addEventListener('click', () => {
+            // Add back all markers to the housesLayer
+            houseMarkers.forEach(m => {
+                try { if (!housesLayer.hasLayer(m)) housesLayer.addLayer(m); } catch(e) { console.warn('restore layer add failed', e); }
+            });
+            // Re-enable the complete button and reset its text
+            if (completeSelBtn) {
+                completeSelBtn.disabled = false;
+                completeSelBtn.textContent = 'Completar selección';
+            }
+            // Update UI counters
+            updateItineraryUI();
+            setText('houses-filtered-count', houseMarkers.filter(m => housesLayer.hasLayer(m)).length + ' (seleccionadas: ' + selectedProperties.length + ')');
+        });
+    }
+
     // Load everything (including paraderos, nodes and edges if present)
     Promise.all([
         loadHouses(), 

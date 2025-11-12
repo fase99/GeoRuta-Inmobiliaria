@@ -147,6 +147,13 @@
     </div>
 
     <div class="control-group card">
+      <div class="button-group" style="display:flex;gap:8px;flex-wrap:wrap">
+        <button id="complete-selection-btn" class="btn btn-info">Completar selección</button>
+        <button id="restore-selection-btn" class="btn btn-outline">⤴️ Restaurar todo</button>
+      </div>
+    </div>
+
+    <div class="control-group card">
       <h3 class="section-title">📊 Cantidad de Elementos Registrados</h3>
       <div class="stats-grid stats-grid-2col">
         <div class="stat-item">
@@ -214,10 +221,7 @@
         <input type="checkbox" id="show-edges-layer" checked />
         <span>🛣️ Calles (aristas OSM)</span>
       </label>
-      <label class="checkbox-label">
-        <input type="checkbox" id="show-route-osm" />
-        <span>📍 Ruta OSM</span>
-      </label>
+      
       <div class="debug-info">
         <p class="debug">Paraderos: <span id="debug-paraderos">-</span></p>
         <p class="debug">Carabineros: <span id="debug-carabineros">-</span></p>
