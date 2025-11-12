@@ -48,6 +48,8 @@
     const nodeIndex = new Map(); // nodeId -> {lat, lon}
     const adj = new Map(); // nodeId -> Array<{to, weight}>
     const edgeLookup = new Map(); // "u-v" -> feature
+    const edgeProbMap = new Map(); // "u-v" -> probability (0..1)
+    const nodeProbMap = new Map(); // nodeId -> probability (0..1)
 
     // Icons
     const icons = {
@@ -769,7 +771,16 @@
             if (u === goalId) break;
             const neighbors = adj.get(u) || [];
             for (const nb of neighbors) {
-                const alt = dist.get(u) + (nb.weight || 1);
+                // Apply safety penalty using loaded probabilities (edge + node)
+                const base = (nb.weight || 1);
+                const edgeKey = `${u}-${nb.to}`;
+                const reverseKey = `${nb.to}-${u}`;
+                const edgeProb = (edgeProbMap.get(edgeKey) !== undefined) ? edgeProbMap.get(edgeKey) : (edgeProbMap.get(reverseKey) || 0);
+                const nodeProb = nodeProbMap.get(nb.to) || 0;
+                // Penalty design: increase path length proportional to edge probability (more risk -> larger factor)
+                // weight = base * (1 + 2 * edgeProb) + nodeProb * 50
+                const penalized = base * (1 + 2 * edgeProb) + (nodeProb * 50);
+                const alt = dist.get(u) + penalized;
                 if (alt < (dist.get(nb.to) || Infinity)) {
                     dist.set(nb.to, alt);
                     prev.set(nb.to, u);
@@ -1092,8 +1103,8 @@
                     if (u !== undefined && v !== undefined) {
                         if (!adj.has(u)) adj.set(u, []);
                         if (!adj.has(v)) adj.set(v, []);
-                        adj.get(u).push({ to: v, weight: Number(length) });
-                        adj.get(v).push({ to: u, weight: Number(length) });
+                                adj.get(u).push({ to: v, weight: Number(length) });
+                                adj.get(v).push({ to: u, weight: Number(length) });
                         edgeLookup.set(`${u}-${v}`, f);
                         edgeLookup.set(`${v}-${u}`, f);
                     }
@@ -1113,6 +1124,37 @@
             edgesLayer.addLayer(geojsonLayer);
             setText('debug-edges', `aristas cargadas: ${ (gj.features && gj.features.length) || 0}`);
         }).catch(e => { console.warn('edges load error', e); const d=document.getElementById('debug-edges'); if(d)d.textContent='edges load error'; });
+    }
+
+    // Load edge/node probabilities (optional files produced by amenazas generator)
+    async function loadProbabilities() {
+        try {
+            const [eResp, nResp] = await Promise.all([
+                fetch('data/edge_probabilities.json').catch(_=>null),
+                fetch('data/node_probabilities.json').catch(_=>null)
+            ]);
+            if (eResp && eResp.ok) {
+                const eJson = await eResp.json();
+                // support either object map {"u-v": prob} or array [{u:..., v:..., prob:...}]
+                if (Array.isArray(eJson)) {
+                    eJson.forEach(it => {
+                        if (it.u !== undefined && it.v !== undefined) edgeProbMap.set(`${it.u}-${it.v}`, Number(it.prob || it.p || 0));
+                        else if (it.key) edgeProbMap.set(it.key, Number(it.prob || it.p || 0));
+                    });
+                } else if (typeof eJson === 'object' && eJson !== null) {
+                    Object.keys(eJson).forEach(k => { edgeProbMap.set(k, Number(eJson[k] || 0)); });
+                }
+            }
+            if (nResp && nResp.ok) {
+                const nJson = await nResp.json();
+                if (Array.isArray(nJson)) {
+                    nJson.forEach(it => { if (it.id !== undefined) nodeProbMap.set(Number(it.id), Number(it.prob || it.p || 0)); });
+                } else if (typeof nJson === 'object' && nJson !== null) {
+                    Object.keys(nJson).forEach(k => { nodeProbMap.set(Number(k), Number(nJson[k] || 0)); });
+                }
+            }
+            console.log('probabilities loaded', edgeProbMap.size, nodeProbMap.size);
+        } catch (e) { console.warn('loadProbabilities failed', e); }
     }
 
     function loadNodes() {
@@ -1513,8 +1555,10 @@
         const walkSpeed = 83.333; // m per min (~5km/h)
         const busSpeed = 416.667; // m per min (~25km/h)
 
-        let currentLatLng = startPointMarker.getLatLng();
-        const legs = []; // sequence of {type:'walk'|'transit', distanceM, timeMin, desc, from:{lat,lon,name}, to:{lat,lon,name}, transport}
+    let currentLatLng = startPointMarker.getLatLng();
+    const legs = []; // sequence of {type:'walk'|'transit', distanceM, timeMin, desc, from:{lat,lon,name}, to:{lat,lon,name}, transport}
+    const destLegIndices = []; // end index in legs[] for each destination (used to compute ETAs)
+    const startTime = new Date();
 
         function stopLatLon(s) {
             if (!s) return null;
@@ -1674,12 +1718,33 @@
             // mark property
             recommendedLayer.addLayer(L.circleMarker([target.lat, target.lon], { radius: 6, color: '#2E8B57', fillColor: '#2E8B57', fillOpacity: 0.9 }).bindPopup(`<b>${target.titulo || 'Propiedad'}</b><br/>${target.comuna || ''}`));
 
+            // Remember where this destination's legs end
+            destLegIndices.push(legs.length);
+
             currentLatLng = L.latLng(target.lat, target.lon);
         }
-
-        // compute totals and render instructions with per-leg metrics
+        // compute totals, per-destination ETAs and render instructions with per-leg metrics
         let totalMeters = 0, totalMinutes = 0;
-        legs.forEach(l => { totalMeters += (l.distanceM || 0); totalMinutes += (l.timeMin || 0); });
+        const destSummaries = []; // { target, eta:Date, cumMinutes, cumMeters }
+        let legIdx = 0;
+        for (let i = 0; i < legs.length; i++) {
+            const l = legs[i];
+            totalMeters += (l.distanceM || 0);
+            totalMinutes += (l.timeMin || 0);
+            legIdx = i + 1; // 1-based end index
+            // check whether this leg index marks the end of a destination
+            for (let d = 0; d < destLegIndices.length; d++) {
+                if (destLegIndices[d] === legIdx && !destSummaries[d]) {
+                    // compute cumulative up to this point
+                    const cumMinutes = legs.slice(0, legIdx).reduce((s, x) => s + (x.timeMin || 0), 0);
+                    const cumMeters = legs.slice(0, legIdx).reduce((s, x) => s + (x.distanceM || 0), 0);
+                    const eta = new Date(startTime.getTime() + Math.round(cumMinutes * 60000));
+                    // target corresponding is selectedProperties[d]
+                    const target = selectedProperties[d];
+                    destSummaries[d] = { target, eta, cumMinutes, cumMeters };
+                }
+            }
+        }
 
         if (instrContainer) {
             const summary = document.createElement('div');
@@ -1688,6 +1753,20 @@
             summary.innerHTML = `<b>Total estimado:</b> ${Math.round(totalMinutes)} min — ${Math.round(totalMeters)} m`;
             instrContainer.appendChild(summary);
 
+            // Show per-destination ETAs first
+            const destDiv = document.createElement('div');
+            destDiv.style.marginBottom = '8px';
+            destDiv.style.fontSize = '13px';
+            destDiv.style.color = '#374151';
+            destSummaries.forEach((ds, idx) => {
+                if (!ds) return;
+                const hhmm = ds.eta.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                const txt = `Llegada estimada a ${ds.target.titulo || 'propiedad'}: ${hhmm} (acumulado: ${Math.round(ds.cumMinutes)} min — ${Math.round(ds.cumMeters)} m)`;
+                const p = document.createElement('div'); p.textContent = txt; p.style.marginBottom = '4px'; destDiv.appendChild(p);
+            });
+            instrContainer.appendChild(destDiv);
+
+            // Full legs list
             const ol = document.createElement('ol');
             legs.forEach(l => {
                 const li = document.createElement('li');
@@ -1706,27 +1785,59 @@
         // Also populate the legend modal top area so the recommended route appears there
         try {
             const legendEl = document.getElementById('legend-recommended-route');
+            const legendModalEl = document.getElementById('legend-modal');
             if (legendEl) {
                 // Make visible
                 legendEl.style.display = 'block';
-                // Build inner content: summary + short list (first 6 items) to avoid overflow
+                // Build inner content: summary + short list (first 6 items) + 'Abrir detalle completo' button
                 let html = `<div style="font-size:13px; margin-bottom:6px;"><b>Ruta recomendada</b></div>`;
                 html += `<div style="font-size:13px; margin-bottom:8px; color:#374151;"><b>Total:</b> ${Math.round(totalMinutes)} min — ${Math.round(totalMeters)} m</div>`;
-                html += '<ol style="margin:0 0 0 18px; padding:0; font-size:13px; color:#374151;">';
+                html += '<ol style="margin:0 0 8px 18px; padding:0; font-size:13px; color:#374151;">';
                 const maxItems = 6;
                 legs.slice(0, maxItems).forEach(l => {
-                    if (l.type === 'walk') html += `<li>${escapeHtml(l.desc)} (${Math.round(l.distanceM)} m — ${Math.round(l.timeMin)} min)</li>`;
-                    else html += `<li>${escapeHtml(l.desc)} (${Math.round(l.distanceM)} m — ${Math.round(l.timeMin)} min)</li>`;
+                    html += `<li>${escapeHtml(l.desc)} (${Math.round(l.distanceM)} m — ${Math.round(l.timeMin)} min)</li>`;
                 });
                 if (legs.length > maxItems) html += `<li>...y ${legs.length - maxItems} pasos más (ver panel lateral para el detalle)</li>`;
                 html += '</ol>';
+                html += `<div style="text-align:right;margin-top:6px;"><button id="legend-open-detail-btn" style="background:#7C3AED;color:#fff;border:none;padding:6px 8px;border-radius:4px;cursor:pointer">Abrir detalle completo</button></div>`;
                 legendEl.innerHTML = html;
+
+                // attach click handler for button
+                setTimeout(() => {
+                    const btn = document.getElementById('legend-open-detail-btn');
+                    if (btn) btn.addEventListener('click', () => {
+                        // close modal and focus the instructions panel
+                        try {
+                            if (legendModalEl) {
+                                legendModalEl.classList.remove('show');
+                                legendModalEl.style.display = 'none';
+                            }
+                        } catch (e) {}
+                        const instrPanel = document.getElementById('recommended-instructions');
+                        if (instrPanel) {
+                            instrPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            // highlight briefly
+                            const origBg = instrPanel.style.background;
+                            instrPanel.style.transition = 'box-shadow 0.3s ease';
+                            instrPanel.style.boxShadow = '0 0 0 3px rgba(124,58,237,0.15)';
+                            setTimeout(() => { instrPanel.style.boxShadow = ''; }, 1500);
+                        }
+                    });
+                }, 50);
+
+                // Auto-open the modal so user sees the recommended route right away
+                try {
+                    if (legendModalEl) {
+                        legendModalEl.classList.add('show');
+                        legendModalEl.style.display = 'flex';
+                    }
+                } catch (e) { /* ignore */ }
             }
         } catch (e) { console.warn('could not populate legend recommended route', e); }
 
         // small helper to escape HTML when injecting text
         function escapeHtml(str) {
-            return (str || '').toString().replace(/[&"'<>]/g, function (m) { return ({'&':'&amp;','"':'&quot;',"'":'&#39;','<':'&lt;','>':'&gt;'})[m]; });
+            return (str || '').toString().replace(/[&"'<>]/g, function (m) { return ({'&':'&amp;','"':'&quot;','\'':'&#39;','<':'&lt;','>':'&gt;'})[m]; });
         }
 
         try { map.fitBounds(recommendedLayer.getBounds(), { padding: [20, 20] }); } catch (e) { }
@@ -1751,7 +1862,8 @@
         loadColegios(),
         loadNodes(), 
         loadEdges()
-    ]).then(() => {
+        // load edge/node probabilities (optional)
+    ]).then(() => loadProbabilities()).then(() => {
         const dm = debugMain('debug-mainjs'); if (dm) dm.textContent = 'main.js ejecutado';
     });
 
