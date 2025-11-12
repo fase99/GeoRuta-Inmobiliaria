@@ -1703,6 +1703,32 @@
             instrContainer.appendChild(ol);
         }
 
+        // Also populate the legend modal top area so the recommended route appears there
+        try {
+            const legendEl = document.getElementById('legend-recommended-route');
+            if (legendEl) {
+                // Make visible
+                legendEl.style.display = 'block';
+                // Build inner content: summary + short list (first 6 items) to avoid overflow
+                let html = `<div style="font-size:13px; margin-bottom:6px;"><b>Ruta recomendada</b></div>`;
+                html += `<div style="font-size:13px; margin-bottom:8px; color:#374151;"><b>Total:</b> ${Math.round(totalMinutes)} min — ${Math.round(totalMeters)} m</div>`;
+                html += '<ol style="margin:0 0 0 18px; padding:0; font-size:13px; color:#374151;">';
+                const maxItems = 6;
+                legs.slice(0, maxItems).forEach(l => {
+                    if (l.type === 'walk') html += `<li>${escapeHtml(l.desc)} (${Math.round(l.distanceM)} m — ${Math.round(l.timeMin)} min)</li>`;
+                    else html += `<li>${escapeHtml(l.desc)} (${Math.round(l.distanceM)} m — ${Math.round(l.timeMin)} min)</li>`;
+                });
+                if (legs.length > maxItems) html += `<li>...y ${legs.length - maxItems} pasos más (ver panel lateral para el detalle)</li>`;
+                html += '</ol>';
+                legendEl.innerHTML = html;
+            }
+        } catch (e) { console.warn('could not populate legend recommended route', e); }
+
+        // small helper to escape HTML when injecting text
+        function escapeHtml(str) {
+            return (str || '').toString().replace(/[&"'<>]/g, function (m) { return ({'&':'&amp;','"':'&quot;',"'":'&#39;','<':'&lt;','>':'&gt;'})[m]; });
+        }
+
         try { map.fitBounds(recommendedLayer.getBounds(), { padding: [20, 20] }); } catch (e) { }
     }
 
