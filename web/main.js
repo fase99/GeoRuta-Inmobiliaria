@@ -205,7 +205,16 @@
     const startPointBtn = document.getElementById('start-point-btn');
     const filterByMetroCb = document.getElementById('filter-by-metro');
     const filterByHealthCb = document.getElementById('filter-by-health');
-    const metroRadiusInput = document.getElementById('metro-radius');
+    const filterByParaderosCb = document.getElementById('filter-by-paraderos');
+    const filterByCarabinerosCb = document.getElementById('filter-by-carabineros');
+    const filterByFeriasCb = document.getElementById('filter-by-ferias');
+    const filterByBomberosCb = document.getElementById('filter-by-bomberos');
+    const filterByUniversidadesCb = document.getElementById('filter-by-universidades');
+    const filterByColegiosCb = document.getElementById('filter-by-colegios');
+    const metroRadiusInput = document.getElementById('metro-radius'); // legacy
+    const proximityRadiusInput = document.getElementById('proximity-radius');
+    const applyProximityFiltersBtn = document.getElementById('apply-proximity-filters-btn');
+    const clearProximityFiltersBtn = document.getElementById('clear-proximity-filters-btn');
     const applyPoiFiltersBtn = document.getElementById('apply-poi-filters'); // optional
     const filterHealthCb = document.getElementById('filter-health'); // optional
     const filterMetroCb = document.getElementById('filter-metro'); // optional
@@ -554,16 +563,33 @@
     function applyProximityFilters() {
         const metroEnabled = filterByMetroCb && filterByMetroCb.checked;
         const healthEnabled = filterByHealthCb && filterByHealthCb.checked;
+        const paraderosEnabled = filterByParaderosCb && filterByParaderosCb.checked;
+        const carabinerosEnabled = filterByCarabinerosCb && filterByCarabinerosCb.checked;
+        const feriasEnabled = filterByFeriasCb && filterByFeriasCb.checked;
+        const bomberosEnabled = filterByBomberosCb && filterByBomberosCb.checked;
+        const universidadesEnabled = filterByUniversidadesCb && filterByUniversidadesCb.checked;
+        const colegiosEnabled = filterByColegiosCb && filterByColegiosCb.checked;
         
-        // if neither proximity filter enabled, redisplay all houses (respecting smart search filters)
-        if (!metroEnabled && !healthEnabled) { 
+        // if no proximity filter enabled, redisplay all houses (respecting smart search filters)
+        if (!metroEnabled && !healthEnabled && !paraderosEnabled && !carabinerosEnabled && 
+            !feriasEnabled && !bomberosEnabled && !universidadesEnabled && !colegiosEnabled) { 
             displayHouses(housesData); 
             return; 
         }
 
-        const radius = metroRadiusInput ? parseFloat(metroRadiusInput.value) : 500;
+        // Get radius from the new proximity-radius input, fallback to legacy metro-radius
+        const radius = proximityRadiusInput ? parseFloat(proximityRadiusInput.value) : 
+                       (metroRadiusInput ? parseFloat(metroRadiusInput.value) : 500);
+        
+        // Prepare point arrays for each enabled filter
         const metroPoints = metroPois.map(m => ({ lat: m.lat, lon: m.lon }));
         const healthPoints = healthPois.map(h => ({ lat: h.lat, lon: h.lon }));
+        const paraderosPoints = paraderos.map(p => ({ lat: p.lat, lon: p.lon }));
+        const carabinerosPoints = carabinerosPois.map(c => ({ lat: c.lat, lon: c.lon }));
+        const feriasPoints = feriasPois.map(f => ({ lat: f.lat, lon: f.lon }));
+        const bomberosPoints = bomberosPois.map(b => ({ lat: b.lat, lon: b.lon }));
+        const universidadesPoints = universidadesPois.map(u => ({ lat: u.lat, lon: u.lon }));
+        const colegiosPoints = colegiosPois.map(c => ({ lat: c.lat, lon: c.lon }));
 
         // First, regenerate all markers with current filters
         displayHouses(housesData);
@@ -576,6 +602,7 @@
             if (!h) return; // skip if no data
             const point = { lat: h.lat, lon: h.lon };
             let ok = true;
+            
             if (metroEnabled) {
                 const nearMetro = metroPoints.some(mp => haversineDistance(point, mp) <= radius);
                 if (!nearMetro) ok = false;
@@ -584,14 +611,76 @@
                 const nearHealth = healthPoints.some(hp => haversineDistance(point, hp) <= radius);
                 if (!nearHealth) ok = false;
             }
+            if (paraderosEnabled) {
+                const nearParaderos = paraderosPoints.some(pp => haversineDistance(point, pp) <= radius);
+                if (!nearParaderos) ok = false;
+            }
+            if (carabinerosEnabled) {
+                const nearCarabineros = carabinerosPoints.some(cp => haversineDistance(point, cp) <= radius);
+                if (!nearCarabineros) ok = false;
+            }
+            if (feriasEnabled) {
+                const nearFerias = feriasPoints.some(fp => haversineDistance(point, fp) <= radius);
+                if (!nearFerias) ok = false;
+            }
+            if (bomberosEnabled) {
+                const nearBomberos = bomberosPoints.some(bp => haversineDistance(point, bp) <= radius);
+                if (!nearBomberos) ok = false;
+            }
+            if (universidadesEnabled) {
+                const nearUniversidades = universidadesPoints.some(up => haversineDistance(point, up) <= radius);
+                if (!nearUniversidades) ok = false;
+            }
+            if (colegiosEnabled) {
+                const nearColegios = colegiosPoints.some(cp => haversineDistance(point, cp) <= radius);
+                if (!nearColegios) ok = false;
+            }
+            
             if (ok) { matched.push(h); housesLayer.addLayer(marker); }
         });
         setText('houses-filtered-count', matched.length);
+        console.log(`✅ Filtros de proximidad aplicados. ${matched.length} propiedades coinciden.`);
     }
 
     if (filterByMetroCb) filterByMetroCb.addEventListener('change', applyProximityFilters);
     if (filterByHealthCb) filterByHealthCb.addEventListener('change', applyProximityFilters);
+    if (filterByParaderosCb) filterByParaderosCb.addEventListener('change', applyProximityFilters);
+    if (filterByCarabinerosCb) filterByCarabinerosCb.addEventListener('change', applyProximityFilters);
+    if (filterByFeriasCb) filterByFeriasCb.addEventListener('change', applyProximityFilters);
+    if (filterByBomberosCb) filterByBomberosCb.addEventListener('change', applyProximityFilters);
+    if (filterByUniversidadesCb) filterByUniversidadesCb.addEventListener('change', applyProximityFilters);
+    if (filterByColegiosCb) filterByColegiosCb.addEventListener('change', applyProximityFilters);
     if (metroRadiusInput) metroRadiusInput.addEventListener('change', applyProximityFilters);
+    if (proximityRadiusInput) proximityRadiusInput.addEventListener('change', applyProximityFilters);
+
+    // Proximity filters buttons
+    if (applyProximityFiltersBtn) {
+        applyProximityFiltersBtn.addEventListener('click', () => {
+            applyProximityFilters();
+            console.log('🔍 Filtros de proximidad aplicados manualmente');
+        });
+    }
+
+    if (clearProximityFiltersBtn) {
+        clearProximityFiltersBtn.addEventListener('click', () => {
+            // Uncheck all proximity filters
+            if (filterByMetroCb) filterByMetroCb.checked = false;
+            if (filterByHealthCb) filterByHealthCb.checked = false;
+            if (filterByParaderosCb) filterByParaderosCb.checked = false;
+            if (filterByCarabinerosCb) filterByCarabinerosCb.checked = false;
+            if (filterByFeriasCb) filterByFeriasCb.checked = false;
+            if (filterByBomberosCb) filterByBomberosCb.checked = false;
+            if (filterByUniversidadesCb) filterByUniversidadesCb.checked = false;
+            if (filterByColegiosCb) filterByColegiosCb.checked = false;
+            
+            // Reset radius to default
+            if (proximityRadiusInput) proximityRadiusInput.value = '500';
+            
+            // Reapply to show all properties
+            applyProximityFilters();
+            console.log('🔄 Filtros de proximidad limpiados');
+        });
+    }
 
     // Type/operation filters should re-run the current filtering pipeline
     if (filterTypeCasaCb) filterTypeCasaCb.addEventListener('change', () => applyProximityFilters());
@@ -1724,58 +1813,166 @@
             instrContainer.appendChild(ol);
         }
 
-        // Also populate the legend modal top area so the recommended route appears there
+        // Populate the professional route panel
         try {
             const legendEl = document.getElementById('legend-recommended-route');
-            const legendModalEl = document.getElementById('legend-modal');
-            if (legendEl) {
-                // Make visible
+            const routePlaceholder = document.getElementById('route-placeholder');
+            const routeStepsContainer = document.getElementById('route-steps-container');
+            const routeEmptyMessage = document.getElementById('route-empty-message');
+            
+            if (legendEl && routePlaceholder && routeStepsContainer) {
+                // Hide placeholder, show route panel
+                routePlaceholder.style.display = 'none';
                 legendEl.style.display = 'block';
-                // Build inner content: summary + short list (first 6 items) + 'Abrir detalle completo' button
-                let html = `<div style="font-size:13px; margin-bottom:6px;"><b>Ruta recomendada</b></div>`;
-                html += `<div style="font-size:13px; margin-bottom:8px; color:#374151;"><b>Total:</b> ${Math.round(totalMinutes)} min — ${Math.round(totalMeters)} m</div>`;
-                html += '<ol style="margin:0 0 8px 18px; padding:0; font-size:13px; color:#374151;">';
-                const maxItems = 6;
-                legs.slice(0, maxItems).forEach(l => {
-                    html += `<li>${escapeHtml(l.desc)} (${Math.round(l.distanceM)} m — ${Math.round(l.timeMin)} min)</li>`;
-                });
-                if (legs.length > maxItems) html += `<li>...y ${legs.length - maxItems} pasos más (ver panel lateral para el detalle)</li>`;
-                html += '</ol>';
-                html += `<div style="text-align:right;margin-top:6px;"><button id="legend-open-detail-btn" style="background:#7C3AED;color:#fff;border:none;padding:6px 8px;border-radius:4px;cursor:pointer">Abrir detalle completo</button></div>`;
-                legendEl.innerHTML = html;
-
-                // attach click handler for button
-                setTimeout(() => {
-                    const btn = document.getElementById('legend-open-detail-btn');
-                    if (btn) btn.addEventListener('click', () => {
-                        // close modal and focus the instructions panel
-                        try {
-                            if (legendModalEl) {
-                                legendModalEl.classList.remove('show');
-                                legendModalEl.style.display = 'none';
-                            }
-                        } catch (e) {}
-                        const instrPanel = document.getElementById('recommended-instructions');
-                        if (instrPanel) {
-                            instrPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            // highlight briefly
-                            const origBg = instrPanel.style.background;
-                            instrPanel.style.transition = 'box-shadow 0.3s ease';
-                            instrPanel.style.boxShadow = '0 0 0 3px rgba(124,58,237,0.15)';
-                            setTimeout(() => { instrPanel.style.boxShadow = ''; }, 1500);
-                        }
-                    });
-                }, 50);
-
-                // Auto-open the modal so user sees the recommended route right away
-                try {
-                    if (legendModalEl) {
-                        legendModalEl.classList.add('show');
-                        legendModalEl.style.display = 'flex';
+                
+                // Update summary statistics
+                const totalTimeEl = document.getElementById('route-total-time');
+                const totalDistanceEl = document.getElementById('route-total-distance');
+                const totalStopsEl = document.getElementById('route-total-stops');
+                
+                if (totalTimeEl) totalTimeEl.textContent = `${Math.round(totalMinutes)} min`;
+                if (totalDistanceEl) totalDistanceEl.textContent = totalMeters >= 1000 
+                    ? `${(totalMeters / 1000).toFixed(1)} km` 
+                    : `${Math.round(totalMeters)} m`;
+                if (totalStopsEl) totalStopsEl.textContent = selectedProperties.length;
+                
+                // Clear previous steps
+                routeStepsContainer.innerHTML = '';
+                
+                // Hide empty message
+                if (routeEmptyMessage) routeEmptyMessage.style.display = 'none';
+                
+                // Associate properties with their corresponding legs
+                let propertyIndex = 0;
+                
+                // Build professional step-by-step route
+                legs.forEach((leg, index) => {
+                    const stepDiv = document.createElement('div');
+                    stepDiv.className = 'route-step';
+                    
+                    // Detect if this is the last leg to a property
+                    const isPropertyArrival = leg.desc && leg.desc.toLowerCase().includes('propiedad');
+                    const currentProperty = isPropertyArrival && propertyIndex < selectedProperties.length 
+                        ? selectedProperties[propertyIndex++] 
+                        : null;
+                    
+                    // Add step number
+                    const stepNumber = document.createElement('div');
+                    stepNumber.className = 'step-number';
+                    stepNumber.textContent = index + 1;
+                    stepDiv.appendChild(stepNumber);
+                    
+                    // Determine transport mode and icon
+                    const isWalking = leg.type === 'walk' || (leg.desc && leg.desc.toLowerCase().includes('camina'));
+                    const isBus = leg.type === 'transit' && leg.transport === 'bus';
+                    const isMetro = leg.type === 'transit' && leg.transport === 'metro';
+                    
+                    let transportIcon = '🚶🏻‍♂️';
+                    let transportMode = 'Caminar';
+                    
+                    if (isBus) {
+                        transportIcon = '🚌';
+                        transportMode = 'Tomar Bus';
+                    } else if (isMetro) {
+                        transportIcon = '🚇';
+                        transportMode = 'Tomar Metro';
                     }
-                } catch (e) { /* ignore */ }
+                    
+                    // Step header
+                    const headerDiv = document.createElement('div');
+                    headerDiv.className = 'step-header';
+                    headerDiv.innerHTML = `
+                        <span class="step-icon">${transportIcon}</span>
+                        <span class="step-mode">${transportMode}</span>
+                        <span class="step-duration">${Math.round(leg.timeMin)} min</span>
+                    `;
+                    stepDiv.appendChild(headerDiv);
+                    
+                    // Step details
+                    const detailsDiv = document.createElement('div');
+                    detailsDiv.className = 'step-details';
+                    
+                    // Distance
+                    const distanceDiv = document.createElement('div');
+                    distanceDiv.className = 'step-distance';
+                    distanceDiv.textContent = leg.distanceM >= 1000 
+                        ? `${(leg.distanceM / 1000).toFixed(1)} km` 
+                        : `${Math.round(leg.distanceM)} m`;
+                    detailsDiv.appendChild(distanceDiv);
+                    
+                    // Destination
+                    const destDiv = document.createElement('div');
+                    destDiv.className = 'step-destination';
+                    destDiv.textContent = leg.desc || 'Siguiente punto';
+                    detailsDiv.appendChild(destDiv);
+                    
+                    // Risk level - Calculate from edge/node probabilities if available
+                    if (leg.pathNodes && leg.pathNodes.length > 0) {
+                        // Calculate average risk from path nodes
+                        let totalRisk = 0;
+                        let riskCount = 0;
+                        
+                        for (let i = 0; i < leg.pathNodes.length - 1; i++) {
+                            const edgeKey = `${leg.pathNodes[i]}-${leg.pathNodes[i+1]}`;
+                            const reverseKey = `${leg.pathNodes[i+1]}-${leg.pathNodes[i]}`;
+                            const edgeProb = edgeProbMap.get(edgeKey) || edgeProbMap.get(reverseKey) || 0;
+                            totalRisk += edgeProb;
+                            riskCount++;
+                        }
+                        
+                        if (riskCount > 0) {
+                            const avgRisk = totalRisk / riskCount;
+                            const riskPercent = Math.round(avgRisk * 100);
+                            let riskClass = 'risk-low';
+                            let riskIcon = '🟢';
+                            let riskLabel = 'Riesgo bajo';
+                            
+                            if (riskPercent > 30) {
+                                riskClass = 'risk-medium';
+                                riskIcon = '🟡';
+                                riskLabel = 'Riesgo medio';
+                            }
+                            if (riskPercent > 60) {
+                                riskClass = 'risk-high';
+                                riskIcon = '🔴';
+                                riskLabel = 'Riesgo alto';
+                            }
+                            
+                            const riskDiv = document.createElement('div');
+                            riskDiv.className = `step-risk ${riskClass}`;
+                            riskDiv.textContent = `${riskIcon} ${riskLabel} (${riskPercent}%)`;
+                            detailsDiv.appendChild(riskDiv);
+                        }
+                    }
+                    
+                    // Property info (if this step leads to a property)
+                    if (currentProperty) {
+                        const propInfoDiv = document.createElement('div');
+                        propInfoDiv.className = 'step-property-info';
+                        
+                        let propDetails = '';
+                        if (currentProperty.precio) propDetails += `<div class="step-property-detail"><strong>💰</strong> ${currentProperty.precio} UF</div>`;
+                        if (currentProperty.dormitorios) propDetails += `<div class="step-property-detail"><strong>🛏️</strong> ${currentProperty.dormitorios} dorm</div>`;
+                        if (currentProperty.banos) propDetails += `<div class="step-property-detail"><strong>🚿</strong> ${currentProperty.banos} baños</div>`;
+                        if (currentProperty.m2_construidos) propDetails += `<div class="step-property-detail"><strong>📐</strong> ${currentProperty.m2_construidos} m²</div>`;
+                        else if (currentProperty.m2_superficie) propDetails += `<div class="step-property-detail"><strong>📐</strong> ${currentProperty.m2_superficie} m²</div>`;
+                        
+                        if (propDetails) {
+                            propInfoDiv.innerHTML = propDetails;
+                            detailsDiv.appendChild(propInfoDiv);
+                        }
+                    }
+                    
+                    stepDiv.appendChild(detailsDiv);
+                    routeStepsContainer.appendChild(stepDiv);
+                });
+                
+                // Scroll to route panel
+                setTimeout(() => {
+                    legendEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 300);
             }
-        } catch (e) { console.warn('could not populate legend recommended route', e); }
+        } catch (e) { console.warn('could not populate professional route panel', e); }
 
         // small helper to escape HTML when injecting text
         function escapeHtml(str) {

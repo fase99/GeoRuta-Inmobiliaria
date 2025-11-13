@@ -107,24 +107,56 @@
 
     <div class="control-group card">
       <h3 class="section-title">📍 Filtros de Proximidad</h3>
+      <p class="help-text" style="margin-bottom: 12px; font-size: 12px; color: #666;">Filtra propiedades cercanas a servicios específicos</p>
+      
       <label class="checkbox-label">
         <input type="checkbox" id="filter-by-metro" />
-        <span>Estaciones de metro cercanas</span>
+        <span>🚇 Estaciones de metro</span>
       </label>
       <label class="checkbox-label">
         <input type="checkbox" id="filter-by-health" />
-        <span>Centros de salud cercanos</span>
+        <span>🏥 Centros de salud</span>
       </label>
-      <div class="input-group">
-        <label for="metro-radius" class="input-label">Radio de búsqueda (metros)</label>
-        <input type="number" id="metro-radius" value="500" min="50" max="5000" class="input-field" />
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-paraderos" />
+        <span>🚏 Paraderos de bus</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-carabineros" />
+        <span>🚓 Carabineros</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-ferias" />
+        <span>🛒 Ferias libres</span>
+      </label>
+      <!-- <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-bomberos" />
+        <span>🚒 Bomberos</span>
+      </label> -->
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-universidades" />
+        <span>🎓 Universidades</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-colegios" />
+        <span>🏫 Colegios y Liceos</span>
+      </label>
+      
+      <div class="input-group" style="margin-top: 12px;">
+        <label for="proximity-radius" class="input-label">Radio de búsqueda (metros)</label>
+        <input type="number" id="proximity-radius" value="500" min="50" max="5000" step="50" class="input-field" />
+      </div>
+      
+      <div class="button-group" style="margin-top: 12px;">
+        <button id="apply-proximity-filters-btn" class="btn btn-primary">🔍 Aplicar Filtros</button>
+        <button id="clear-proximity-filters-btn" class="btn btn-outline">🔄 Limpiar</button>
       </div>
     </div>
 
     <div class="control-group card">
       <h3 class="section-title">📍 Punto de Partida</h3>
       <select id="start-select" class="select-field">
-        <option value="user">Usar mi ubicación</option>
+        <option value="user">Selecciona tu punto de partida</option>
       </select>
       <div class="button-group">
         <button id="pick-start-btn" class="btn btn-secondary">📍 Elegir en mapa</button>
