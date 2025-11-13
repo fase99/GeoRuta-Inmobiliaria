@@ -203,7 +203,6 @@
     // Controls
     const comunaFilter = null; // comuna filter removed from UI
     const startPointBtn = document.getElementById('start-point-btn');
-    const calculateRouteBtn = document.getElementById('calculate-route-btn');
     const filterByMetroCb = document.getElementById('filter-by-metro');
     const filterByHealthCb = document.getElementById('filter-by-health');
     const metroRadiusInput = document.getElementById('metro-radius');
@@ -1304,59 +1303,8 @@
         map.setView([lat, lon], 14);
     }
 
-    // Placeholder for route calculation button
-    calculateRouteBtn.addEventListener('click', async () => {
-        // Graph-aware routing: snap start & waypoints to nearest graph node and compute shortest path across edges
-        if (!startPointMarker) return alert('Define punto de partida');
-        const toVisit = selectedProperties.length ? selectedProperties : houseMarkers.filter(m => housesLayer.hasLayer(m)).map(m => m.houseData);
-        if (toVisit.length === 0) return alert('No hay propiedades seleccionadas o visibles para calcular ruta');
-
-        // ensure graph loaded
-        if (!nodesGeoJSON) await loadNodes();
-        if (!edgesGeoJSON) await loadEdges();
-
-        // snap start & each target to node
-        const start = startPointMarker.getLatLng();
-        const snapped = snapToNearestNode(start.lat, start.lng);
-        if (!snapped || snapped.id === null) return alert('No se pudo ubicar nodo cercano al inicio');
-        const startNode = snapped.id;
-
-        // collect waypoint node ids (preserve order)
-        const waypointNodes = [];
-        for (const h of toVisit) {
-            const s = snapToNearestNode(h.lat, h.lon);
-            if (!s || s.id===null) {
-                console.warn('could not snap', h); continue;
-            }
-            waypointNodes.push({ house: h, nodeId: s.id });
-        }
-        if (waypointNodes.length === 0) return alert('No se pudo snapear ninguna propiedad a la red');
-
-        // compute concatenated path across sequence: start -> wp1 -> wp2 -> ...
-        let current = startNode;
-        let allEdgeFeatures = [];
-        for (const wp of waypointNodes) {
-            const pathNodes = dijkstra(current, wp.nodeId);
-            if (!pathNodes) { console.warn('no path between', current, wp.nodeId); continue; }
-            const feats = nodesPathToEdgeFeatures(pathNodes);
-            allEdgeFeatures = allEdgeFeatures.concat(feats);
-            current = wp.nodeId;
-        }
-
-        if (allEdgeFeatures.length === 0) return alert('No se pudo generar la ruta en la red (revisa aristas/nodos)');
-
-        // render
-        if (window._generatedRouteLayer) map.removeLayer(window._generatedRouteLayer);
-        const fc = { type: 'FeatureCollection', features: allEdgeFeatures };
-        window._generatedRouteLayer = L.geoJSON(fc, { style: { color: '#28a745', weight: 4, opacity: 0.9 } }).addTo(map);
-        // zoom to route
-        try { map.fitBounds(window._generatedRouteLayer.getBounds(), { padding: [20,20] }); } catch(e){}
-        setText('debug-route', (allEdgeFeatures && allEdgeFeatures.length) || 0);
-    });
-
-    // Clear selection and calculate selected buttons
+    // Clear selection button
     const clearSelBtn = document.getElementById('clear-selection-btn');
-    const calcSelBtn = document.getElementById('calc-route-selected-btn');
     if (clearSelBtn) clearSelBtn.addEventListener('click', () => {
         selectedProperties = [];
         houseMarkers.forEach(m => {
@@ -1365,12 +1313,6 @@
             }
         });
         updateItineraryUI();
-    });
-    if (calcSelBtn) calcSelBtn.addEventListener('click', () => {
-        // Replace naive straight-line route with recommended multimodal route
-        if (!startPointMarker) return alert('Define punto de partida');
-        if (selectedProperties.length === 0) return alert('No hay propiedades seleccionadas');
-        generateRecommendedRoute();
     });
 
     // Completar selección: ocultar todas las propiedades no seleccionadas
@@ -1389,10 +1331,10 @@
             });
             // update counters and UI
             updateItineraryUI();
-            setText('houses-filtered-count', houseMarkers.filter(m => housesLayer.hasLayer(m)).length + ' (seleccionadas: ' + selectedProperties.length + ')');
+            // setText('houses-filtered-count', houseMarkers.filter(m => housesLayer.hasLayer(m)).length + ' (seleccionadas: ' + selectedProperties.length + ')');
             // disable the button after completing selection to avoid accidental repeats
             completeSelBtn.disabled = true;
-            completeSelBtn.textContent = 'Selección completada';
+            completeSelBtn.textContent = '✅ Selección completada';
         });
     }
 
@@ -1407,7 +1349,7 @@
             // Re-enable the complete button and reset its text
             if (completeSelBtn) {
                 completeSelBtn.disabled = false;
-                completeSelBtn.textContent = 'Completar selección';
+                completeSelBtn.textContent = '☑️ Mostrar selección';
             }
             // Update UI counters
             updateItineraryUI();
@@ -1906,6 +1848,74 @@
                 setTimeout(() => {
                     legendModal.style.display = 'none';
                 }, 300);
+            }
+        });
+    }
+
+    // Info Modal Control
+    const infoButton = document.getElementById('info-button');
+    const infoModal = document.getElementById('info-modal');
+    const closeInfoModalBtn = document.getElementById('close-info-modal');
+
+    console.log('=== INFO MODAL SETUP ===');
+    console.log('Info Button:', infoButton);
+    console.log('Info Modal:', infoModal);
+    console.log('Close Button:', closeInfoModalBtn);
+
+    if (infoButton && infoModal) {
+        console.log('✅ Configurando event listeners para modal de información');
+        
+        // Open info modal
+        infoButton.addEventListener('click', (e) => {
+            console.log('🖱️ Click en botón de información detectado');
+            e.preventDefault();
+            e.stopPropagation();
+            infoModal.classList.add('show');
+            infoModal.style.display = 'flex';
+            console.log('Modal display:', infoModal.style.display);
+            console.log('Modal classes:', infoModal.className);
+        });
+
+        // Close modal with X button
+        if (closeInfoModalBtn) {
+            closeInfoModalBtn.addEventListener('click', (e) => {
+                console.log('🖱️ Click en cerrar modal');
+                e.preventDefault();
+                e.stopPropagation();
+                infoModal.classList.remove('show');
+                setTimeout(() => {
+                    infoModal.style.display = 'none';
+                }, 300);
+            });
+        }
+
+        // Close modal when clicking outside
+        infoModal.addEventListener('click', (e) => {
+            if (e.target === infoModal) {
+                console.log('🖱️ Click fuera del modal');
+                infoModal.classList.remove('show');
+                setTimeout(() => {
+                    infoModal.style.display = 'none';
+                }, 300);
+            }
+        });
+
+        // Close modal with ESC key (handle both modals)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (infoModal.classList.contains('show')) {
+                    console.log('⌨️ ESC presionado - cerrando modal info');
+                    infoModal.classList.remove('show');
+                    setTimeout(() => {
+                        infoModal.style.display = 'none';
+                    }, 300);
+                }
+                if (legendModal && legendModal.classList.contains('show')) {
+                    legendModal.classList.remove('show');
+                    setTimeout(() => {
+                        legendModal.style.display = 'none';
+                    }, 300);
+                }
             }
         });
     }

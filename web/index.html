@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>GeoRuta Inmobiliaria</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-  <link rel="stylesheet" href="custom-styles.css" />
+  <link rel="stylesheet" href="custom-styles.css?v=4.0" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -138,33 +138,102 @@
       <div id="itinerary-list" class="itinerary-container"></div>
       <div class="button-group">
         <button id="clear-selection-btn" class="btn btn-outline">🗑️ Limpiar</button>
-        <button id="calc-route-selected-btn" class="btn btn-primary">🚗 Ruta</button>
       </div>
     </div>
 
     <div class="control-group card">
-      <button id="calculate-route-btn" class="btn btn-primary btn-large">🎯 Calcular Ruta Óptima</button>
-    </div>
-
-    <div class="control-group card">
       <div class="button-group" style="display:flex;gap:8px;flex-wrap:wrap">
-        <button id="complete-selection-btn" class="btn btn-info">Completar selección</button>
-        <button id="restore-selection-btn" class="btn btn-outline">⤴️ Restaurar todo</button>
+        <button id="complete-selection-btn" class="btn btn-outline">☑️ Mostrar selección</button>
+        <button id="restore-selection-btn" class="btn btn-outline">⤴️ Restaurar selección</button>
       </div>
     </div>
     
     <div class="control-group card">
       <div class="button-group" style="display:flex;gap:8px;flex-wrap:wrap">
         <button id="optimize-order-btn" class="btn btn-secondary">🔀 Optimizar orden</button>
-        <button id="generate-recommended-route-btn" class="btn btn-primary">🚌 Ruta recomendada (bus + caminar)</button>
+        <button id="generate-recommended-route-btn" class="btn btn-primary">🎯 Calcular Ruta Óptima</button>
       </div>
     </div>
     
-    <div class="control-group card">
+    <!-- <div class="control-group card">
       <h3 class="section-title">📋 Instrucciones recomendadas</h3>
       <div id="recommended-instructions" style="max-height:220px;overflow:auto;padding:8px;background:#fff; border:1px solid #eee;border-radius:6px">
         <em id="instructions-placeholder">Genera una ruta recomendada para ver instrucciones paso a paso.</em>
         <div id="instructions-content"></div>
+      </div>
+    </div> -->
+
+    <div class="control-group card">
+      <h3 class="section-title">🗺️ Ruta Recomendada</h3>
+      
+      <!-- Contenedor principal para mostrar la ruta optimizada -->
+      <div id="legend-recommended-route" style="display:none;">
+        
+        <!-- Resumen de la ruta -->
+        <div style="margin-bottom: 16px; padding: 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+            <span style="font-size: 32px;">🎯</span>
+            <div style="flex: 1;">
+              <h4 style="margin: 0; font-size: 16px; font-weight: 700; color: white;">Tu Ruta Optimizada</h4>
+              <p style="margin: 4px 0 0; font-size: 12px; color: rgba(255,255,255,0.9);">Basada en resiliencia y eficiencia</p>
+            </div>
+          </div>
+          
+          <!-- Estadísticas de la ruta -->
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px;">
+            <div style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); padding: 10px; border-radius: 8px; text-align: center;">
+              <div style="font-size: 20px; margin-bottom: 4px;">⏱️</div>
+              <div id="route-total-time" style="font-size: 16px; font-weight: 700; color: white;">--</div>
+              <div style="font-size: 11px; color: rgba(255,255,255,0.85);">Tiempo</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); padding: 10px; border-radius: 8px; text-align: center;">
+              <div style="font-size: 20px; margin-bottom: 4px;">📏</div>
+              <div id="route-total-distance" style="font-size: 16px; font-weight: 700; color: white;">--</div>
+              <div style="font-size: 11px; color: rgba(255,255,255,0.85);">Distancia</div>
+            </div>
+            <div style="background: rgba(255,255,255,0.2); backdrop-filter: blur(10px); padding: 10px; border-radius: 8px; text-align: center;">
+              <div style="font-size: 20px; margin-bottom: 4px;">🏠</div>
+              <div id="route-total-stops" style="font-size: 16px; font-weight: 700; color: white;">--</div>
+              <div style="font-size: 11px; color: rgba(255,255,255,0.85);">Paradas</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Instrucciones paso a paso -->
+        <div id="route-steps-container" style="max-height: 400px; overflow-y: auto; padding: 4px;">
+          <!-- Los pasos se llenarán dinámicamente aquí -->
+          <!-- Ejemplo de estructura de paso:
+          <div class="route-step">
+            <div class="step-header">
+              <span class="step-icon">🚶</span>
+              <span class="step-mode">Caminar</span>
+              <span class="step-duration">5 min</span>
+            </div>
+            <div class="step-details">
+              <div class="step-distance">450 m</div>
+              <div class="step-destination">📍 Casa en Av. Providencia 1234</div>
+              <div class="step-risk">🟢 Riesgo bajo (12%)</div>
+            </div>
+          </div>
+          -->
+        </div>
+
+        <!-- Mensaje cuando no hay ruta -->
+        <div id="route-empty-message" style="text-align: center; padding: 32px 16px; color: #9CA3AF;">
+          <div style="font-size: 48px; margin-bottom: 12px; opacity: 0.5;">🗺️</div>
+          <p style="margin: 0 0 8px; font-size: 14px; font-weight: 600; color: #6B7280;">No hay ruta calculada</p>
+          <p style="margin: 0; font-size: 12px; color: #9CA3AF;">Selecciona propiedades y haz clic en "🎯 Calcular Ruta Óptima"</p>
+        </div>
+
+      </div>
+
+      <!-- Mensaje inicial cuando no se ha calculado ruta -->
+      <div id="route-placeholder" style="text-align: center; padding: 24px 16px; background: #F9FAFB; border-radius: 8px; border: 2px dashed #D1D5DB;">
+        <div style="font-size: 40px; margin-bottom: 10px; opacity: 0.6;">🧭</div>
+        <p style="margin: 0 0 6px; font-size: 13px; font-weight: 600; color: #374151;">¿Listo para tu tour inmobiliario?</p>
+        <p style="margin: 0; font-size: 12px; color: #6B7280; line-height: 1.5;">
+          Selecciona propiedades en el mapa y genera tu ruta optimizada para visitarlas todas de forma eficiente
+        </p>
       </div>
     </div>
 
@@ -254,6 +323,15 @@
   <button id="legend-button" class="floating-legend-btn" title="Ver simbología de marcadores">
     📣
   </button>
+  <!-- Botón flotante para información de la pagina, como utilizarla -->
+  <button 
+    id="info-button" 
+    class="floating-info-btn" 
+    title="Información sobre GeoRuta Inmobiliaria"
+    onclick="console.log('Click inline detectado'); document.getElementById('info-modal').style.display='flex'; document.getElementById('info-modal').classList.add('show');">
+    ℹ️
+  </button>
+
 
   <!-- Modal de simbología -->
   <div id="legend-modal" class="modal">
@@ -264,10 +342,6 @@
       </div>
       
       <div class="modal-body">
-        <!-- Contenedor para mostrar la ruta recomendada dentro del modal de simbología -->
-        <div id="legend-recommended-route" style="margin-bottom:16px; padding:12px; background:#fff7e6; border-radius:6px; border:1px solid #f1e0c8; display:none;">
-          <!-- Será llenado dinámicamente con la ruta recomendada (resumen + pasos) -->
-        </div>
         <p class="help-text" style="margin-bottom: 16px; font-size: 13px; color: #6B7280;">Los marcadores están divididos en dos colores para identificar el tipo de propiedad y operación</p>
         
         <div style="margin-bottom: 20px;">
@@ -391,6 +465,106 @@
     </div>
   </div>
 
+  <!-- Modal de información -->
+  <div id="info-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #3B82F6;">ℹ️ Guía de Uso - GeoRuta Inmobiliaria</h3>
+        <button id="close-info-modal" class="close-modal">&times;</button>
+      </div>
+      
+      <div class="modal-body">
+        <p class="help-text" style="margin-bottom: 20px; font-size: 14px; color: #374151;">
+          Bienvenido a <strong>GeoRuta Inmobiliaria</strong>, tu herramienta para encontrar y planificar visitas a propiedades en Providencia con rutas optimizadas basadas en resiliencia.
+        </p>
+
+        <!-- Paso 1 -->
+        <div style="margin-bottom: 20px; padding: 16px; background: #F0F9FF; border-radius: 8px; border-left: 4px solid #3B82F6;">
+          <h4 style="margin: 0 0 10px; font-size: 15px; font-weight: 600; color: #1E40AF;">
+            📝 Paso 1: Filtra Propiedades
+          </h4>
+          <p style="margin: 0; font-size: 13px; color: #374151; line-height: 1.6;">
+            Usa el panel <strong>"🔍 Búsqueda Inteligente"</strong> para filtrar por tipo (casa/depto), operación (venta/arriendo), dormitorios, baños, precio y más. Haz clic en <strong>"🔍 Aplicar Búsqueda"</strong> para ver los resultados en el mapa.
+          </p>
+        </div>
+
+        <!-- Paso 2 -->
+        <div style="margin-bottom: 20px; padding: 16px; background: #F5F3FF; border-radius: 8px; border-left: 4px solid #7C3AED;">
+          <h4 style="margin: 0 0 10px; font-size: 15px; font-weight: 600; color: #5B21B6;">
+            📍 Paso 2: Define tu Punto de Partida
+          </h4>
+          <p style="margin: 0; font-size: 13px; color: #374151; line-height: 1.6;">
+            En el panel <strong>"📍 Punto de Partida"</strong>, elige tu ubicación actual (🧭 Mi ubicación) o selecciona un punto en el mapa (📍 Elegir en mapa). Este será el inicio de tu ruta.
+          </p>
+        </div>
+
+        <!-- Paso 3 -->
+        <div style="margin-bottom: 20px; padding: 16px; background: #FEF3C7; border-radius: 8px; border-left: 4px solid #F59E0B;">
+          <h4 style="margin: 0 0 10px; font-size: 15px; font-weight: 600; color: #92400E;">
+            🏠 Paso 3: Selecciona Propiedades
+          </h4>
+          <p style="margin: 0; font-size: 13px; color: #374151; line-height: 1.6;">
+            Haz clic en los marcadores de propiedades en el mapa para añadirlas a tu itinerario. Las verás aparecer en <strong>"🗓️ Itinerario del Día"</strong>. Los marcadores seleccionados tendrán un borde verde brillante.
+          </p>
+        </div>
+
+        <!-- Paso 4 -->
+        <div style="margin-bottom: 20px; padding: 16px; background: #DCFCE7; border-radius: 8px; border-left: 4px solid #22C55E;">
+          <h4 style="margin: 0 0 10px; font-size: 15px; font-weight: 600; color: #15803D;">
+            🎯 Paso 4: Calcula la Ruta Óptima
+          </h4>
+          <p style="margin: 0; font-size: 13px; color: #374151; line-height: 1.6;">
+            Una vez seleccionadas tus propiedades, haz clic en <strong>"🎯 Calcular Ruta Óptima"</strong>. El sistema generará una ruta optimizada que:
+          </p>
+          <ul style="margin: 8px 0 0 20px; font-size: 13px; color: #374151; line-height: 1.6;">
+            <li>Minimiza distancias y tiempo de viaje</li>
+            <li>Considera paraderos de transporte público</li>
+            <li>Calcula probabilidades de riesgo en cada tramo</li>
+            <li>Te sugiere si caminar o usar transporte público</li>
+          </ul>
+        </div>
+
+        <!-- Paso 5 -->
+        <div style="margin-bottom: 20px; padding: 16px; background: #FEE2E2; border-radius: 8px; border-left: 4px solid #EF4444;">
+          <h4 style="margin: 0 0 10px; font-size: 15px; font-weight: 600; color: #991B1B;">
+            �️ Paso 5: Revisa tu Ruta Recomendada
+          </h4>
+          <p style="margin: 0; font-size: 13px; color: #374151; line-height: 1.6;">
+            Una vez calculada la ruta, el panel <strong>"🗺️ Ruta Recomendada"</strong> te mostrará:
+          </p>
+          <ul style="margin: 8px 0 0 20px; font-size: 13px; color: #374151; line-height: 1.6;">
+            <li><strong>Resumen general:</strong> Tiempo total estimado ⏱️, distancia total 📏 y número de paradas 🏠</li>
+            <li><strong>Instrucciones paso a paso:</strong> Cada tramo con su modo de transporte (🚶 caminar / 🚌 bus)</li>
+            <li><strong>Nivel de riesgo:</strong> Cada paso muestra su nivel de seguridad (🟢 bajo / 🟡 medio / 🔴 alto)</li>
+            <li><strong>Detalles de propiedades:</strong> Información de cada inmueble (precio, dormitorios, baños)</li>
+            <li><strong>Visualización en mapa:</strong> La ruta se dibuja automáticamente con colores según el riesgo</li>
+          </ul>
+        </div>
+
+        <!-- Consejos adicionales -->
+        <div style="padding: 16px; background: #F9FAFB; border-radius: 8px; border: 2px dashed #D1D5DB;">
+          <h4 style="margin: 0 0 10px; font-size: 15px; font-weight: 600; color: #374151;">
+            💡 Consejos Útiles
+          </h4>
+          <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #6B7280; line-height: 1.8;">
+            <li>Usa <strong>"🔀 Optimizar orden"</strong> antes de calcular la ruta para obtener el mejor recorrido</li>
+            <li>El panel <strong>"🗺️ Ruta Recomendada"</strong> se actualiza cada vez que generas una nueva ruta</li>
+            <li>Los pasos de la ruta incluyen distancias precisas y tiempos estimados de traslado</li>
+            <li>Usa <strong>"☑️ Mostrar selección"</strong> para ocultar propiedades no seleccionadas</li>
+            <li>Haz clic en <strong>"📣"</strong> para ver la simbología de los marcadores</li>
+            <li>Activa/desactiva capas desde <strong>"🗺️ Capas Adicionales"</strong></li>
+            <li>Filtra por proximidad a metro/salud en <strong>"📍 Filtros de Proximidad"</strong></li>
+            <li>Los tramos de ruta se colorean según su nivel de riesgo (verde=seguro, rojo=riesgoso)</li>
+          </ul>
+        </div>
+
+        <p style="margin-top: 20px; text-align: center; font-size: 12px; color: #9CA3AF; font-style: italic;">
+          ⭐ La resiliencia te guía hacia tu propiedad perfecta
+        </p>
+      </div>
+    </div>
+  </div>
+
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
   <script>
@@ -417,6 +591,41 @@
         try{ const el = debug('debug-mainjs'); const msg = evt.message + ' @ ' + evt.filename + ':' + evt.lineno; if (el) el.textContent = 'runtime error: '+msg; console.error('global err', evt.error||msg);}catch(e){}
       });
     })();
+  </script>
+  
+  <script>
+    // Debug: Verificar que el botón de info existe y está visible
+    window.addEventListener('DOMContentLoaded', function() {
+      const infoBtn = document.getElementById('info-button');
+      const legendBtn = document.getElementById('legend-button');
+      
+      console.log('=== DEBUG BOTONES ===');
+      console.log('Legend button:', legendBtn);
+      console.log('Info button:', infoBtn);
+      
+      if (infoBtn) {
+        const styles = window.getComputedStyle(infoBtn);
+        console.log('Info button display:', styles.display);
+        console.log('Info button position:', styles.position);
+        console.log('Info button top:', styles.top);
+        console.log('Info button right:', styles.right);
+        console.log('Info button z-index:', styles.zIndex);
+        console.log('Info button visibility:', styles.visibility);
+        console.log('Info button opacity:', styles.opacity);
+      } else {
+        console.error('⚠️ Info button NO encontrado!');
+      }
+      
+      if (legendBtn) {
+        const styles = window.getComputedStyle(legendBtn);
+        console.log('Legend button display:', styles.display);
+        console.log('Legend button position:', styles.position);
+        console.log('Legend button top:', styles.top);
+        console.log('Legend button right:', styles.right);
+      } else {
+        console.error('⚠️ Legend button NO encontrado!');
+      }
+    });
   </script>
 </body>
 </html>
