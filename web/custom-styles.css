@@ -1108,3 +1108,20 @@ input[type="number"]::-webkit-inner-spin-button {
   box-shadow: 0 2px 6px rgba(124,58,237,0.4);
   border: 2px solid white;
 }
+
+/* Estilos para sección de autores */
+.control-group a[href*="github.com"] > div {
+  transition: all 0.3s ease;
+}
+
+.control-group a[href*="github.com"]:hover > div {
+  background: linear-gradient(135deg, #e9ecf1 0%, #dce1e8 100%);
+  border-color: #7C3AED !important;
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
+}
+
+.control-group a[href*="github.com"]:active > div {
+  transform: translateX(2px);
+  box-shadow: 0 2px 6px rgba(124, 58, 237, 0.1);
+}

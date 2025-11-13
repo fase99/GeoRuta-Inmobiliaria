@@ -346,7 +346,7 @@
         <span>🛣️ Calles (aristas OSM)</span>
       </label>
       
-      <div class="debug-info">
+      <div class="debug-info" style="display: none;">
         <p class="debug">Salud: <span id="debug-health">-</span></p>
         <p class="debug">Metro: <span id="debug-metro">-</span></p>
         <p class="debug">Paraderos: <span id="debug-paraderos">-</span></p>
@@ -358,6 +358,86 @@
         <p class="debug">Aristas: <span id="debug-edges">-</span></p>
         <p class="debug">Ruta OSM: <span id="debug-route">-</span></p>
       </div>
+    </div>
+
+    <div class="control-group card">
+      <h3 class="section-title">👥 Autores del Proyecto</h3>
+      <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 12px;">
+        
+        <a href="https://github.com/fase99" target="_blank" rel="noopener noreferrer" style="text-decoration: none; color: inherit;">
+          <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: linear-gradient(135deg, #f6f8fb 0%, #e9ecf1 100%); border-radius: 12px; transition: all 0.3s ease; cursor: pointer; border: 2px solid transparent;">
+            <img 
+              src="https://github.com/fase99.png" 
+              alt="fase99" 
+              style="width: 48px; height: 48px; border-radius: 50%; border: 2px solid #7C3AED; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);"
+              onerror="this.src='https://via.placeholder.com/48/7C3AED/FFFFFF?text=F'"
+            />
+            <div style="flex: 1;">
+              <div style="font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 2px;">fase99</div>
+              <div style="font-size: 12px; color: #6B7280; display: flex; align-items: center; gap: 4px;">
+                <svg style="width: 14px; height: 14px; fill: currentColor;" viewBox="0 0 16 16">
+                  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                </svg>
+                GitHub Profile
+              </div>
+            </div>
+            <svg style="width: 20px; height: 20px; fill: #9CA3AF;" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+        </a>
+
+        <a href="https://github.com/tiagomedi" target="_blank" rel="noopener noreferrer" style="text-decoration: none; color: inherit;">
+          <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: linear-gradient(135deg, #f6f8fb 0%, #e9ecf1 100%); border-radius: 12px; transition: all 0.3s ease; cursor: pointer; border: 2px solid transparent;">
+            <img 
+              src="https://github.com/tiagomedi.png" 
+              alt="tiagomedi" 
+              style="width: 48px; height: 48px; border-radius: 50%; border: 2px solid #7C3AED; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);"
+              onerror="this.src='https://via.placeholder.com/48/7C3AED/FFFFFF?text=F'"
+            />
+            <div style="flex: 1;">
+              <div style="font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 2px;">tiagomedi</div>
+              <div style="font-size: 12px; color: #6B7280; display: flex; align-items: center; gap: 4px;">
+                <svg style="width: 14px; height: 14px; fill: currentColor;" viewBox="0 0 16 16">
+                  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                </svg>
+                GitHub Profile
+              </div>
+            </div>
+            <svg style="width: 20px; height: 20px; fill: #9CA3AF;" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+        </a>
+
+        <a href="https://github.com/Pipeemendez" target="_blank" rel="noopener noreferrer" style="text-decoration: none; color: inherit;">
+          <div style="display: flex; align-items: center; gap: 12px; padding: 12px; background: linear-gradient(135deg, #f6f8fb 0%, #e9ecf1 100%); border-radius: 12px; transition: all 0.3s ease; cursor: pointer; border: 2px solid transparent;">
+            <img 
+              src="https://github.com/Pipeemendez.png" 
+              alt="Pipeemendez" 
+              style="width: 48px; height: 48px; border-radius: 50%; border: 2px solid #7C3AED; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);"
+              onerror="this.src='https://via.placeholder.com/48/7C3AED/FFFFFF?text=F'"
+            />
+            <div style="flex: 1;">
+              <div style="font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 2px;">Pipeemendez</div>
+              <div style="font-size: 12px; color: #6B7280; display: flex; align-items: center; gap: 4px;">
+                <svg style="width: 14px; height: 14px; fill: currentColor;" viewBox="0 0 16 16">
+                  <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                </svg>
+                GitHub Profile
+              </div>
+            </div>
+            <svg style="width: 20px; height: 20px; fill: #9CA3AF;" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+        </a>
+
+      </div>
+      
+      <p style="margin-top: 12px; text-align: center; font-size: 11px; color: #9CA3AF; font-style: italic;">
+        Haz clic para visitar el perfil de GitHub
+      </p>
     </div>
   </div>
 
