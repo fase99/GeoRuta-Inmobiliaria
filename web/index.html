@@ -106,7 +106,7 @@
     </div>
 
     <div class="control-group card">
-      <h3 class="section-title">📍 Filtros de Proximidad</h3>
+      <h3 class="section-title">📐 Filtros de Proximidad</h3>
       <p class="help-text" style="margin-bottom: 12px; font-size: 12px; color: #666;">Filtra propiedades cercanas a servicios específicos</p>
       
       <label class="checkbox-label">
@@ -308,7 +308,7 @@
     </div>
 
     <div class="control-group card">
-      <h3 class="section-title">️ Capas Adicionales</h3>
+      <h3 class="section-title">️⚙️ Capas Adicionales</h3>
       <label class="checkbox-label">
         <input type="checkbox" id="show-paraderos-layer" checked />
         <span>🚏 Paraderos de bus</span>
@@ -493,9 +493,107 @@
             💡 Activa/desactiva estas capas desde el panel lateral "🗺️ Capas Adicionales"
           </p>
         </div>
+
+        <div style="margin-top: 24px; padding-top: 20px; border-top: 3px solid #7C3AED;">
+        <h4 style="margin: 0 0 16px; font-size: 16px; font-weight: 700; color: #7C3AED;">
+          🚦 Simbología Promedio de Trafico Vehicular
+        </h4>
+        <!-- <p style="margin-bottom: 16px; font-size: 13px; color: #6B7280; line-height: 1.6;">
+            Las rutas calculadas se visualizan en el mapa con diferentes colores según el nivel de riesgo y el modo de transporte:
+          </p> -->
+
+          <!-- Niveles de Riesgo en Rutas -->
+          <div style="margin-bottom: 20px; padding: 16px; background: #F9FAFB; border-radius: 8px; border: 1px solid #E5E7EB;">
+            <h5 style="margin: 0 0 12px; font-size: 14px; font-weight: 600; color: #374151;">
+              🎨 Colores por Nivel de Tráfico Promedio
+            </h5>
+            
+            <p style="margin: 0 0 12px; font-size: 12px; color: #6B7280; line-height: 1.5;">
+              Los colores indican el nivel de tráfico promedio histórico de cada zona:
+            </p>
+            
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <div class="legend-item" style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 50px; height: 6px; background: #10B981; border-radius: 3px; box-shadow: 0 2px 4px rgba(16,185,129,0.3); flex-shrink: 0;"></div>
+                <div style="flex: 1;">
+                  <span style="font-size: 14px; font-weight: 600; color: #059669;">🟢 Tráfico Bajo (0-25%)</span>
+                  <p style="margin: 2px 0 0; font-size: 11px; color: #6B7280;">Zona con flujo vehicular fluido</p>
+                </div>
+              </div>
+              
+              <div class="legend-item" style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 50px; height: 6px; background: #F59E0B; border-radius: 3px; box-shadow: 0 2px 4px rgba(245,158,11,0.3); flex-shrink: 0;"></div>
+                <div style="flex: 1;">
+                  <span style="font-size: 14px; font-weight: 600; color: #D97706;">🟡 Tráfico Medio (25-50%)</span>
+                  <p style="margin: 2px 0 0; font-size: 11px; color: #6B7280;">Congestión moderada en horarios peak</p>
+                </div>
+              </div>
+              
+              <div class="legend-item" style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 50px; height: 6px; background: #EF4444; border-radius: 3px; box-shadow: 0 2px 4px rgba(239,68,68,0.3); flex-shrink: 0;"></div>
+                <div style="flex: 1;">
+                  <span style="font-size: 14px; font-weight: 600; color: #DC2626;">🔴 Tráfico Alto (>50%)</span>
+                  <p style="margin: 2px 0 0; font-size: 11px; color: #6B7280;">Alta congestión frecuente</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+        <!-- Simbología de Rutas -->
+        <div style="margin-top: 24px; padding-top: 20px; border-top: 3px solid #7C3AED;">
+          <h4 style="margin: 0 0 16px; font-size: 16px; font-weight: 700; color: #7C3AED;">
+            🗺️ Simbología de Rutas Optimizadas
+          </h4>
+
+          <!-- Modos de Transporte -->
+          <div style="margin-bottom: 16px; padding: 16px; background: #EFF6FF; border-radius: 8px; border: 1px solid #DBEAFE;">
+            <h5 style="margin: 0 0 12px; font-size: 14px; font-weight: 600; color: #1E40AF;">
+              🚶 Simbología Modos de Transporte
+            </h5>
+            
+            <p style="margin: 0 0 12px; font-size: 12px; color: #6B7280; line-height: 1.5;">
+              Las líneas de ruta muestran el modo de transporte recomendado:
+            </p>
+            
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <!-- Caminar - Línea segmentada azul -->
+              <div class="legend-item" style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 60px; height: 8px; background: repeating-linear-gradient(90deg, #3B82F6 0px, #3B82F6 8px, transparent 8px, transparent 16px); border-radius: 2px; box-shadow: 0 2px 4px rgba(59,130,246,0.3); flex-shrink: 0; position: relative;">
+                  <div style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); font-size: 16px;">🚶</div>
+                  <div style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); font-size: 16px;">🚶</div>
+                </div>
+                <div style="flex: 1; margin-left: 8px;">
+                  <span style="font-size: 14px; font-weight: 600; color: #1E40AF;">Caminar - Línea segmentada azul</span>
+                  <p style="margin: 2px 0 0; font-size: 11px; color: #6B7280;">Tramos cortos a pie entre ubicaciones</p>
+                </div>
+              </div>
+              
+              <!-- Transporte Público - Línea rojo anaranjado -->
+              <div class="legend-item" style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 60px; height: 8px; background: linear-gradient(90deg, #EF4444 0%, #F97316 100%); border-radius: 2px; box-shadow: 0 2px 4px rgba(239,68,68,0.3); flex-shrink: 0; position: relative;">
+                  <div style="position: absolute; left: 0; top: 50%; transform: translateY(-50%); font-size: 16px;">🚌</div>
+                  <div style="position: absolute; right: 0; top: 50%; transform: translateY(-50%); font-size: 16px;">🚌</div>
+                </div>
+                <div style="flex: 1; margin-left: 8px;">
+                  <span style="font-size: 14px; font-weight: 600; color: #DC2626;">Micro - Línea rojo anaranjado</span>
+                  <p style="margin: 2px 0 0; font-size: 11px; color: #6B7280;">Usar paradero cercano para distancias largas</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Información adicional -->
+          <div style="padding: 12px; background: linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%); border-radius: 8px; border-left: 4px solid #22C55E;">
+            <p style="margin: 0; font-size: 12px; color: #166534; line-height: 1.6;">
+              <strong>💡 Tip:</strong> El sistema calcula automáticamente la mejor ruta considerando distancias, tiempos de viaje, disponibilidad de transporte público y niveles de tráfico histórico en cada tramo. Los colores te ayudan a identificar rápidamente las zonas con menor congestión vehicular en tu recorrido.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
+</div>
 
   <!-- Modal de información -->
   <div id="info-modal" class="modal">
