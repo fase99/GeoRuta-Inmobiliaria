@@ -310,6 +310,14 @@
     <div class="control-group card">
       <h3 class="section-title">️⚙️ Capas Adicionales</h3>
       <label class="checkbox-label">
+        <input type="checkbox" id="show-health-layer" checked />
+        <span>🏥 Centros de salud</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-metro-layer" checked />
+        <span>🚇 Estaciones de metro</span>
+      </label>
+      <label class="checkbox-label">
         <input type="checkbox" id="show-paraderos-layer" checked />
         <span>🚏 Paraderos de bus</span>
       </label>
@@ -339,6 +347,8 @@
       </label>
       
       <div class="debug-info">
+        <p class="debug">Salud: <span id="debug-health">-</span></p>
+        <p class="debug">Metro: <span id="debug-metro">-</span></p>
         <p class="debug">Paraderos: <span id="debug-paraderos">-</span></p>
         <p class="debug">Carabineros: <span id="debug-carabineros">-</span></p>
         <p class="debug">Ferias: <span id="debug-ferias">-</span></p>
