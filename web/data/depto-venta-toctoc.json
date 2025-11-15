@@ -3213,23 +3213,6 @@
         "estacionamientos": true
     },
     {
-        "id": 3959742,
-        "lat": -33.4227088,
-        "lon": -70.5996616,
-        "baños": 3,
-        "dormitorios": 3,
-        "comuna": "Providencia",
-        "fecha_publicacion": "30-09-2025 0:00:00",
-        "precio_uf": 10300.0,
-        "precio_peso": 406702195.0,
-        "m2_superficie": 0.0,
-        "m2_terraza": 0.0,
-        "titulo": "ACOGEDOR DEPARTAMENTO EN VENTA",
-        "url": "https://www.toctoc.com/propiedades/compracorredorasr/departamento/providencia/acogedor-departamento-en-venta/3959742",
-        "imagen": "https://d1cfu8v5n1wsm.cloudfront.net/toctoc/fotos/20250930/3959742/s_wm_5b424f4206128ee0c100338e6c8a4dfd005df594.jpg",
-        "estacionamientos": true
-    },
-    {
         "id": 3918266,
         "lat": -33.4298568,
         "lon": -70.5958301,

@@ -325,6 +325,155 @@
     }
 
 
+    // Convierte la URL de imagen pequeña a grande
+    function getHighQualityImageUrl(originalUrl) {
+        if (!originalUrl) return null;
+        
+        // TocToc usa 's_wm_' para imágenes pequeñas y 'n_wm_' para imágenes grandes
+        // También cambia la extensión de .jpg a .webp en algunos casos
+        
+        try {
+            let highQualityUrl = originalUrl;
+            
+            // Reemplazar s_wm_ por n_wm_
+            if (highQualityUrl.includes('/s_wm_')) {
+                highQualityUrl = highQualityUrl.replace('/s_wm_', '/n_wm_');
+                console.log('✨ URL de imagen mejorada (s_wm → n_wm):', highQualityUrl);
+            }
+            
+            // Probar versión .webp si termina en .jpg
+            if (highQualityUrl.endsWith('.jpg')) {
+                const webpUrl = highQualityUrl.replace(/\.jpg$/, '.webp');
+                console.log('✨ También disponible en WebP:', webpUrl);
+                return webpUrl; // WebP es más moderna y ligera
+            }
+            
+            return highQualityUrl;
+        } catch (err) {
+            console.warn('⚠️ Error mejorando URL de imagen:', err.message);
+            return originalUrl;
+        }
+    }
+
+    // Extrae la imagen real desde el HTML de TocToc usando múltiples proxies
+    async function extractImageFromTocToc(url) {
+        if (!url) return null;
+        
+        try {
+            console.log('🔍 Intentando extraer imagen desde URL de TocToc:', url);
+            
+            // Lista de proxies CORS a intentar
+            const proxies = [
+                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+                `https://corsproxy.io/?${encodeURIComponent(url)}`,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+                `https://thingproxy.freeboard.io/fetch/${url}`
+            ];
+            
+            let html = null;
+            let successProxy = null;
+            
+            // Intentar cada proxy hasta que uno funcione
+            for (const proxyUrl of proxies) {
+                try {
+                    console.log('🔄 Intentando proxy:', proxyUrl.split('?')[0]);
+                    
+                    const resp = await fetch(proxyUrl, { 
+                        signal: AbortSignal.timeout(8000) // timeout de 8 segundos
+                    });
+                    
+                    if (resp.ok) {
+                        html = await resp.text();
+                        
+                        // Verificar que no sea una página de error (AWS WAF, etc)
+                        if (html.length > 5000 && !html.includes('window.gokuProps') && !html.includes('aws')) {
+                            successProxy = proxyUrl.split('?')[0];
+                            console.log('✅ HTML obtenido correctamente con proxy:', successProxy);
+                            break;
+                        } else {
+                            console.warn('⚠️ Proxy retornó página de error o bloqueada');
+                            html = null;
+                        }
+                    }
+                } catch (err) {
+                    console.warn('❌ Error con proxy:', err.message);
+                    continue;
+                }
+            }
+            
+            if (!html) {
+                console.warn('⚠️ Todos los proxies fallaron, no se pudo obtener el HTML');
+                return null;
+            }
+            
+            console.log('✅ HTML recibido, tamaño:', html.length, 'bytes');
+            
+            // Estrategia 1: Buscar img con clases específicas de galería (flexible con orden de atributos)
+            const patterns = [
+                // Buscar img-gal (con src antes o después de class)
+                /<img[^>]*class="[^"]*img-gal[^"]*"[^>]*src=["']([^"']+)["']/i,
+                /<img[^>]*src=["']([^"']+)["'][^>]*class="[^"]*img-gal[^"]*"/i,
+                // Buscar bg-img-gal
+                /<img[^>]*class="[^"]*bg-img-gal[^"]*"[^>]*src=["']([^"']+)["']/i,
+                /<img[^>]*src=["']([^"']+)["'][^>]*class="[^"]*bg-img-gal[^"]*"/i,
+                // Buscar cualquier img con "gal" en la clase
+                /<img[^>]*class="[^"]*gal[^"]*"[^>]*src=["']([^"']+)["']/i,
+                /<img[^>]*src=["']([^"']+)["'][^>]*class="[^"]*gal[^"]*"/i
+            ];
+            
+            for (const pattern of patterns) {
+                const match = html.match(pattern);
+                if (match && match[1]) {
+                    console.log('🖼️ Imagen extraída con patrón de galería');
+                    console.log('🖼️ URL:', match[1]);
+                    return match[1];
+                }
+            }
+            
+            // Estrategia 2: Buscar dentro de cf-galeria
+            const galeriaMatch = html.match(/<section[^>]*class=["']?[^"']*cf-galeria[^"']*["']?[^>]*>([\s\S]*?)<\/section>/i);
+            
+            if (galeriaMatch) {
+                console.log('✅ Encontrada sección cf-galeria');
+                const galeriaContent = galeriaMatch[1];
+                
+                // Buscar todas las imágenes dentro de la galería
+                const imgMatches = galeriaContent.match(/<img[^>]*>/gi);
+                
+                if (imgMatches && imgMatches.length > 0) {
+                    console.log(`✅ Encontradas ${imgMatches.length} imágenes en galería`);
+                    
+                    // Extraer el src de la primera imagen
+                    for (const imgTag of imgMatches) {
+                        const srcMatch = imgTag.match(/src=["']([^"']+)["']/i);
+                        if (srcMatch && srcMatch[1] && srcMatch[1].includes('cloudfront')) {
+                            console.log('🖼️ Imagen extraída desde galería:', srcMatch[1]);
+                            return srcMatch[1];
+                        }
+                    }
+                }
+            }
+            
+            // Estrategia 3: Buscar cualquier imagen de cloudfront (CDN de TocToc)
+            const cloudfrontMatches = html.match(/src=["'](https:\/\/d1cfu8v5n1wsm\.cloudfront\.net\/toctoc\/fotos[^"']+)["']/gi);
+            if (cloudfrontMatches && cloudfrontMatches.length > 0) {
+                // Extraer la primera URL
+                const firstMatch = cloudfrontMatches[0].match(/src=["']([^"']+)["']/i);
+                if (firstMatch && firstMatch[1]) {
+                    console.log('🖼️ Imagen extraída de CloudFront:', firstMatch[1]);
+                    return firstMatch[1];
+                }
+            }
+            
+            console.warn('⚠️ No se encontró imagen en el HTML de TocToc');
+            console.log('Muestra del HTML (primeros 500 caracteres):', html.substring(0, 500));
+            return null;
+        } catch (err) {
+            console.warn('❌ Error extrayendo imagen de TocToc:', err.message);
+            return null;
+        }
+    }
+
     // Consulta tráfico TomTom y retorna promesa con resultado actual
     async function getTrafficLevelTomTomActual(lat, lon) {
         const apiKey = "pg1U3ZBt90bqfmOe4J6vTV2OegHIsz1X";
@@ -424,13 +573,21 @@
                 // Formatear fecha
                 const fechaPublicacion = house.fecha_publicacion || 'N/A';
                 
+                // Preparar contenido inicial de la imagen
+                const imgInitial = house.imagen ? 
+                    `<img src="${house.imagen}" style="width:100%; height:100%; object-fit:cover;"/>` :
+                    `<div style="text-align:center; color:#9CA3AF; font-size:10px;">
+                        <div style="font-size:24px; margin-bottom:4px;">🖼️</div>
+                        <div>Sin imagen</div>
+                    </div>`;
+                
                 // Construir popup moderno horizontal compacto
                 const popupBase = `
                     <div style="width:420px; max-width:90vw; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
                         <!-- Header con imagen y título -->
-                        <div style="display:flex; gap:10px; margin-bottom:10px;">
-                            <div style="flex-shrink:0; width:140px; height:100px; overflow:hidden; border-radius:8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
-                                <img src="${house.imagen || ''}" style="width:100%; height:100%; object-fit:cover;"/>
+                        <div style="display:flex; gap:12px; margin-bottom:10px;">
+                            <div id="img-container-${house.id}" style="flex-shrink:0; width:200px; height:140px; overflow:hidden; border-radius:8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); background:#F3F4F6; display:flex; align-items:center; justify-content:center;">
+                                ${imgInitial}
                             </div>
                             <div style="flex:1; display:flex; flex-direction:column; justify-content:space-between;">
                                 <div>
@@ -507,8 +664,85 @@
                 `;
                 marker.bindPopup(popupBase, { maxWidth: 450 });
                 
-                // Manejar clic en el popup para cargar tráfico
+                // Manejar clic en el popup para cargar tráfico e imagen mejorada
                 marker.on('popupopen', async function(e){
+                    const imgContainerId = `img-container-${house.id}`;
+                    const imgContainer = document.getElementById(imgContainerId);
+                    
+                    // Estrategia 1: Mejorar calidad de la imagen del JSON (s_wm → n_wm, .jpg → .webp)
+                    let imageLoadSuccess = false;
+                    
+                    if (imgContainer && house.imagen) {
+                        const highQualityUrl = getHighQualityImageUrl(house.imagen);
+                        
+                        if (highQualityUrl && highQualityUrl !== house.imagen) {
+                            console.log('🔄 Estrategia 1: Cargando imagen mejorada del JSON');
+                            const newImg = document.createElement('img');
+                            newImg.src = highQualityUrl;
+                            newImg.style.cssText = 'width:100%; height:100%; object-fit:cover;';
+                            
+                            // Si falla, intentar extraer del HTML de TocToc
+                            newImg.onerror = async function() {
+                                console.warn('⚠️ Estrategia 1 falló, intentando Estrategia 2...');
+                                
+                                // Estrategia 2: Extraer imagen desde el HTML de TocToc
+                                if (house.url) {
+                                    try {
+                                        const realImageSrc = await extractImageFromTocToc(house.url);
+                                        
+                                        if (realImageSrc && imgContainer) {
+                                            console.log('🔄 Estrategia 2: Cargando imagen extraída de TocToc');
+                                            const toctocImg = document.createElement('img');
+                                            toctocImg.src = realImageSrc;
+                                            toctocImg.style.cssText = 'width:100%; height:100%; object-fit:cover;';
+                                            
+                                            toctocImg.onerror = function() {
+                                                console.warn('⚠️ Estrategia 2 falló, usando imagen original del JSON');
+                                                const fallbackImg = document.createElement('img');
+                                                fallbackImg.src = house.imagen;
+                                                fallbackImg.style.cssText = 'width:100%; height:100%; object-fit:cover;';
+                                                imgContainer.innerHTML = '';
+                                                imgContainer.appendChild(fallbackImg);
+                                            };
+                                            
+                                            toctocImg.onload = function() {
+                                                console.log('✅ Imagen de TocToc cargada correctamente');
+                                            };
+                                            
+                                            imgContainer.innerHTML = '';
+                                            imgContainer.appendChild(toctocImg);
+                                        } else {
+                                            throw new Error('No se pudo extraer imagen del HTML');
+                                        }
+                                    } catch (err) {
+                                        console.warn('⚠️ Todas las estrategias fallaron, usando imagen original');
+                                        const fallbackImg = document.createElement('img');
+                                        fallbackImg.src = house.imagen;
+                                        fallbackImg.style.cssText = 'width:100%; height:100%; object-fit:cover;';
+                                        imgContainer.innerHTML = '';
+                                        imgContainer.appendChild(fallbackImg);
+                                    }
+                                } else {
+                                    // No hay URL de TocToc, usar imagen original
+                                    console.warn('⚠️ No hay URL de TocToc, usando imagen original');
+                                    const fallbackImg = document.createElement('img');
+                                    fallbackImg.src = house.imagen;
+                                    fallbackImg.style.cssText = 'width:100%; height:100%; object-fit:cover;';
+                                    imgContainer.innerHTML = '';
+                                    imgContainer.appendChild(fallbackImg);
+                                }
+                            };
+                            
+                            newImg.onload = function() {
+                                console.log('✅ Imagen mejorada cargada correctamente (Estrategia 1)');
+                                imageLoadSuccess = true;
+                            };
+                            
+                            imgContainer.innerHTML = '';
+                            imgContainer.appendChild(newImg);
+                        }
+                    }
+                    
                     // Consultar tráfico actual y mostrar en popup
                     const traficoDivId = `trafico-casa-${house.id}`;
                     const traficoDiv = document.getElementById(traficoDivId);
