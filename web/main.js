@@ -257,15 +257,14 @@
 
     // Load and merge houses
     function loadHouses() {
-        // Load multiple sources: primary casas + toctoc casas + depto venta + depto arriendo
-        const primary = fetch('data/casas.json').then(r => r.json()).catch(e => { console.error('casas.json load error', e); return []; });
-        const secondary = fetch('data/casa-venta-toctoc.json').then(r => r.json()).catch(e => { console.warn('casa-venta-toctoc.json missing', e); return []; });
+        // Load multiple sources: casas arriendo + casa venta + depto venta + depto arriendo
+        const casasArriendo = fetch('data/casas-arriendo-toctoc.json').then(r => r.json()).catch(e => { console.error('casas-arriendo-toctoc.json load error', e); return []; });
+        const casasVenta = fetch('data/casa-venta-toctoc.json').then(r => r.json()).catch(e => { console.warn('casa-venta-toctoc.json missing', e); return []; });
         const deptoVenta = fetch('data/depto-venta-toctoc.json').then(r => r.json()).catch(e => { console.warn('depto-venta-toctoc.json missing', e); return []; });
         const deptoArriendo = fetch('data/depto-arriendo-toctoc.json').then(r => r.json()).catch(e => { console.warn('depto-arriendo-toctoc.json missing', e); return []; });
 
-        return Promise.all([primary, secondary, deptoVenta, deptoArriendo]).then(([p, s, dv, da]) => {
-            housesData = p || [];
-            // annotate and merge additional sources
+        return Promise.all([casasArriendo, casasVenta, deptoVenta, deptoArriendo]).then(([ca, cv, dv, da]) => {
+            // annotate and merge all sources
             const annotateSource = (items, sourceName, propertyType, operation) => (items || []).map(item => {
                 // prefer existing id or generate one
                 if (!item.id && item._id) item.id = item._id;
@@ -276,16 +275,16 @@
                 return item;
             });
 
-            const sAnnotated = annotateSource(s, 'casa-toctoc', 'casa', 'venta');
+            const caAnnotated = annotateSource(ca, 'casa-arriendo-toctoc', 'casa', 'arriendo');
+            const cvAnnotated = annotateSource(cv, 'casa-venta-toctoc', 'casa', 'venta');
             const dvAnnotated = annotateSource(dv, 'depto-venta-toctoc', 'departamento', 'venta');
             const daAnnotated = annotateSource(da, 'depto-arriendo-toctoc', 'departamento', 'arriendo');
 
-            additionalHouses = [].concat(sAnnotated, dvAnnotated, daAnnotated);
-
-            // Merge by id, prefer primary
+            // Merge all sources
             const byId = new Map();
-            housesData.forEach(h => byId.set(h.id, h));
-            additionalHouses.forEach(h => { if (!byId.has(h.id)) byId.set(h.id, h); });
+            [...caAnnotated, ...cvAnnotated, ...dvAnnotated, ...daAnnotated].forEach(h => {
+                if (!byId.has(h.id)) byId.set(h.id, h);
+            });
             housesData = Array.from(byId.values());
 
             setText('debug-casas', `casas cargadas: ${housesData.length}`);
