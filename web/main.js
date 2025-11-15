@@ -389,72 +389,199 @@
                 // Determinar tipo de propiedad
                 let propType = (house._propertyType || house.tipo_inmueble || house.tipo || house.property_type || '').toString().toLowerCase();
                 const isDepto = propType.includes('depart') || propType.includes('dpto') || propType.includes('depto') || propType === 'departamento';
+                const tipoPropiedad = isDepto ? 'Departamento' : 'Casa';
                 
-                // Construir información específica según tipo
-                let detailsHTML = '';
-                if (isDepto) {
-                    // Información para departamentos
-                    detailsHTML = `
-                        <p style="margin:2px 0"><b>🛏️ Dormitorios:</b> ${house.dormitorios || 'N/A'}</p>
-                        <p style="margin:2px 0"><b>🚿 Baños:</b> ${house.baños || house.banos || 'N/A'}</p>
-                        <p style="margin:2px 0"><b>📏 M² Superficie:</b> ${house.m2_superficie || 'N/A'} m²</p>
-                        <p style="margin:2px 0"><b>🌿 Terraza:</b> ${(house.m2_terraza && house.m2_terraza > 0) ? house.m2_terraza + ' m²' : 'No tiene'}</p>
-                    `;
+                // Determinar operación
+                const op = (house._operation || house.operacion || house.operation || house.tipo_anuncio || '').toString().toLowerCase();
+                const operacion = op.includes('venta') ? 'Venta' : 'Arriendo';
+                
+                // Formatear precios (detectar si están invertidos)
+                // Lógica: precio_peso siempre debe ser mayor que precio_uf (millones vs miles)
+                let precioEnPesos, precioEnUF;
+                
+                if (house.precio_uf && house.precio_peso) {
+                    // Si precio_uf > precio_peso, están invertidos
+                    if (house.precio_uf > house.precio_peso) {
+                        // Están invertidos
+                        precioEnPesos = house.precio_uf;
+                        precioEnUF = house.precio_peso;
+                    } else {
+                        // Están correctos
+                        precioEnPesos = house.precio_peso;
+                        precioEnUF = house.precio_uf;
+                    }
                 } else {
-                    // Información para casas
-                    detailsHTML = `
-                        <p style="margin:2px 0"><b>🛏️ Dormitorios:</b> ${house.dormitorios || 'N/A'}</p>
-                        <p style="margin:2px 0"><b>🚿 Baños:</b> ${house.baños || house.banos || 'N/A'}</p>
-                        <p style="margin:2px 0"><b>📐 M² Construidos:</b> ${house.m2_construido || 'N/A'} m²</p>
-                        <p style="margin:2px 0"><b>🏞️ M² Terreno:</b> ${house.m2_terreno || 'N/A'} m²</p>
-                    `;
+                    // Si falta alguno, usar lo que haya
+                    precioEnPesos = house.precio_peso || house.precio_uf || 0;
+                    precioEnUF = house.precio_uf || house.precio_peso || 0;
                 }
                 
-                const formattedPrice = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(house.precio_peso || house.precio_uf || 0);
+                const formattedPricePeso = precioEnPesos ? 
+                    new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', minimumFractionDigits: 0 }).format(precioEnPesos) : 'N/A';
+                const formattedPriceUF = precioEnUF ? 
+                    `${precioEnUF.toFixed(2)} UF` : 'N/A';
+                
+                // Formatear fecha
+                const fechaPublicacion = house.fecha_publicacion || 'N/A';
+                
+                // Construir popup moderno horizontal compacto
                 const popupBase = `
-                    <div style="width:240px">
-                        <img src="${house.imagen || ''}" style="width:100%;height:auto;border-radius:4px"/>
-                        <h4 style="margin:6px 0">${house.titulo || ''}</h4>
-                        <p style="margin:2px 0"><b>💰 Precio:</b> ${formattedPrice}</p>
-                        <p style="margin:2px 0"><b>📍 Comuna:</b> ${house.comuna || ''}</p>
-                        ${detailsHTML}
-                        <a href="${house.url || '#'}" target="_blank" style="display:inline-block;margin-top:8px;color:#7C3AED;font-weight:600;">Ver más detalles →</a>
-                        <div id="trafico-casa-${house.id}" style="margin-top:8px;font-size:13px;color:#333">Cargando tráfico...</div>
+                    <div style="width:420px; max-width:90vw; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+                        <!-- Header con imagen y título -->
+                        <div style="display:flex; gap:10px; margin-bottom:10px;">
+                            <div style="flex-shrink:0; width:140px; height:100px; overflow:hidden; border-radius:8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                                <img src="${house.imagen || ''}" style="width:100%; height:100%; object-fit:cover;"/>
+                            </div>
+                            <div style="flex:1; display:flex; flex-direction:column; justify-content:space-between;">
+                                <div>
+                                    <div style="display:flex; gap:6px; margin-bottom:6px;">
+                                        <span style="background:#7C3AED; color:white; padding:2px 8px; border-radius:12px; font-size:9px; font-weight:600; text-transform:uppercase;">${tipoPropiedad}</span>
+                                        <span style="background:#10B981; color:white; padding:2px 8px; border-radius:12px; font-size:9px; font-weight:600; text-transform:uppercase;">${operacion}</span>
+                                    </div>
+                                    <h3 style="margin:0 0 4px 0; font-size:13px; font-weight:700; color:#1F2937; line-height:1.3; word-wrap:break-word; overflow-wrap:break-word;">${house.titulo || 'Propiedad sin título'}</h3>
+                                    <p style="margin:0; font-size:11px; color:#6B7280;">📍 ${house.comuna || 'N/A'}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Precio -->
+                        <div style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding:8px; border-radius:8px; margin-bottom:10px; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);">
+                            <p style="margin:0; font-size:16px; font-weight:800; color:white;">${formattedPricePeso}</p>
+                            <p style="margin:2px 0 0 0; font-size:11px; color:rgba(255,255,255,0.9); font-weight:500;">${formattedPriceUF}</p>
+                        </div>
+                        
+                        <!-- Características en grid horizontal -->
+                        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:8px; padding:10px; background:#F9FAFB; border-radius:8px; margin-bottom:10px;">
+                            <div style="text-align:center;">
+                                <div style="font-size:18px; margin-bottom:2px;">🛏️</div>
+                                <div style="font-weight:700; font-size:14px; color:#1F2937;">${house.dormitorios || 'N/A'}</div>
+                                <div style="font-size:9px; color:#6B7280; text-transform:uppercase; font-weight:600; white-space:nowrap;">Dormitorios</div>
+                            </div>
+                            <div style="text-align:center;">
+                                <div style="font-size:18px; margin-bottom:2px;">🚿</div>
+                                <div style="font-weight:700; font-size:14px; color:#1F2937;">${house.baños || house.banos || 'N/A'}</div>
+                                <div style="font-size:9px; color:#6B7280; text-transform:uppercase; font-weight:600; white-space:nowrap;">Baños</div>
+                            </div>
+                            ${isDepto ? `
+                            <div style="text-align:center;">
+                                <div style="font-size:18px; margin-bottom:2px;">📏</div>
+                                <div style="font-weight:700; font-size:14px; color:#1F2937;">${house.m2_superficie || 'N/A'}</div>
+                                <div style="font-size:9px; color:#6B7280; text-transform:uppercase; font-weight:600; white-space:nowrap;">M² Superficie</div>
+                            </div>
+                            <div style="text-align:center;">
+                                <div style="font-size:18px; margin-bottom:2px;">🌿</div>
+                                <div style="font-weight:700; font-size:14px; color:#1F2937;">${(house.m2_terraza && house.m2_terraza > 0) ? house.m2_terraza : '-'}</div>
+                                <div style="font-size:9px; color:#6B7280; text-transform:uppercase; font-weight:600; white-space:nowrap;">M² Terraza</div>
+                            </div>
+                            ` : `
+                            <div style="text-align:center;">
+                                <div style="font-size:18px; margin-bottom:2px;">📐</div>
+                                <div style="font-weight:700; font-size:14px; color:#1F2937;">${house.m2_construido || 'N/A'}</div>
+                                <div style="font-size:9px; color:#6B7280; text-transform:uppercase; font-weight:600; white-space:nowrap;">M² Construido</div>
+                            </div>
+                            <div style="text-align:center;">
+                                <div style="font-size:18px; margin-bottom:2px;">🏞️</div>
+                                <div style="font-weight:700; font-size:14px; color:#1F2937;">${house.m2_terreno || 'N/A'}</div>
+                                <div style="font-size:9px; color:#6B7280; text-transform:uppercase; font-weight:600; white-space:nowrap;">M² Terreno</div>
+                            </div>
+                            `}
+                        </div>
+                        
+                        <!-- Información de tráfico -->
+                        <div id="trafico-casa-${house.id}" style="padding:10px; background:#FEF3C7; border-radius:8px; margin-bottom:10px; border-left:3px solid #F59E0B;">
+                            <p style="margin:0; font-size:11px; color:#92400E; font-weight:600;">🚦 Cargando información de tráfico...</p>
+                        </div>
+                        
+                        <!-- Botones de acción -->
+                        <div style="display:flex; gap:8px; margin-bottom:8px;">
+                            <button id="add-itinerary-${house.id}" style="flex:1; background:#10B981; color:white; padding:8px 16px; border:none; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer; transition: all 0.3s; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);">
+                                + Agregar al Itinerario
+                            </button>
+                        </div>
+                        
+                        <!-- Botón ver más -->
+                        <a href="${house.url || '#'}" target="_blank" style="display:block; text-align:center; background:#7C3AED; color:white; padding:8px 16px; border-radius:8px; text-decoration:none; font-weight:700; font-size:12px; transition: all 0.3s; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4);">
+                            Ver Detalles en TocToc →
+                        </a>
                     </div>
                 `;
-                marker.bindPopup(popupBase);
-                // toggle selection on click
-                marker.on('click', async function(e){
-                    // toggle selected state
-                    const idx = selectedProperties.findIndex(s => s.id === house.id);
-                    if (idx === -1) {
-                        selectedProperties.push(house);
-                        marker.setIcon(getPropertyIcon(house, true)); // Usar versión seleccionada
-                    } else {
-                        selectedProperties.splice(idx,1);
-                        marker.setIcon(getPropertyIcon(house, false)); // Usar versión normal
-                    }
-                    updateItineraryUI();
-
+                marker.bindPopup(popupBase, { maxWidth: 450 });
+                
+                // Manejar clic en el popup para cargar tráfico
+                marker.on('popupopen', async function(e){
                     // Consultar tráfico actual y mostrar en popup
-                    marker.openPopup();
                     const traficoDivId = `trafico-casa-${house.id}`;
                     const traficoDiv = document.getElementById(traficoDivId);
                     if (traficoDiv) {
-                        traficoDiv.textContent = "Consultando tráfico actual...";
+                        traficoDiv.innerHTML = `<p style="margin:0; font-size:11px; color:#92400E; font-weight:600;">🚦 Consultando tráfico en tiempo real...</p>`;
                         const trafico = await getTrafficLevelTomTomActual(house.lat, house.lon);
-                        let html = `<div style='font-size:12px; line-height:1.6;'>`;
+                        
+                        let html = `<div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:8px;">`;
                         
                         if (trafico.nivel) {
                             const congestioPercent = (trafico.congestioRatio * 100).toFixed(1);
-                            html += `<p style='margin:4px 0;'><b>${trafico.emoji} Nivel de tráfico:</b> ${trafico.nivel}</p>`;
-                            html += `<p style='margin:4px 0;'><b>📊 Congestión:</b> ${congestioPercent}%</p>`;
+                            const nivelColor = trafico.nivel === 'Fluido' ? '#10B981' : 
+                                             trafico.nivel === 'Moderado' ? '#F59E0B' : 
+                                             trafico.nivel === 'Denso' ? '#EF4444' : '#DC2626';
+                            
+                            html += `
+                                <div style="background:white; padding:8px; border-radius:6px; box-shadow: 0 1px 4px rgba(0,0,0,0.1);">
+                                    <div style="font-size:16px; margin-bottom:2px;">${trafico.emoji}</div>
+                                    <div style="font-size:9px; color:#6B7280; font-weight:600; text-transform:uppercase; margin-bottom:2px;">Nivel</div>
+                                    <div style="font-size:12px; font-weight:800; color:${nivelColor};">${trafico.nivel}</div>
+                                </div>
+                                <div style="background:white; padding:8px; border-radius:6px; box-shadow: 0 1px 4px rgba(0,0,0,0.1);">
+                                    <div style="font-size:16px; margin-bottom:2px;">📊</div>
+                                    <div style="font-size:9px; color:#6B7280; font-weight:600; text-transform:uppercase; margin-bottom:2px;">Congestión</div>
+                                    <div style="font-size:12px; font-weight:800; color:#7C3AED;">${congestioPercent}%</div>
+                                </div>
+                            `;
                         }
                         
-                        html += `<p style='margin:4px 0;'><b>🚗 Velocidad actual:</b> ${trafico.currentSpeed||"-"} km/h</p>`;
-                        html += `<p style='margin:4px 0;'><b>✓ Velocidad sin congestión:</b> ${trafico.freeFlowSpeed||"-"} km/h</p>`;
+                        html += `
+                            <div style="background:white; padding:8px; border-radius:6px; box-shadow: 0 1px 4px rgba(0,0,0,0.1);">
+                                <div style="font-size:16px; margin-bottom:2px;">🚗</div>
+                                <div style="font-size:9px; color:#6B7280; font-weight:600; text-transform:uppercase; margin-bottom:2px;">Vel. Actual</div>
+                                <div style="font-size:12px; font-weight:800; color:#1F2937;">${trafico.currentSpeed||"-"} km/h</div>
+                            </div>
+                            <div style="background:white; padding:8px; border-radius:6px; box-shadow: 0 1px 4px rgba(0,0,0,0.1);">
+                                <div style="font-size:16px; margin-bottom:2px;">✓</div>
+                                <div style="font-size:9px; color:#6B7280; font-weight:600; text-transform:uppercase; margin-bottom:2px;">Vel. Libre</div>
+                                <div style="font-size:12px; font-weight:800; color:#10B981;">${trafico.freeFlowSpeed||"-"} km/h</div>
+                            </div>
+                        `;
+                        
                         html += `</div>`;
                         traficoDiv.innerHTML = html;
+                    }
+                    
+                    // Configurar el botón de agregar al itinerario
+                    const addBtn = document.getElementById(`add-itinerary-${house.id}`);
+                    if (addBtn) {
+                        // Verificar si ya está en el itinerario
+                        const isInItinerary = selectedProperties.some(s => s.id === house.id);
+                        
+                        if (isInItinerary) {
+                            addBtn.textContent = '✓ En el Itinerario';
+                            addBtn.style.background = '#6B7280';
+                            addBtn.disabled = true;
+                        }
+                        
+                        addBtn.onclick = function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            
+                            const idx = selectedProperties.findIndex(s => s.id === house.id);
+                            if (idx === -1) {
+                                // Agregar al itinerario
+                                selectedProperties.push(house);
+                                marker.setIcon(getPropertyIcon(house, true));
+                                addBtn.textContent = '✓ En el Itinerario';
+                                addBtn.style.background = '#6B7280';
+                                addBtn.disabled = true;
+                                updateItineraryUI();
+                            }
+                        };
                     }
                 });
                 marker.houseData = house;
