@@ -1,21 +1,5 @@
 [
     {
-        "id": 3642741,
-        "lat": -33.4415667,
-        "lon": -70.5940763,
-        "baños": 4,
-        "dormitorios": 4,
-        "comuna": "Providencia",
-        "fecha_publicacion": "07-07-2025 0:00:00",
-        "precio_uf": 63.31,
-        "precio_peso": 2500000.0,
-        "m2_construido": 335.0,
-        "m2_terreno": 335.0,
-        "titulo": "Casa en arriendo cerca Colegio San Ignacio",
-        "url": "https://www.toctoc.com/propiedades/arriendocorredorasr/casa/providencia/casa-en-arriendo-cerca-colegio-san-ignacio/3642741",
-        "imagen": "https://d1cfu8v5n1wsm.cloudfront.net/toctoc/fotos/20241209/3642741/s_wm_db2b45fb7346bc57b2932b1819fce755621f70ba.jpg"
-    },
-    {
         "id": 3834783,
         "lat": -33.4451265,
         "lon": -70.6165311,
