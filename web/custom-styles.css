@@ -1125,3 +1125,62 @@ input[type="number"]::-webkit-inner-spin-button {
   transform: translateX(2px);
   box-shadow: 0 2px 6px rgba(124, 58, 237, 0.1);
 }
+
+/* Estilos para popups personalizados de propiedades */
+.leaflet-popup-content-wrapper {
+  padding: 0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2) !important;
+  overflow: hidden;
+}
+
+.leaflet-popup-content {
+  margin: 0 !important;
+  max-width: 320px !important;
+}
+
+.custom-popup .leaflet-popup-content-wrapper {
+  background: white;
+}
+
+.custom-popup .leaflet-popup-tip {
+  background: white;
+}
+
+/* Efectos hover para botones en popups */
+.custom-popup button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4) !important;
+}
+
+.custom-popup button:active {
+  transform: translateY(0);
+}
+
+/* Animación de entrada para popups */
+.leaflet-popup {
+  animation: popupFadeIn 0.3s ease-out;
+}
+
+@keyframes popupFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Mejorar legibilidad de texto en popups */
+.custom-popup h3 {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Responsividad para popups en pantallas pequeñas */
+@media (max-width: 768px) {
+  .leaflet-popup-content {
+    max-width: 280px !important;
+  }
+}
