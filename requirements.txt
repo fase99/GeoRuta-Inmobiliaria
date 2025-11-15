@@ -6,3 +6,5 @@ shapely
 fiona
 pyproj
 rtree
+beautifulsoup4
+requests
