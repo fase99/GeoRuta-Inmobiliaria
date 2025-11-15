@@ -652,13 +652,13 @@
                         <!-- Botones de acción -->
                         <div style="display:flex; gap:8px; margin-bottom:8px;">
                             <button id="add-itinerary-${house.id}" style="flex:1; background:#10B981; color:white; padding:8px 16px; border:none; border-radius:8px; font-weight:700; font-size:12px; cursor:pointer; transition: all 0.3s; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);">
-                                + Agregar al Itinerario
+                                ➕ Agregar al Itinerario
                             </button>
                         </div>
                         
                         <!-- Botón ver más -->
                         <a href="${house.url || '#'}" target="_blank" style="display:block; text-align:center; background:#7C3AED; color:white; padding:8px 16px; border-radius:8px; text-decoration:none; font-weight:700; font-size:12px; transition: all 0.3s; box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4);">
-                            Ver Detalles en TocToc →
+                            🔍 Ver Detalles & 📅 Agendar
                         </a>
                     </div>
                 `;
