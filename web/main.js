@@ -2661,7 +2661,12 @@
         const resultsEl = document.getElementById('map-inline-search-results');
         if (!resultsEl) return;
         resultsEl.innerHTML = '';
-        if (!query || query.length < 2) return;
+        if (!query || query.length < 2) {
+            resultsEl.style.display = 'none';
+            return;
+        }
+        // show results container when performing a search
+        resultsEl.style.display = 'block';
         const q = query.toLowerCase();
         // search through housesData (title, direccion, comuna, nombre)
         const matches = (housesData || []).filter(h => {
@@ -2675,7 +2680,10 @@
         } else {
             // If no local matches, show help and allow user to geocode using the button
             const resultsEl = document.getElementById('map-inline-search-results');
-            if (resultsEl) resultsEl.innerHTML = `<div style="padding:6px;color:#6b7280">No se encontraron propiedades locales. Usa "Buscar dirección (Nominatim)" para buscar direcciones y luego propiedades cercanas.</div>`;
+            if (resultsEl) {
+                resultsEl.innerHTML = `<div style="padding:6px;color:#6b7280">No se encontraron propiedades locales. Usa \"Buscar dirección (Nominatim)\" para buscar direcciones y luego propiedades cercanas.</div>`;
+                resultsEl.style.display = 'block';
+            }
         }
     }
 
@@ -2735,14 +2743,12 @@
         if (!resultsEl) return;
         resultsEl.innerHTML = '';
         if (!items || items.length === 0) {
-            const p = document.createElement('div');
-            p.style.padding = '6px';
-            p.style.color = '#6b7280';
-            p.style.fontSize = '13px';
-            p.textContent = 'Escribe al menos 2 caracteres para buscar...';
-            resultsEl.appendChild(p);
+            // hide results container when there are no items to show
+            resultsEl.style.display = 'none';
             return;
         }
+        // show results container when rendering items
+        resultsEl.style.display = 'block';
         items.forEach(h => {
             const row = document.createElement('div');
             row.style.display = 'flex';
@@ -2828,6 +2834,10 @@
         const searchBtn = document.getElementById('map-inline-search-button');
         const geocodeBtn = document.getElementById('map-inline-geocode-btn');
         const resultsEl = document.getElementById('map-inline-search-results');
+        if (resultsEl) {
+            // hide results by default to avoid an empty dark bar when nothing searched
+            resultsEl.style.display = 'none';
+        }
         const opSelect = document.getElementById('map-op-select');
         const typeSelect = document.getElementById('map-type-select');
 
@@ -2837,7 +2847,12 @@
         function doInlineSearchWithFilters(q) {
             if (!resultsEl) return;
             resultsEl.innerHTML = '';
-            if (!q || q.length < 2) return;
+            if (!q || q.length < 2) {
+                resultsEl.style.display = 'none';
+                return;
+            }
+            // ensure results container is visible when searching
+            resultsEl.style.display = 'block';
             const ql = q.toLowerCase();
             const op = opSelect ? opSelect.value : 'any';
             const type = typeSelect ? typeSelect.value : 'any';
@@ -2883,7 +2898,10 @@
                 ev.preventDefault(); ev.stopPropagation();
                 const q = (input ? (input.value || '').trim() : '');
                 if (!q || q.length < 3) {
-                    if (resultsEl) resultsEl.innerHTML = '<div style="padding:6px;color:#9ca3af">Escribe al menos 3 caracteres para geocodificar.</div>';
+                    if (resultsEl) {
+                        resultsEl.innerHTML = '<div style="padding:6px;color:#9ca3af">Escribe al menos 3 caracteres para geocodificar.</div>';
+                        resultsEl.style.display = 'block';
+                    }
                     return;
                 }
                 geocodeBtn.disabled = true;
