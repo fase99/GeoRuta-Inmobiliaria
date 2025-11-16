@@ -24,8 +24,27 @@ if __name__ == "__main__":
     # Instead, run the consolidated loader that imports existing web/data files into PostGIS.
     run_script("metadata/loaders/load_to_postgis.py")
 
-    # --- FASE 4: RUTA DE EJEMPLO ---
+    # --- FASE 4: AMENAZAS Y PROBABILIDADES ---
+    print("\n=== FASE 4: PROCESANDO AMENAZAS ===")
+    run_script("amenazas/extract_traffic_incidents.py")
+    run_script("amenazas/generate_probabilities_enhanced.py")
+    run_script("amenazas/simulate_threats.py")
+    
+    # --- FASE 5: RUTA DE EJEMPLO ---
+    print("\n=== FASE 5: GENERANDO RUTA DE EJEMPLO ===")
     run_script("generate_dijkstra_route.py")
+    
+    # --- FASE 6: DEMOSTRACIÓN DE RUTA RESILIENTE ---
+    print("\n=== FASE 6: CASO DEMOSTRATIVO ===")
+    run_script("amenazas/demo_resilient_route.py")
 
-    print("--- PROCESO ETL Y RUTA DE EJEMPLO COMPLETADOS ---")
-    print("El sitio web está disponible en http://localhost:8080")
+    print("\n" + "="*60)
+    print("✅ PROCESO ETL COMPLETADO EXITOSAMENTE")
+    print("="*60)
+    print("\n📊 Componentes disponibles:")
+    print("   ✓ Infraestructura vial (nodos y aristas)")
+    print("   ✓ Metadatos (propiedades, servicios, transporte)")
+    print("   ✓ Amenazas (incidentes, probabilidades, simulación)")
+    print("   ✓ Rutas optimizadas (Dijkstra + resiliente)")
+    print("\n🌐 El sitio web está disponible en: http://localhost:8080")
+    print("="*60)
