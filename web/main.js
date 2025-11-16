@@ -2555,6 +2555,270 @@
         const dm = debugMain('debug-mainjs'); if (dm) dm.textContent = 'main.js ejecutado';
     });
 
+    // Inline Map Search Control (floating label-like input)
+    function addMapInlineSearchControl() {
+        const SearchControl = L.Control.extend({
+            options: { position: 'topright' },
+            onAdd: function () {
+                const container = L.DomUtil.create('div', 'map-inline-search');
+                container.style.background = 'white';
+                container.style.padding = '6px';
+                container.style.borderRadius = '6px';
+                container.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+                container.style.width = '300px';
+                container.style.maxWidth = '40vw';
+
+                const input = document.createElement('input');
+                input.type = 'search';
+                input.placeholder = 'Buscar propiedades (título, dirección, comuna)...';
+                input.style.width = '100%';
+                input.style.padding = '6px 8px';
+                input.style.border = '1px solid #e5e7eb';
+                input.style.borderRadius = '4px';
+                input.style.boxSizing = 'border-box';
+                input.id = 'map-inline-search-input';
+
+                const results = document.createElement('div');
+                results.id = 'map-inline-search-results';
+                results.style.maxHeight = '260px';
+                results.style.overflow = 'auto';
+                results.style.marginTop = '6px';
+
+                // geocode button (fallback)
+                const geocodeBtn = document.createElement('button');
+                geocodeBtn.id = 'map-inline-geocode-btn';
+                geocodeBtn.textContent = 'Buscar dirección (Nominatim)';
+                geocodeBtn.title = 'Buscar la cadena como dirección en Nominatim y encontrar propiedades cercanas';
+                geocodeBtn.style.marginTop = '6px';
+                geocodeBtn.style.width = '100%';
+                geocodeBtn.style.padding = '6px 8px';
+                geocodeBtn.style.background = '#6b7280';
+                geocodeBtn.style.color = '#fff';
+                geocodeBtn.style.border = 'none';
+                geocodeBtn.style.borderRadius = '4px';
+                geocodeBtn.style.cursor = 'pointer';
+
+                container.appendChild(geocodeBtn);
+
+                geocodeBtn.addEventListener('click', function (ev) {
+                    ev.preventDefault(); ev.stopPropagation();
+                    const q = (input.value || '').trim();
+                    if (!q || q.length < 3) {
+                        renderInlineResults([]);
+                        const resultsEl = document.getElementById('map-inline-search-results');
+                        if (resultsEl) {
+                            resultsEl.innerHTML = '<div style="padding:6px;color:#9ca3af">Escribe al menos 3 caracteres para geocodificar.</div>';
+                        }
+                        return;
+                    }
+                    geocodeBtn.disabled = true;
+                    geocodeBtn.textContent = 'Buscando...';
+                    doGeocode(q).finally(() => {
+                        setTimeout(() => { geocodeBtn.disabled = false; geocodeBtn.textContent = 'Buscar dirección (Nominatim)'; }, 900);
+                    });
+                });
+
+                container.appendChild(input);
+                container.appendChild(results);
+
+                // prevent map interactions when typing
+                L.DomEvent.disableClickPropagation(container);
+                L.DomEvent.disableScrollPropagation(container);
+
+                // events
+                let timer = null;
+                input.addEventListener('input', function (e) {
+                    const q = (e.target.value || '').trim();
+                    if (timer) clearTimeout(timer);
+                    timer = setTimeout(() => doInlineSearch(q), 180);
+                });
+
+                input.addEventListener('keydown', function (e) {
+                    if (e.key === 'Escape') {
+                        input.value = '';
+                        renderInlineResults([]);
+                        input.blur();
+                    }
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        const q = (e.target.value || '').trim();
+                        doInlineSearch(q);
+                    }
+                });
+
+                // expose for testing
+                this._container = container;
+                this._input = input;
+                this._results = results;
+                return container;
+            }
+        });
+        const ctrl = new SearchControl();
+        map.addControl(ctrl);
+    }
+
+    function doInlineSearch(query) {
+        const resultsEl = document.getElementById('map-inline-search-results');
+        if (!resultsEl) return;
+        resultsEl.innerHTML = '';
+        if (!query || query.length < 2) return;
+        const q = query.toLowerCase();
+        // search through housesData (title, direccion, comuna, nombre)
+        const matches = (housesData || []).filter(h => {
+            const titulo = (h.titulo || h.title || h.nombre || '').toString().toLowerCase();
+            const direccion = (h.direccion || h.direccion_completa || h.address || '').toString().toLowerCase();
+            const comuna = (h.comuna || '').toString().toLowerCase();
+            return (titulo.includes(q) || direccion.includes(q) || comuna.includes(q));
+        }).slice(0, 12);
+        if (matches.length > 0) {
+            renderInlineResults(matches);
+        } else {
+            // If no local matches, show help and allow user to geocode using the button
+            const resultsEl = document.getElementById('map-inline-search-results');
+            if (resultsEl) resultsEl.innerHTML = `<div style="padding:6px;color:#6b7280">No se encontraron propiedades locales. Usa "Buscar dirección (Nominatim)" para buscar direcciones y luego propiedades cercanas.</div>`;
+        }
+    }
+
+    // Geocode a free-text query using Nominatim and render results + nearby properties
+    async function doGeocode(query) {
+        const resultsEl = document.getElementById('map-inline-search-results');
+        if (!resultsEl) return;
+        resultsEl.innerHTML = '<div style="padding:6px;color:#6b7280">Consultando Nominatim…</div>';
+        try {
+            const url = 'https://nominatim.openstreetmap.org/search?format=json&limit=5&addressdetails=1&accept-language=es&q=' + encodeURIComponent(query);
+            const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            if (!resp.ok) throw new Error('Nominatim returned ' + resp.status);
+            const arr = await resp.json();
+            if (!Array.isArray(arr) || arr.length === 0) {
+                resultsEl.innerHTML = '<div style="padding:6px;color:#9ca3af">No se encontraron coincidencias en Nominatim.</div>';
+                return;
+            }
+
+            // render top results with actions
+            resultsEl.innerHTML = '';
+            for (const r of arr) {
+                const lat = parseFloat(r.lat), lon = parseFloat(r.lon);
+                const row = document.createElement('div');
+                row.style.padding = '6px';
+                row.style.borderBottom = '1px solid #f3f4f6';
+                const name = document.createElement('div'); name.style.fontWeight = '700'; name.style.fontSize = '13px'; name.textContent = r.display_name;
+                const meta = document.createElement('div'); meta.style.color = '#6b7280'; meta.style.fontSize = '12px'; meta.textContent = `Coordenadas: ${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+                const actions = document.createElement('div'); actions.style.marginTop = '6px'; actions.style.display = 'flex'; actions.style.gap = '6px';
+                const gotoBtn = document.createElement('button'); gotoBtn.textContent = 'Ir al punto'; gotoBtn.style.background = '#3b82f6'; gotoBtn.style.color='#fff'; gotoBtn.style.border='none'; gotoBtn.style.padding='6px'; gotoBtn.style.borderRadius='4px'; gotoBtn.onclick = () => { map.setView([lat, lon], 17); };
+                const nearbyBtn = document.createElement('button'); nearbyBtn.textContent = 'Propiedades cercanas'; nearbyBtn.style.background = '#10b981'; nearbyBtn.style.color='#fff'; nearbyBtn.style.border='none'; nearbyBtn.style.padding='6px'; nearbyBtn.style.borderRadius='4px'; nearbyBtn.onclick = () => { const nearby = findNearestPropertiesByCoords(lat, lon, 800, 12); if (nearby && nearby.length) renderInlineResults(nearby); else { resultsEl.innerHTML = '<div style="padding:6px;color:#9ca3af">No se encontraron propiedades cerca de este punto.</div>'; } };
+                actions.appendChild(gotoBtn); actions.appendChild(nearbyBtn);
+                row.appendChild(name); row.appendChild(meta); row.appendChild(actions);
+                resultsEl.appendChild(row);
+            }
+        } catch (err) {
+            console.warn('Nominatim error', err);
+            resultsEl.innerHTML = '<div style="padding:6px;color:#f43f5e">Error consultando Nominatim.</div>';
+        }
+    }
+
+    function findNearestPropertiesByCoords(lat, lon, radiusMeters = 800, limit = 12) {
+        if (!housesData || housesData.length === 0) return [];
+        const origin = { lat: lat, lon: lon };
+        const scored = housesData.map(h => {
+            const d = (h.lat && h.lon) ? haversineDistance(origin, { lat: h.lat, lon: h.lon }) : Infinity;
+            return { house: h, d };
+        }).filter(x => x.d <= radiusMeters).sort((a,b) => a.d - b.d).slice(0, limit).map(x => {
+            // annotate with distance for potential UI use
+            x.house._search_distance = Math.round(x.d);
+            return x.house;
+        });
+        return scored;
+    }
+
+    function renderInlineResults(items) {
+        const resultsEl = document.getElementById('map-inline-search-results');
+        if (!resultsEl) return;
+        resultsEl.innerHTML = '';
+        if (!items || items.length === 0) {
+            const p = document.createElement('div');
+            p.style.padding = '6px';
+            p.style.color = '#6b7280';
+            p.style.fontSize = '13px';
+            p.textContent = 'Escribe al menos 2 caracteres para buscar...';
+            resultsEl.appendChild(p);
+            return;
+        }
+        items.forEach(h => {
+            const row = document.createElement('div');
+            row.style.display = 'flex';
+            row.style.alignItems = 'center';
+            row.style.justifyContent = 'space-between';
+            row.style.padding = '6px';
+            row.style.borderBottom = '1px solid #f3f4f6';
+
+            const left = document.createElement('div');
+            left.style.flex = '1';
+            left.style.marginRight = '8px';
+            const title = document.createElement('div');
+            title.style.fontSize = '13px';
+            title.style.fontWeight = '700';
+            title.textContent = h.titulo || h.nombre || h.title || 'Propiedad';
+            const meta = document.createElement('div');
+            meta.style.fontSize = '12px';
+            meta.style.color = '#6b7280';
+            meta.textContent = `${h.comuna || ''} — ${h._operation || ''}`;
+            left.appendChild(title);
+            left.appendChild(meta);
+
+            const actions = document.createElement('div');
+            actions.style.display = 'flex';
+            actions.style.gap = '6px';
+
+            const gotoBtn = document.createElement('button');
+            gotoBtn.textContent = 'Ir';
+            gotoBtn.style.background = '#3b82f6';
+            gotoBtn.style.color = '#fff';
+            gotoBtn.style.border = 'none';
+            gotoBtn.style.padding = '6px 8px';
+            gotoBtn.style.borderRadius = '4px';
+            gotoBtn.style.cursor = 'pointer';
+            gotoBtn.onclick = function (e) {
+                e.preventDefault(); e.stopPropagation();
+                const marker = houseMarkers.find(m => m.houseData && m.houseData.id === h.id);
+                if (marker) {
+                    map.setView(marker.getLatLng(), 17);
+                    marker.openPopup();
+                } else if (h.lat && h.lon) {
+                    map.setView([h.lat, h.lon], 17);
+                }
+            };
+
+            const addBtn = document.createElement('button');
+            addBtn.textContent = 'Agregar';
+            addBtn.style.background = '#10b981';
+            addBtn.style.color = '#fff';
+            addBtn.style.border = 'none';
+            addBtn.style.padding = '6px 8px';
+            addBtn.style.borderRadius = '4px';
+            addBtn.style.cursor = 'pointer';
+            addBtn.onclick = function (e) {
+                e.preventDefault(); e.stopPropagation();
+                const exists = selectedProperties.find(s => s.id === h.id);
+                if (!exists) {
+                    selectedProperties.push(h);
+                    const marker = houseMarkers.find(m => m.houseData && m.houseData.id === h.id);
+                    if (marker) marker.setIcon(getPropertyIcon(h, true));
+                    updateItineraryUI();
+                }
+            };
+
+            actions.appendChild(gotoBtn);
+            actions.appendChild(addBtn);
+
+            row.appendChild(left);
+            row.appendChild(actions);
+            resultsEl.appendChild(row);
+        });
+    }
+
+    // Initialize the inline search control on map
+    try { addMapInlineSearchControl(); } catch (e) { console.warn('inline search control init failed', e); }
+
     // Legend Modal Control
     const legendButton = document.getElementById('legend-button');
     const legendModal = document.getElementById('legend-modal');
