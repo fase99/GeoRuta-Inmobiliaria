@@ -61,6 +61,10 @@ html, body {
   z-index: 1000;
 }
 
+.button-buscar:hover{
+  background: #059669;
+}
+
 /* Scrollbar personalizado */
 #controls::-webkit-scrollbar {
   width: 8px;
@@ -836,6 +840,11 @@ input[type="number"]::-webkit-inner-spin-button {
 /* Contenedor de pasos de ruta */
 #route-steps-container {
   scrollbar-width: thin;
+  scrollbar-color: var(--primary-purple-light) var(--bg-gray);
+}
+
+#map-inline-search-results{
+   scrollbar-width: thin;
   scrollbar-color: var(--primary-purple-light) var(--bg-gray);
 }
 
