@@ -41,6 +41,13 @@
     const bomberosLayer = L.layerGroup().addTo(map);
     const universidadesLayer = L.layerGroup().addTo(map);
     const colegiosLayer = L.layerGroup().addTo(map);
+    
+    // Amenazas layers
+    const activeThreatsLayer = L.layerGroup(); // not added by default
+    const threatProbabilitiesLayer = L.layerGroup(); // not added by default
+    let activeThreatsData = null;
+    let edgeProbabilitiesData = null;
+    let nodeProbabilitiesData = null;
 
     // Graph data (loaded from data/nodes.geojson and data/edges.geojson)
     let nodesGeoJSON = null;
@@ -1625,6 +1632,154 @@
         }).catch(e => { console.warn('nodes load error', e); const d=document.getElementById('debug-nodes'); if(d)d.textContent='nodes load error'; });
     }
 
+    // Load active threats from Monte Carlo simulation
+    async function loadActiveThreats() {
+        try {
+            const res = await fetch('data/active_threats.json');
+            if (!res.ok) throw new Error('active_threats.json not found');
+            activeThreatsData = await res.json();
+            console.log('Amenazas activas cargadas:', activeThreatsData);
+            renderActiveThreats();
+        } catch (err) {
+            console.warn('No se pudieron cargar las amenazas activas:', err);
+        }
+    }
+
+    // Render active threats on map
+    function renderActiveThreats() {
+        activeThreatsLayer.clearLayers();
+        if (!activeThreatsData) return;
+
+        let count = 0;
+
+        // Render active edges
+        if (activeThreatsData.edges && activeThreatsData.edges.length > 0) {
+            activeThreatsData.edges.forEach(edge => {
+                const edgeId = `${edge.u}-${edge.v}`;
+                const edgeFeature = edgeLookup.get(edgeId);
+                if (edgeFeature) {
+                    const prob = edge.probability || 0;
+                    const color = prob > 0.3 ? '#FF0000' : prob > 0.15 ? '#FFA500' : '#FFD700';
+                    L.geoJSON(edgeFeature, {
+                        style: { color: color, weight: 4, opacity: 0.8 }
+                    }).bindPopup(`⚠️ Amenaza activa en arista<br>Nodos: ${edge.u} → ${edge.v}<br>Probabilidad: ${(prob * 100).toFixed(1)}%<br>Severidad: ${edge.severity}`).addTo(activeThreatsLayer);
+                    count++;
+                }
+            });
+        }
+
+        // Render active nodes
+        if (activeThreatsData.nodes && activeThreatsData.nodes.length > 0) {
+            activeThreatsData.nodes.forEach(node => {
+                const nodeCoords = nodeIndex.get(Number(node.node_id));
+                if (nodeCoords) {
+                    const prob = node.probability || 0;
+                    const color = prob > 0.3 ? '#FF0000' : prob > 0.15 ? '#FFA500' : '#FFD700';
+                    L.circleMarker([nodeCoords.lat, nodeCoords.lon], {
+                        radius: 6,
+                        fillColor: color,
+                        color: '#000',
+                        weight: 1,
+                        opacity: 1,
+                        fillOpacity: 0.8
+                    }).bindPopup(`⚠️ Amenaza activa en nodo<br>ID: ${node.node_id}<br>Probabilidad: ${(prob * 100).toFixed(1)}%<br>Severidad: ${node.severity}`).addTo(activeThreatsLayer);
+                    count++;
+                }
+            });
+        }
+
+        // Render active incidents
+        if (activeThreatsData.incidents && activeThreatsData.incidents.length > 0) {
+            activeThreatsData.incidents.forEach(incident => {
+                if (incident.coordinates && incident.coordinates.length === 2) {
+                    const lon = incident.coordinates[0];
+                    const lat = incident.coordinates[1];
+                    L.marker([lat, lon], {
+                        icon: L.divIcon({
+                            className: 'threat-incident-icon',
+                            html: '<div style="background-color: #FF0000; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid #000;">🚨</div>',
+                            iconSize: [24, 24]
+                        })
+                    }).bindPopup(`🚨 Incidente activo<br>Tipo: ${incident.type || 'Desconocido'}<br>Descripción: ${incident.description || ''}<br>Severidad: ${incident.severity || 'N/A'}`).addTo(activeThreatsLayer);
+                    count++;
+                }
+            });
+        }
+
+        console.log(`Renderizadas ${count} amenazas activas en el mapa`);
+    }
+
+    // Load threat probabilities
+    async function loadThreatProbabilities() {
+        try {
+            const [edgeRes, nodeRes] = await Promise.all([
+                fetch('data/edge_probabilities.json'),
+                fetch('data/node_probabilities.json')
+            ]);
+            
+            if (edgeRes.ok) edgeProbabilitiesData = await edgeRes.json();
+            if (nodeRes.ok) nodeProbabilitiesData = await nodeRes.json();
+            
+            console.log('Probabilidades de amenazas cargadas:', {
+                edges: edgeProbabilitiesData ? edgeProbabilitiesData.length : 0,
+                nodes: nodeProbabilitiesData ? nodeProbabilitiesData.length : 0
+            });
+            renderThreatProbabilities();
+        } catch (err) {
+            console.warn('No se pudieron cargar las probabilidades de amenazas:', err);
+        }
+    }
+
+    // Render threat probabilities on map
+    function renderThreatProbabilities() {
+        threatProbabilitiesLayer.clearLayers();
+        
+        let count = 0;
+        
+        // Render edge probabilities
+        if (edgeProbabilitiesData && Array.isArray(edgeProbabilitiesData)) {
+            edgeProbabilitiesData.forEach(edge => {
+                if (edge.probability > 0.05) {
+                    const edgeId = `${edge.u}-${edge.v}`;
+                    const edgeFeature = edgeLookup.get(edgeId);
+                    if (edgeFeature) {
+                        const prob = edge.probability;
+                        const color = prob > 0.3 ? '#FF6B6B' : prob > 0.15 ? '#FFB347' : '#FFE66D';
+                        L.geoJSON(edgeFeature, {
+                            style: { color: color, weight: 3, opacity: 0.6 }
+                        }).bindPopup(`Probabilidad de riesgo: ${(prob * 100).toFixed(1)}%<br>Arista: ${edge.u} → ${edge.v}`).addTo(threatProbabilitiesLayer);
+                        count++;
+                    }
+                }
+            });
+        }
+
+        // Render node probabilities
+        if (nodeProbabilitiesData && Array.isArray(nodeProbabilitiesData)) {
+            nodeProbabilitiesData.forEach(node => {
+                if (node.probability > 0.05) {
+                    const nodeId = node.node_id || node.id;
+                    const nodeCoords = nodeIndex.get(Number(nodeId));
+                    if (nodeCoords) {
+                        const prob = node.probability;
+                        const color = prob > 0.3 ? '#FF6B6B' : prob > 0.15 ? '#FFB347' : '#FFE66D';
+                        L.circleMarker([nodeCoords.lat, nodeCoords.lon], {
+                            radius: 4,
+                            fillColor: color,
+                            color: '#000',
+                            weight: 1,
+                            opacity: 0.6,
+                            fillOpacity: 0.5
+                        }).bindPopup(`Probabilidad de riesgo: ${(prob * 100).toFixed(1)}%<br>Nodo: ${nodeId}`).addTo(threatProbabilitiesLayer);
+                        count++;
+                    }
+                }
+            });
+        }
+        
+        console.log(`Renderizadas ${count} probabilidades de riesgo en el mapa`);
+    }
+
     // Apply POI filters
     function applyPoiFilters() {
         const radius = (poiRadiusInput && parseFloat(poiRadiusInput.value)) ? parseFloat(poiRadiusInput.value) : 500;
@@ -1668,6 +1823,37 @@
     if (showUniversidadesCb) showUniversidadesCb.addEventListener('change', e => { if (e.target.checked) universidadesLayer.addTo(map); else map.removeLayer(universidadesLayer); });
     if (showColegiosCb) showColegiosCb.addEventListener('change', e => { if (e.target.checked) colegiosLayer.addTo(map); else map.removeLayer(colegiosLayer); });
 
+    // Amenazas toggles
+    const showActiveThreats = document.getElementById('show-active-threats');
+    const showThreatProbabilities = document.getElementById('show-threat-probabilities');
+    
+    if (showActiveThreats) {
+        showActiveThreats.addEventListener('change', e => {
+            if (e.target.checked) {
+                if (!activeThreatsData) {
+                    loadActiveThreats().then(() => activeThreatsLayer.addTo(map));
+                } else {
+                    activeThreatsLayer.addTo(map);
+                }
+            } else {
+                map.removeLayer(activeThreatsLayer);
+            }
+        });
+    }
+
+    if (showThreatProbabilities) {
+        showThreatProbabilities.addEventListener('change', e => {
+            if (e.target.checked) {
+                if (!edgeProbabilitiesData && !nodeProbabilitiesData) {
+                    loadThreatProbabilities().then(() => threatProbabilitiesLayer.addTo(map));
+                } else {
+                    threatProbabilitiesLayer.addTo(map);
+                }
+            } else {
+                map.removeLayer(threatProbabilitiesLayer);
+            }
+        });
+    }
 
     // Route OSM toggle
     const showRouteOSMCb = document.getElementById('show-route-osm');
@@ -2363,6 +2549,9 @@
         loadEdges()
         // load edge/node probabilities (optional)
     ]).then(() => loadProbabilities()).then(() => {
+        // Load amenazas data after probabilities are loaded
+        loadActiveThreats();
+        loadThreatProbabilities();
         const dm = debugMain('debug-mainjs'); if (dm) dm.textContent = 'main.js ejecutado';
     });
 
