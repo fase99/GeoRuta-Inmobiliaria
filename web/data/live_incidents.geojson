@@ -3,18 +3,131 @@
   "features": [
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [ -70.6105, -33.4365 ] },
-      "properties": { "type": "ACCIDENTE", "description": "Accidente menor, precaución" }
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -70.58982,
+          -33.42753
+        ]
+      },
+      "properties": {
+        "type": "ACCIDENTE",
+        "severity": "MEDIA",
+        "description": "Colisi\u00f3n vehicular en la zona.",
+        "timestamp": "2025-11-16T12:00:00Z"
+      }
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [ -70.6075, -33.4280 ] },
-      "properties": { "type": "CONGESTION", "description": "Alta congestión vehicular" }
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -70.606275,
+          -33.414267
+        ]
+      },
+      "properties": {
+        "type": "CONGESTION",
+        "severity": "MEDIA",
+        "description": "Flujo lento de veh\u00edculos en la zona.",
+        "timestamp": "2025-11-16T12:00:00Z"
+      }
     },
     {
       "type": "Feature",
-      "geometry": { "type": "Point", "coordinates": [ -70.6180, -33.4330 ] },
-      "properties": { "type": "CIERRE VIAL", "description": "Calle cerrada por evento" }
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -70.582267,
+          -33.427725
+        ]
+      },
+      "properties": {
+        "type": "ACCIDENTE",
+        "severity": "BAJA",
+        "description": "Accidente sin heridos en la zona.",
+        "timestamp": "2025-11-16T12:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -70.592415,
+          -33.42891
+        ]
+      },
+      "properties": {
+        "type": "CIERRE VIAL",
+        "severity": "ALTA",
+        "description": "Calle cerrada por evento en la zona.",
+        "timestamp": "2025-11-16T12:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -70.602922,
+          -33.425947
+        ]
+      },
+      "properties": {
+        "type": "CIERRE VIAL",
+        "severity": "ALTA",
+        "description": "Mantenci\u00f3n de v\u00eda en la zona.",
+        "timestamp": "2025-11-16T12:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -70.59597,
+          -33.420841
+        ]
+      },
+      "properties": {
+        "type": "ACCIDENTE",
+        "severity": "BAJA",
+        "description": "Accidente sin heridos en la zona.",
+        "timestamp": "2025-11-16T12:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -70.586266,
+          -33.414187
+        ]
+      },
+      "properties": {
+        "type": "CIERRE VIAL",
+        "severity": "ALTA",
+        "description": "Desv\u00edo temporal en la zona.",
+        "timestamp": "2025-11-16T12:00:00Z"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -70.602799,
+          -33.438335
+        ]
+      },
+      "properties": {
+        "type": "ACCIDENTE",
+        "severity": "ALTA",
+        "description": "Accidente sin heridos en la zona.",
+        "timestamp": "2025-11-16T12:00:00Z"
+      }
     }
   ]
 }
