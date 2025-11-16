@@ -1,0 +1,110 @@
+{
+  "timestamp": "2025-11-16T13:06:04.074288",
+  "scenario": {
+    "origin": {
+      "lat": -33.425,
+      "lon": -70.61,
+      "name": "Punto de Inicio (Ej: Metro Los Leones)"
+    },
+    "destination": {
+      "lat": -33.432,
+      "lon": -70.605,
+      "name": "Destino (Ej: Propiedad en Av. Providencia)"
+    },
+    "active_threats": {
+      "total_active": 115,
+      "edges": 74,
+      "nodes": 37,
+      "incidents": 4
+    }
+  },
+  "optimal_route": {
+    "distance_m": 1500,
+    "time_min": 18.0,
+    "risk": {
+      "total_risk": 0.0043,
+      "avg_edge_risk": 0.0046,
+      "avg_node_risk": 0.0035,
+      "high_risk_segments": 0,
+      "total_segments": 6,
+      "risk_percentage": 0.43
+    },
+    "edges": [
+      [
+        224414490,
+        11560166843
+      ],
+      [
+        224544239,
+        224544161
+      ],
+      [
+        223964633,
+        285889272
+      ],
+      [
+        732674374,
+        131391334
+      ],
+      [
+        13877404,
+        251255175
+      ],
+      [
+        429990989,
+        430560186
+      ]
+    ]
+  },
+  "resilient_route": {
+    "distance_m": 1680.0,
+    "time_min": 20.2,
+    "risk": {
+      "total_risk": 0.0,
+      "avg_edge_risk": 0.0,
+      "avg_node_risk": 0.0,
+      "high_risk_segments": 0,
+      "total_segments": 8,
+      "risk_percentage": 0.0
+    },
+    "edges": [
+      [
+        388703,
+        133663431
+      ],
+      [
+        388703,
+        5905730961
+      ],
+      [
+        388705,
+        321324963
+      ],
+      [
+        388705,
+        130018933
+      ],
+      [
+        13876993,
+        130813313
+      ],
+      [
+        13876995,
+        130884258
+      ],
+      [
+        13876995,
+        133979752
+      ],
+      [
+        13877010,
+        282395206
+      ]
+    ]
+  },
+  "comparison": {
+    "risk_reduction_percentage": 0.43,
+    "distance_increase_percentage": 12.0,
+    "recommendation": "optimal"
+  }
+}
