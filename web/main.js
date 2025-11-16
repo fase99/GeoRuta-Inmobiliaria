@@ -62,14 +62,14 @@
     const icons = {
         // Casas - Orange (tipo) + Red/Gold (operación)
         casaVenta: L.divIcon({
-            html: '<div style="width: 24px; height: 24px; background: linear-gradient(90deg, #FFA500 50%, #DC143C 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4);"></div>',
+            html: '<div style="width: 30px; height: 30px; background: linear-gradient(90deg, #FFA500 50%, #DC143C 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>',
             className: 'custom-div-icon',
             iconSize: [24, 24],
             iconAnchor: [12, 24],
             popupAnchor: [0, -24]
         }),
         casaArriendo: L.divIcon({
-            html: '<div style="width: 24px; height: 24px; background: linear-gradient(90deg, #FFA500 50%, #FFD700 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4);"></div>',
+            html: '<div style="width: 30px; height: 30px; background: linear-gradient(90deg, #FFA500 50%, #FFD700 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>',
             className: 'custom-div-icon',
             iconSize: [24, 24],
             iconAnchor: [12, 24],
@@ -77,14 +77,14 @@
         }),
         // Departamentos - Blue (tipo) + Red/Gold (operación)
         deptoVenta: L.divIcon({
-            html: '<div style="width: 24px; height: 24px; background: linear-gradient(90deg, #2A81CB 50%, #DC143C 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4);"></div>',
+            html: '<div style="width: 30px; height: 30px; background: linear-gradient(90deg, #2A81CB 50%, #DC143C 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M17 11V3H7v4H3v14h8v-4h2v4h8V11h-4zM7 19H5v-2h2v2zm0-4H5v-2h2v2zm0-4H5V9h2v2zm4 4H9v-2h2v2zm0-4H9V9h2v2zm0-4H9V5h2v2zm4 8h-2v-2h2v2zm0-4h-2V9h2v2zm0-4h-2V5h2v2zm4 12h-2v-2h2v2zm0-4h-2v-2h2v2z"/></svg></div>',
             className: 'custom-div-icon',
             iconSize: [24, 24],
             iconAnchor: [12, 24],
             popupAnchor: [0, -24]
         }),
         deptoArriendo: L.divIcon({
-            html: '<div style="width: 24px; height: 24px; background: linear-gradient(90deg, #2A81CB 50%, #FFD700 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4);"></div>',
+            html: '<div style="width: 30px; height: 30px; background: linear-gradient(90deg, #2A81CB 50%, #FFD700 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M17 11V3H7v4H3v14h8v-4h2v4h8V11h-4zM7 19H5v-2h2v2zm0-4H5v-2h2v2zm0-4H5V9h2v2zm4 4H9v-2h2v2zm0-4H9V9h2v2zm0-4H9V5h2v2zm4 8h-2v-2h2v2zm0-4h-2V9h2v2zm0-4h-2V5h2v2zm4 12h-2v-2h2v2zm0-4h-2v-2h2v2z"/></svg></div>',
             className: 'custom-div-icon',
             iconSize: [24, 24],
             iconAnchor: [12, 24],
@@ -92,28 +92,28 @@
         }),
         // Iconos seleccionados (con borde verde)
         casaVentaSelected: L.divIcon({
-            html: '<div style="width: 24px; height: 24px; background: linear-gradient(90deg, #FFA500 50%, #DC143C 50%); border-radius: 50%; border: 4px solid #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.6), 0 2px 5px rgba(0,0,0,0.4);"></div>',
+            html: '<div style="width: 30px; height: 30px; background: linear-gradient(90deg, #FFA500 50%, #DC143C 50%); border-radius: 50%; border: 4px solid #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.6), 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>',
             className: 'custom-div-icon',
             iconSize: [24, 24],
             iconAnchor: [12, 24],
             popupAnchor: [0, -24]
         }),
         casaArriendoSelected: L.divIcon({
-            html: '<div style="width: 24px; height: 24px; background: linear-gradient(90deg, #FFA500 50%, #FFD700 50%); border-radius: 50%; border: 4px solid #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.6), 0 2px 5px rgba(0,0,0,0.4);"></div>',
+            html: '<div style="width: 30px; height: 30px; background: linear-gradient(90deg, #FFA500 50%, #FFD700 50%); border-radius: 50%; border: 4px solid #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.6), 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>',
             className: 'custom-div-icon',
             iconSize: [24, 24],
             iconAnchor: [12, 24],
             popupAnchor: [0, -24]
         }),
         deptoVentaSelected: L.divIcon({
-            html: '<div style="width: 24px; height: 24px; background: linear-gradient(90deg, #2A81CB 50%, #DC143C 50%); border-radius: 50%; border: 4px solid #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.6), 0 2px 5px rgba(0,0,0,0.4);"></div>',
+            html: '<div style="width: 33px; height: 33px; background: linear-gradient(90deg, #2A81CB 50%, #DC143C 50%); border-radius: 50%; border: 4px solid #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.6), 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M17 11V3H7v4H3v14h8v-4h2v4h8V11h-4zM7 19H5v-2h2v2zm0-4H5v-2h2v2zm0-4H5V9h2v2zm4 4H9v-2h2v2zm0-4H9V9h2v2zm0-4H9V5h2v2zm4 8h-2v-2h2v2zm0-4h-2V9h2v2zm0-4h-2V5h2v2zm4 12h-2v-2h2v2zm0-4h-2v-2h2v2z"/></svg></div>',
             className: 'custom-div-icon',
             iconSize: [24, 24],
             iconAnchor: [12, 24],
             popupAnchor: [0, -24]
         }),
         deptoArriendoSelected: L.divIcon({
-            html: '<div style="width: 24px; height: 24px; background: linear-gradient(90deg, #2A81CB 50%, #FFD700 50%); border-radius: 50%; border: 4px solid #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.6), 0 2px 5px rgba(0,0,0,0.4);"></div>',
+            html: '<div style="width: 33px; height: 33px; background: linear-gradient(90deg, #2A81CB 50%, #FFD700 50%); border-radius: 50%; border: 4px solid #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.6), 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M17 11V3H7v4H3v14h8v-4h2v4h8V11h-4zM7 19H5v-2h2v2zm0-4H5v-2h2v2zm0-4H5V9h2v2zm4 4H9v-2h2v2zm0-4H9V9h2v2zm0-4H9V5h2v2zm4 8h-2v-2h2v2zm0-4h-2V9h2v2zm0-4h-2V5h2v2zm4 12h-2v-2h2v2zm0-4h-2v-2h2v2z"/></svg></div>',
             className: 'custom-div-icon',
             iconSize: [24, 24],
             iconAnchor: [12, 24],
