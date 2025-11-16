@@ -1,0 +1,689 @@
+{
+  "timestamp": "2025-11-16T13:05:57.131519",
+  "seed": 50116,
+  "edges": [
+    {
+      "u": 13877007,
+      "v": 442001152,
+      "probability": 0.0141,
+      "severity": "baja"
+    },
+    {
+      "u": 13877442,
+      "v": 148849425,
+      "probability": 0.3459,
+      "severity": "alta"
+    },
+    {
+      "u": 13882187,
+      "v": 131200330,
+      "probability": 0.3195,
+      "severity": "alta"
+    },
+    {
+      "u": 13882187,
+      "v": 253300158,
+      "probability": 0.3087,
+      "severity": "alta"
+    },
+    {
+      "u": 13885175,
+      "v": 338175268,
+      "probability": 0.4486,
+      "severity": "alta"
+    },
+    {
+      "u": 131200330,
+      "v": 338175779,
+      "probability": 0.3596,
+      "severity": "alta"
+    },
+    {
+      "u": 131390473,
+      "v": 131390460,
+      "probability": 0.2906,
+      "severity": "media"
+    },
+    {
+      "u": 131390553,
+      "v": 131391002,
+      "probability": 0.4715,
+      "severity": "alta"
+    },
+    {
+      "u": 131390553,
+      "v": 332274731,
+      "probability": 0.3335,
+      "severity": "alta"
+    },
+    {
+      "u": 131390615,
+      "v": 252981169,
+      "probability": 0.4545,
+      "severity": "alta"
+    },
+    {
+      "u": 131390629,
+      "v": 131390615,
+      "probability": 0.383,
+      "severity": "alta"
+    },
+    {
+      "u": 131390752,
+      "v": 131390988,
+      "probability": 0.2892,
+      "severity": "media"
+    },
+    {
+      "u": 131390977,
+      "v": 131390615,
+      "probability": 0.4397,
+      "severity": "alta"
+    },
+    {
+      "u": 131390988,
+      "v": 131390752,
+      "probability": 0.2892,
+      "severity": "media"
+    },
+    {
+      "u": 131391002,
+      "v": 737832283,
+      "probability": 0.4715,
+      "severity": "alta"
+    },
+    {
+      "u": 131391066,
+      "v": 131391471,
+      "probability": 0.1989,
+      "severity": "media"
+    },
+    {
+      "u": 131391259,
+      "v": 131391147,
+      "probability": 0.1582,
+      "severity": "media"
+    },
+    {
+      "u": 131391471,
+      "v": 131391459,
+      "probability": 0.0854,
+      "severity": "baja"
+    },
+    {
+      "u": 131391546,
+      "v": 131390460,
+      "probability": 0.2196,
+      "severity": "media"
+    },
+    {
+      "u": 146229335,
+      "v": 13885175,
+      "probability": 0.3775,
+      "severity": "alta"
+    },
+    {
+      "u": 207720488,
+      "v": 253300352,
+      "probability": 0.1327,
+      "severity": "baja"
+    },
+    {
+      "u": 207720488,
+      "v": 206423203,
+      "probability": 0.0089,
+      "severity": "baja"
+    },
+    {
+      "u": 224569616,
+      "v": 1857422080,
+      "probability": 0.0001,
+      "severity": "baja"
+    },
+    {
+      "u": 224583710,
+      "v": 131518229,
+      "probability": 0.0534,
+      "severity": "baja"
+    },
+    {
+      "u": 225091834,
+      "v": 225091689,
+      "probability": 0.1814,
+      "severity": "media"
+    },
+    {
+      "u": 225091834,
+      "v": 5589248549,
+      "probability": 0.1814,
+      "severity": "media"
+    },
+    {
+      "u": 240362135,
+      "v": 225091689,
+      "probability": 0.126,
+      "severity": "baja"
+    },
+    {
+      "u": 243793943,
+      "v": 668083790,
+      "probability": 0.477,
+      "severity": "alta"
+    },
+    {
+      "u": 248053020,
+      "v": 253299970,
+      "probability": 0.0224,
+      "severity": "baja"
+    },
+    {
+      "u": 252850193,
+      "v": 267336781,
+      "probability": 0.1278,
+      "severity": "baja"
+    },
+    {
+      "u": 252850193,
+      "v": 252850418,
+      "probability": 0.0192,
+      "severity": "baja"
+    },
+    {
+      "u": 252850752,
+      "v": 252850775,
+      "probability": 0.2723,
+      "severity": "media"
+    },
+    {
+      "u": 252850775,
+      "v": 13877442,
+      "probability": 0.3459,
+      "severity": "alta"
+    },
+    {
+      "u": 252851410,
+      "v": 255469057,
+      "probability": 0.132,
+      "severity": "baja"
+    },
+    {
+      "u": 252981162,
+      "v": 131390580,
+      "probability": 0.4951,
+      "severity": "alta"
+    },
+    {
+      "u": 252981162,
+      "v": 2179743856,
+      "probability": 0.2909,
+      "severity": "media"
+    },
+    {
+      "u": 252981169,
+      "v": 131390580,
+      "probability": 0.4726,
+      "severity": "alta"
+    },
+    {
+      "u": 252981234,
+      "v": 252981233,
+      "probability": 0.0098,
+      "severity": "baja"
+    },
+    {
+      "u": 252982080,
+      "v": 252982102,
+      "probability": 0.0428,
+      "severity": "baja"
+    },
+    {
+      "u": 252982111,
+      "v": 252982078,
+      "probability": 0.0164,
+      "severity": "baja"
+    },
+    {
+      "u": 253299969,
+      "v": 146229352,
+      "probability": 0.1075,
+      "severity": "baja"
+    },
+    {
+      "u": 253299978,
+      "v": 253293930,
+      "probability": 0.0026,
+      "severity": "baja"
+    },
+    {
+      "u": 253300160,
+      "v": 515560519,
+      "probability": 0.1735,
+      "severity": "media"
+    },
+    {
+      "u": 253300352,
+      "v": 253300360,
+      "probability": 0.1983,
+      "severity": "media"
+    },
+    {
+      "u": 254034113,
+      "v": 131390988,
+      "probability": 0.2988,
+      "severity": "media"
+    },
+    {
+      "u": 254234088,
+      "v": 254233773,
+      "probability": 0.3329,
+      "severity": "alta"
+    },
+    {
+      "u": 255469057,
+      "v": 13885175,
+      "probability": 0.3767,
+      "severity": "alta"
+    },
+    {
+      "u": 267336781,
+      "v": 252850752,
+      "probability": 0.2005,
+      "severity": "media"
+    },
+    {
+      "u": 332274889,
+      "v": 332276416,
+      "probability": 0.1357,
+      "severity": "baja"
+    },
+    {
+      "u": 338175054,
+      "v": 338175081,
+      "probability": 0.2067,
+      "severity": "media"
+    },
+    {
+      "u": 338175621,
+      "v": 338175220,
+      "probability": 0.2521,
+      "severity": "media"
+    },
+    {
+      "u": 338175779,
+      "v": 253416033,
+      "probability": 0.3595,
+      "severity": "alta"
+    },
+    {
+      "u": 442001163,
+      "v": 131390862,
+      "probability": 0.2259,
+      "severity": "media"
+    },
+    {
+      "u": 489110528,
+      "v": 405896792,
+      "probability": 0.1977,
+      "severity": "media"
+    },
+    {
+      "u": 601142165,
+      "v": 131391138,
+      "probability": 0.3542,
+      "severity": "alta"
+    },
+    {
+      "u": 610408791,
+      "v": 2163421458,
+      "probability": 0.0661,
+      "severity": "baja"
+    },
+    {
+      "u": 712563282,
+      "v": 253300160,
+      "probability": 0.2574,
+      "severity": "media"
+    },
+    {
+      "u": 737832283,
+      "v": 737832497,
+      "probability": 0.4137,
+      "severity": "alta"
+    },
+    {
+      "u": 737832283,
+      "v": 131390473,
+      "probability": 0.4137,
+      "severity": "alta"
+    },
+    {
+      "u": 737832497,
+      "v": 737832283,
+      "probability": 0.4137,
+      "severity": "alta"
+    },
+    {
+      "u": 1349573913,
+      "v": 4787019013,
+      "probability": 0.1783,
+      "severity": "media"
+    },
+    {
+      "u": 1909902327,
+      "v": 1909902294,
+      "probability": 0.0515,
+      "severity": "baja"
+    },
+    {
+      "u": 1955022386,
+      "v": 148849428,
+      "probability": 0.1699,
+      "severity": "media"
+    },
+    {
+      "u": 1978268697,
+      "v": 146229352,
+      "probability": 0.128,
+      "severity": "baja"
+    },
+    {
+      "u": 2035571995,
+      "v": 225091834,
+      "probability": 0.1855,
+      "severity": "media"
+    },
+    {
+      "u": 2179743856,
+      "v": 131391176,
+      "probability": 0.3429,
+      "severity": "alta"
+    },
+    {
+      "u": 2790924682,
+      "v": 442001151,
+      "probability": 0.0419,
+      "severity": "baja"
+    },
+    {
+      "u": 3217321771,
+      "v": 243793943,
+      "probability": 0.4783,
+      "severity": "alta"
+    },
+    {
+      "u": 3569215791,
+      "v": 13877421,
+      "probability": 0.2887,
+      "severity": "media"
+    },
+    {
+      "u": 5902029969,
+      "v": 225091856,
+      "probability": 0.048,
+      "severity": "baja"
+    },
+    {
+      "u": 6407866836,
+      "v": 605184727,
+      "probability": 0.0301,
+      "severity": "baja"
+    },
+    {
+      "u": 6407866836,
+      "v": 5582460404,
+      "probability": 0.0301,
+      "severity": "baja"
+    },
+    {
+      "u": 7443684097,
+      "v": 131391037,
+      "probability": 0.3834,
+      "severity": "alta"
+    },
+    {
+      "u": 11113103271,
+      "v": 2179743856,
+      "probability": 0.2033,
+      "severity": "media"
+    }
+  ],
+  "nodes": [
+    {
+      "id": 13877442,
+      "probability": 0.3459,
+      "severity": "alta"
+    },
+    {
+      "id": 130905080,
+      "probability": 0.0582,
+      "severity": "baja"
+    },
+    {
+      "id": 131200330,
+      "probability": 0.3195,
+      "severity": "alta"
+    },
+    {
+      "id": 131390580,
+      "probability": 0.4346,
+      "severity": "alta"
+    },
+    {
+      "id": 131390977,
+      "probability": 0.3181,
+      "severity": "alta"
+    },
+    {
+      "id": 131391002,
+      "probability": 0.4715,
+      "severity": "alta"
+    },
+    {
+      "id": 131391051,
+      "probability": 0.286,
+      "severity": "media"
+    },
+    {
+      "id": 131391176,
+      "probability": 0.3108,
+      "severity": "alta"
+    },
+    {
+      "id": 131391388,
+      "probability": 0.0122,
+      "severity": "baja"
+    },
+    {
+      "id": 131391558,
+      "probability": 0.0579,
+      "severity": "baja"
+    },
+    {
+      "id": 133864608,
+      "probability": 0.0,
+      "severity": "baja"
+    },
+    {
+      "id": 146229370,
+      "probability": 0.0113,
+      "severity": "baja"
+    },
+    {
+      "id": 148849425,
+      "probability": 0.3362,
+      "severity": "alta"
+    },
+    {
+      "id": 225091644,
+      "probability": 0.0827,
+      "severity": "baja"
+    },
+    {
+      "id": 225091834,
+      "probability": 0.1814,
+      "severity": "media"
+    },
+    {
+      "id": 225091972,
+      "probability": 0.0678,
+      "severity": "baja"
+    },
+    {
+      "id": 243793943,
+      "probability": 0.475,
+      "severity": "alta"
+    },
+    {
+      "id": 252981169,
+      "probability": 0.4545,
+      "severity": "alta"
+    },
+    {
+      "id": 253416033,
+      "probability": 0.3039,
+      "severity": "alta"
+    },
+    {
+      "id": 255469057,
+      "probability": 0.1317,
+      "severity": "baja"
+    },
+    {
+      "id": 332276466,
+      "probability": 0.0019,
+      "severity": "baja"
+    },
+    {
+      "id": 336193288,
+      "probability": 0.0879,
+      "severity": "baja"
+    },
+    {
+      "id": 338175066,
+      "probability": 0.1166,
+      "severity": "baja"
+    },
+    {
+      "id": 338175220,
+      "probability": 0.2502,
+      "severity": "media"
+    },
+    {
+      "id": 338175221,
+      "probability": 0.3873,
+      "severity": "alta"
+    },
+    {
+      "id": 338175778,
+      "probability": 0.3029,
+      "severity": "alta"
+    },
+    {
+      "id": 343468616,
+      "probability": 0.0215,
+      "severity": "baja"
+    },
+    {
+      "id": 430560186,
+      "probability": 0.01,
+      "severity": "baja"
+    },
+    {
+      "id": 457416447,
+      "probability": 0.0125,
+      "severity": "baja"
+    },
+    {
+      "id": 601142149,
+      "probability": 0.2836,
+      "severity": "media"
+    },
+    {
+      "id": 601142169,
+      "probability": 0.2028,
+      "severity": "media"
+    },
+    {
+      "id": 668083790,
+      "probability": 0.4674,
+      "severity": "alta"
+    },
+    {
+      "id": 668083800,
+      "probability": 0.4571,
+      "severity": "alta"
+    },
+    {
+      "id": 2481672097,
+      "probability": 0.0211,
+      "severity": "baja"
+    },
+    {
+      "id": 2948660183,
+      "probability": 0.094,
+      "severity": "baja"
+    },
+    {
+      "id": 3217321771,
+      "probability": 0.4783,
+      "severity": "alta"
+    },
+    {
+      "id": 11113103271,
+      "probability": 0.1853,
+      "severity": "media"
+    }
+  ],
+  "incidents": [
+    {
+      "id": 1,
+      "type": "CONGESTION",
+      "description": "Flujo lento de vehÃ­culos en la zona.",
+      "coordinates": [
+        -70.606275,
+        -33.414267
+      ],
+      "probability": 0.25,
+      "severity": "media"
+    },
+    {
+      "id": 4,
+      "type": "CIERRE VIAL",
+      "description": "MantenciÃ³n de vÃ­a en la zona.",
+      "coordinates": [
+        -70.602922,
+        -33.425947
+      ],
+      "probability": 0.45,
+      "severity": "alta"
+    },
+    {
+      "id": 5,
+      "type": "ACCIDENTE",
+      "description": "Accidente sin heridos en la zona.",
+      "coordinates": [
+        -70.59597,
+        -33.420841
+      ],
+      "probability": 0.1,
+      "severity": "baja"
+    },
+    {
+      "id": 7,
+      "type": "ACCIDENTE",
+      "description": "Accidente sin heridos en la zona.",
+      "coordinates": [
+        -70.602799,
+        -33.438335
+      ],
+      "probability": 0.45,
+      "severity": "alta"
+    }
+  ],
+  "summary": {
+    "total_active": 115,
+    "edges": 74,
+    "nodes": 37,
+    "incidents": 4
+  }
+}
