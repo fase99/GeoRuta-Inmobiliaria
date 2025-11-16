@@ -5049,23 +5049,6 @@
         "estacionamientos": true
     },
     {
-        "id": 3952655,
-        "lat": -33.43970535,
-        "lon": -70.60942854,
-        "baños": 1,
-        "dormitorios": 1,
-        "comuna": "Providencia",
-        "fecha_publicacion": "23-09-2025 0:00:00",
-        "precio_uf": 4100.0,
-        "precio_peso": 161891165.0,
-        "m2_superficie": 0.0,
-        "m2_terraza": 0.0,
-        "titulo": "Departamento en Providencia (Inés de Suárez)",
-        "url": "https://www.toctoc.com/propiedades/compracorredorasr/departamento/providencia/departamento-en-providencia-ines-de-suarez/3952655",
-        "imagen": "https://d1cfu8v5n1wsm.cloudfront.net/toctoc/fotos/20250923/3952655/s_wm_23e350fc1c1accb143420b572028140c6235f828.jpg",
-        "estacionamientos": true
-    },
-    {
         "id": 3823903,
         "lat": -33.4376527,
         "lon": -70.6089913,
