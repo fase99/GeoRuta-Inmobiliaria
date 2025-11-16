@@ -2917,6 +2917,15 @@
     // initialize
     try { setupInlineSearchFromHTML(); } catch (e) { console.warn('inline search setup failed', e); }
 
+    // Close search results when clicking on the map
+    map.on('click', function() {
+        const resultsEl = document.getElementById('map-inline-search-results');
+        if (resultsEl && resultsEl.style.display !== 'none') {
+            resultsEl.style.display = 'none';
+            resultsEl.innerHTML = '';
+        }
+    });
+
     // Legend Modal Control
     const legendButton = document.getElementById('legend-button');
     const legendModal = document.getElementById('legend-modal');
