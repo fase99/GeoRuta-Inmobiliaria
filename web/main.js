@@ -2816,8 +2816,88 @@
         });
     }
 
-    // Initialize the inline search control on map
-    try { addMapInlineSearchControl(); } catch (e) { console.warn('inline search control init failed', e); }
+    // Initialize the inline search UI: prefer HTML markup (index.html). Fallback to injected control.
+    function setupInlineSearchFromHTML() {
+        const wrapper = document.getElementById('map-inline-search-wrapper');
+        if (!wrapper) {
+            try { addMapInlineSearchControl(); } catch (e) { console.warn('inline search control init failed', e); }
+            return;
+        }
+
+        const input = document.getElementById('map-inline-search-input');
+        const searchBtn = document.getElementById('map-inline-search-button');
+        const geocodeBtn = document.getElementById('map-inline-geocode-btn');
+        const resultsEl = document.getElementById('map-inline-search-results');
+        const opSelect = document.getElementById('map-op-select');
+        const typeSelect = document.getElementById('map-type-select');
+
+        // debounce helper
+        let timer = null;
+
+        function doInlineSearchWithFilters(q) {
+            if (!resultsEl) return;
+            resultsEl.innerHTML = '';
+            if (!q || q.length < 2) return;
+            const ql = q.toLowerCase();
+            const op = opSelect ? opSelect.value : 'any';
+            const type = typeSelect ? typeSelect.value : 'any';
+
+            const matches = (housesData || []).filter(h => {
+                // type filter
+                const propType = (h._propertyType || h.tipo_inmueble || h.tipo || h.property_type || '').toString().toLowerCase();
+                const isDepto = propType.includes('depart') || propType.includes('dpto') || propType.includes('depto') || propType === 'departamento';
+                if (type === 'casa' && isDepto) return false;
+                if (type === 'departamento' && !isDepto) return false;
+
+                // operation filter
+                const opField = (h._operation || h.operacion || h.operation || h.tipo_anuncio || '').toString().toLowerCase();
+                if (op === 'venta' && !opField.includes('venta')) return false;
+                if (op === 'arriendo' && !opField.includes('arri')) return false;
+
+                const titulo = (h.titulo || h.title || h.nombre || '').toString().toLowerCase();
+                const direccion = (h.direccion || h.direccion_completa || h.address || '').toString().toLowerCase();
+                const comuna = (h.comuna || '').toString().toLowerCase();
+                return (titulo.includes(ql) || direccion.includes(ql) || comuna.includes(ql));
+            }).slice(0, 12);
+
+            if (matches.length > 0) renderInlineResults(matches);
+            else if (resultsEl) resultsEl.innerHTML = `<div style="padding:6px;color:#6b7280">No se encontraron propiedades locales. Usa "Buscar dirección (Nominatim)" para buscar direcciones y luego propiedades cercanas.</div>`;
+        }
+
+        if (input) {
+            input.addEventListener('input', function (e) {
+                const q = (e.target.value || '').trim();
+                if (timer) clearTimeout(timer);
+                timer = setTimeout(() => doInlineSearchWithFilters(q), 180);
+            });
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') { input.value = ''; renderInlineResults([]); input.blur(); }
+                if (e.key === 'Enter') { e.preventDefault(); doInlineSearchWithFilters((e.target.value || '').trim()); }
+            });
+        }
+
+        if (searchBtn) searchBtn.addEventListener('click', () => { const q = (input ? input.value.trim() : ''); doInlineSearchWithFilters(q); });
+
+        if (geocodeBtn) {
+            geocodeBtn.addEventListener('click', function (ev) {
+                ev.preventDefault(); ev.stopPropagation();
+                const q = (input ? (input.value || '').trim() : '');
+                if (!q || q.length < 3) {
+                    if (resultsEl) resultsEl.innerHTML = '<div style="padding:6px;color:#9ca3af">Escribe al menos 3 caracteres para geocodificar.</div>';
+                    return;
+                }
+                geocodeBtn.disabled = true;
+                const previous = geocodeBtn.textContent;
+                geocodeBtn.textContent = 'Buscando...';
+                doGeocode(q).finally(() => {
+                    setTimeout(() => { geocodeBtn.disabled = false; geocodeBtn.textContent = previous || 'Buscar dirección (Nominatim)'; }, 900);
+                });
+            });
+        }
+    }
+
+    // initialize
+    try { setupInlineSearchFromHTML(); } catch (e) { console.warn('inline search setup failed', e); }
 
     // Legend Modal Control
     const legendButton = document.getElementById('legend-button');

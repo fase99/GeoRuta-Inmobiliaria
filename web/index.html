@@ -10,6 +10,29 @@
 </head>
 <body>
   <div id="map"></div>
+  <!-- Inline map search (bottom-left) - moved to HTML for consistent styling -->
+  <div id="map-inline-search-wrapper" style="position: absolute; left: 18px; bottom: 18px; z-index: 1400; width: 420px; max-width: calc(100% - 40px);">
+    <div style="background: white; border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,0.12); padding: 8px; display:flex; gap:8px; align-items:center;">
+      <select id="map-type-select" aria-label="Tipo" style="padding:6px 8px; border-radius:6px; border:1px solid #e5e7eb; background:#fff; font-weight:600;">
+        <option value="any">Tipo</option>
+        <option value="casa">🏠 Casa</option>
+        <option value="departamento">🏢 Depto</option>
+      </select>
+      <select id="map-op-select" aria-label="Operación" style="padding:6px 8px; border-radius:6px; border:1px solid #e5e7eb; background:#fff; font-weight:600;">
+        <option value="any">Operación</option>
+        <option value="venta">💰 Venta</option>
+        <option value="arriendo">🏘️ Arriendo</option>
+      </select>
+      <input id="map-inline-search-input" type="search" placeholder="Buscar propiedades (título, dirección, comuna)" style="flex:1; padding:8px 10px; border-radius:8px; border:1px solid #e5e7eb; font-size:14px;" />
+      <button id="map-inline-search-button" style="background:#06b6d4; color:#fff; border:none; padding:8px 12px; border-radius:8px; font-weight:700; cursor:pointer;">Buscar</button>
+    </div>
+    <div id="map-inline-search-results" style="margin-top:8px; max-height:360px; overflow:auto; background:transparent;">
+      <!-- Results populated by main.js -->
+    </div>
+    <div style="margin-top:6px; display:flex; gap:6px;">
+      <button id="map-inline-geocode-btn" style="flex:1; background:#6b7280; color:#fff; border:none; padding:8px 10px; border-radius:8px; cursor:pointer;">Buscar dirección (Nominatim)</button>
+    </div>
+  </div>
   <div id="controls">
     <div class="header">
       <h1>🏘️ GeoRuta Inmobiliaria</h1>
