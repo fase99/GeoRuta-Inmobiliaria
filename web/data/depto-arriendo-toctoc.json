@@ -306,23 +306,6 @@
         "estacionamientos": true
     },
     {
-        "id": 3908313,
-        "lat": -33.443311,
-        "lon": -70.607174,
-        "baños": 1,
-        "dormitorios": 1,
-        "comuna": "Providencia",
-        "fecha_publicacion": "03-08-2025 0:00:00",
-        "precio_uf": 21.53,
-        "precio_peso": 850000.0,
-        "m2_superficie": 0.0,
-        "m2_terraza": 0.0,
-        "titulo": "ARRIENDO ESPECTACULAR DEPTO 1D1B, PROVIDENCIA",
-        "url": "https://www.toctoc.com/propiedades/arriendocorredorasr/departamento/providencia/arriendo-espectacular-depto-1d1b-providencia/3908313",
-        "imagen": "https://d1cfu8v5n1wsm.cloudfront.net/toctoc/fotos/20250803/3908313/s_wm_abc9300ce310c7945fd14196e81b9376817fd72d.jpg",
-        "estacionamientos": true
-    },
-    {
         "id": 3964560,
         "lat": -33.44141161,
         "lon": -70.60949158,
