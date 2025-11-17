@@ -2420,6 +2420,163 @@
         return order;
     }
 
+    // =====================
+    // Ant Colony Optimization (metaheurística) para TSP parcial (no retorno a inicio)
+    // =====================
+    function antColonyTSP(distMat, opts = {}) {
+        const n = distMat.length;
+        if (n <= 2) return Array.from({ length: n }, (_, i) => i);
+        const numAnts = opts.numAnts || Math.max(10, n);
+        const iterations = opts.iterations || 120;
+        const alpha = opts.alpha || 1; // pheromone importance
+        const beta = opts.beta || 3;  // heuristic importance
+        const rho = opts.rho || 0.12; // evaporation
+        const Q = opts.Q || 1.0;
+        const eps = 1e-9;
+
+        // initialize pheromone and heuristic
+        const tau = Array.from({ length: n }, () => Array(n).fill(1.0));
+        const eta = Array.from({ length: n }, () => Array(n).fill(0));
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < n; j++) {
+                if (i === j) { eta[i][j] = 0; continue; }
+                let d = distMat[i][j];
+                if (!isFinite(d) || d <= 0) d = 1e9;
+                eta[i][j] = 1.0 / (d + eps);
+            }
+        }
+
+        let bestTour = null;
+        let bestLen = Infinity;
+
+        for (let iter = 0; iter < iterations; iter++) {
+            const antsTours = [];
+            const antsLens = [];
+
+            for (let a = 0; a < numAnts; a++) {
+                const visited = new Set([0]); // start fixed at index 0
+                const tour = [0];
+
+                while (tour.length < n) {
+                    const last = tour[tour.length - 1];
+                    let denom = 0;
+                    const probs = Array(n).fill(0);
+                    for (let j = 1; j < n; j++) {
+                        if (visited.has(j)) { probs[j] = 0; continue; }
+                        const val = Math.pow(tau[last][j], alpha) * Math.pow(eta[last][j], beta);
+                        probs[j] = val;
+                        denom += val;
+                    }
+                    let chosen = null;
+                    if (denom <= 0) {
+                        // fallback: pick random unvisited
+                        const cand = [];
+                        for (let j = 1; j < n; j++) if (!visited.has(j)) cand.push(j);
+                        chosen = cand[Math.floor(Math.random() * cand.length)];
+                    } else {
+                        let r = Math.random() * denom;
+                        for (let j = 1; j < n; j++) {
+                            if (visited.has(j)) continue;
+                            r -= probs[j];
+                            if (r <= 0) { chosen = j; break; }
+                        }
+                        if (chosen === null) {
+                            // numeric fallback
+                            for (let j = 1; j < n; j++) if (!visited.has(j)) { chosen = j; break; }
+                        }
+                    }
+                    tour.push(chosen); visited.add(chosen);
+                }
+
+                // compute length (no return to start)
+                let L = 0;
+                for (let i = 0; i < tour.length - 1; i++) {
+                    const a1 = tour[i], b1 = tour[i + 1];
+                    const d = distMat[a1][b1];
+                    L += (isFinite(d) ? d : 1e9);
+                }
+                antsTours.push(tour);
+                antsLens.push(L);
+
+                if (L < bestLen) { bestLen = L; bestTour = tour.slice(); }
+            }
+
+            // pheromone evaporation
+            for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) tau[i][j] *= (1 - rho);
+
+            // deposits
+            for (let k = 0; k < antsTours.length; k++) {
+                const tour = antsTours[k];
+                const L = Math.max(antsLens[k], 1e-9);
+                const deposit = Q / L;
+                for (let i = 0; i < tour.length - 1; i++) {
+                    const a1 = tour[i], b1 = tour[i + 1];
+                    tau[a1][b1] += deposit;
+                    tau[b1][a1] += deposit;
+                }
+            }
+        }
+
+        return bestTour || Array.from({ length: n }, (_, i) => i);
+    }
+
+    async function optimizeVisitOrderACO(silent = false, opts = {}) {
+        if (!startPointMarker) {
+            console.warn('No hay punto de partida definido');
+            if (!silent) return alert('Define punto de partida antes de optimizar');
+            return false;
+        }
+        if (selectedProperties.length < 1) {
+            console.warn('No hay propiedades seleccionadas');
+            if (!silent) return alert('Selecciona al menos una propiedad');
+            return false;
+        }
+        // ensure graph loaded
+        if (!nodesGeoJSON) await loadNodes();
+        if (!edgesGeoJSON) await loadEdges();
+
+        const startLatLng = startPointMarker.getLatLng();
+        const startSnap = snapToNearestNode(startLatLng.lat, startLatLng.lng);
+        if (!startSnap || startSnap.id === null) {
+            if (!silent) return alert('No se pudo snapear el punto de inicio a la red');
+            return false;
+        }
+        const startNode = startSnap.id;
+
+        // snap each property to nearest node
+        const waypoints = selectedProperties.map(h => ({ house: h, snap: snapToNearestNode(h.lat, h.lon) }));
+        const nodeIds = [startNode].concat(waypoints.map(w => w.snap.id));
+
+        const distMat = await computeDistanceMatrix(nodeIds);
+
+        // run ACO on distance matrix
+        const acoOpts = Object.assign({ numAnts: Math.max(10, nodeIds.length), iterations: 150, alpha: 1, beta: 3, rho: 0.12 }, opts);
+        const bestTour = antColonyTSP(distMat, acoOpts);
+
+        // bestTour is an array of indices with 0 as start
+        const orderedProps = [];
+        for (let idx = 1; idx < bestTour.length; idx++) {
+            const wpIdx = bestTour[idx] - 1; // waypoints start at pos 1
+            if (wpIdx >= 0 && waypoints[wpIdx]) orderedProps.push(waypoints[wpIdx].house);
+        }
+
+        // replace selectedProperties with ordered version
+        selectedProperties = orderedProps;
+
+        // schedule appointments automatically
+        console.log('🔄 Agendando automáticamente todas las propiedades (ACO)...');
+        orderedProps.forEach(house => {
+            if (!scheduledAppointments.has(house.id)) scheduleAppointment(house);
+        });
+
+        // start monitoring if not already
+        if (!routeRefreshInterval) startRouteRefresh();
+
+        updateItineraryUI();
+        if (!silent) alert('✅ Orden optimizado con ACO exitosamente.');
+        return true;
+    }
+
     async function optimizeVisitOrder(silent = false) {
         if (!startPointMarker) {
             console.warn('No hay punto de partida definido');
@@ -3008,6 +3165,8 @@
     // Wire up optimize & recommended buttons
     const optimizeBtn = document.getElementById('optimize-order-btn');
     if (optimizeBtn) optimizeBtn.addEventListener('click', () => { optimizeVisitOrder(); });
+    const optimizeAcoBtn = document.getElementById('optimize-order-aco-btn');
+    if (optimizeAcoBtn) optimizeAcoBtn.addEventListener('click', () => { optimizeVisitOrderACO(); });
     const genRecBtn = document.getElementById('generate-recommended-route-btn');
     if (genRecBtn) genRecBtn.addEventListener('click', () => { generateRecommendedRoute(); });
 
