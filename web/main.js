@@ -2282,6 +2282,7 @@
 
     // Provide a button to disable/uncheck all additional layers at runtime
     const disableAllBtn = document.getElementById('disable-all-layers-btn');
+    let allLayersDisabled = false;
     if (disableAllBtn) disableAllBtn.addEventListener('click', () => {
         const mapping = [
             {id: 'show-health-layer', layer: healthLayer},
@@ -2296,21 +2297,39 @@
             {id: 'show-route-osm', layer: routeOSMLayer}
         ];
 
-        mapping.forEach(item => {
-            try {
-                const el = document.getElementById(item.id);
-                if (el) el.checked = false;
-            } catch (e) {}
-            try { if (item.layer && map.hasLayer(item.layer)) map.removeLayer(item.layer); } catch (e) {}
-        });
+        if (!allLayersDisabled) {
+            // Desactivar todas las capas
+            mapping.forEach(item => {
+                try {
+                    const el = document.getElementById(item.id);
+                    if (el) el.checked = false;
+                } catch (e) {}
+                try { if (item.layer && map.hasLayer(item.layer)) map.removeLayer(item.layer); } catch (e) {}
+            });
 
-        // also hide any active threat layers or probability overlays
-        try { if (map.hasLayer(activeThreatsLayer)) map.removeLayer(activeThreatsLayer); } catch(e) {}
-        try { if (map.hasLayer(threatProbabilitiesLayer)) map.removeLayer(threatProbabilitiesLayer); } catch(e) {}
+            // also hide any active threat layers or probability overlays
+            try { if (map.hasLayer(activeThreatsLayer)) map.removeLayer(activeThreatsLayer); } catch(e) {}
+            try { if (map.hasLayer(threatProbabilitiesLayer)) map.removeLayer(threatProbabilitiesLayer); } catch(e) {}
 
-        // update any debug UI counters
-        try { setText('debug-edges', '0'); } catch(e) {}
-        try { setText('debug-metro', '0'); } catch(e) {}
+            // update any debug UI counters
+            try { setText('debug-edges', '0'); } catch(e) {}
+            try { setText('debug-metro', '0'); } catch(e) {}
+
+            disableAllBtn.textContent = '✅ Activar todas las capas';
+            allLayersDisabled = true;
+        } else {
+            // Activar todas las capas
+            mapping.forEach(item => {
+                try {
+                    const el = document.getElementById(item.id);
+                    if (el) el.checked = true;
+                } catch (e) {}
+                try { if (item.layer && !map.hasLayer(item.layer)) map.addLayer(item.layer); } catch (e) {}
+            });
+
+            disableAllBtn.textContent = '🚫 Desactivar todas las capas';
+            allLayersDisabled = false;
+        }
     });
 
     if (applyPoiFiltersBtn) applyPoiFiltersBtn.addEventListener('click', () => applyPoiFilters());
