@@ -2248,7 +2248,7 @@
         });
     }
 
-    // Ensure additional layers are OFF on startup
+    // Ensure additional layers are ON on startup: check controls and add layers
     try {
         const layerCheckboxIds = [
             'show-health-layer',
@@ -2264,11 +2264,20 @@
 
         layerCheckboxIds.forEach(id => {
             const el = document.getElementById(id);
-            if (el) el.checked = false;
+            if (el) el.checked = true;
         });
 
-        // Layers are not added to the map by default
-    } catch (e) { console.warn('startup layer disable failed', e); }
+        // add layers to map
+        try { if (!map.hasLayer(healthLayer)) map.addLayer(healthLayer); } catch(e) {}
+        try { if (!map.hasLayer(metroLayer)) map.addLayer(metroLayer); } catch(e) {}
+        try { if (!map.hasLayer(paraderosLayer)) map.addLayer(paraderosLayer); } catch(e) {}
+        try { if (!map.hasLayer(carabinerosLayer)) map.addLayer(carabinerosLayer); } catch(e) {}
+        try { if (!map.hasLayer(feriasLayer)) map.addLayer(feriasLayer); } catch(e) {}
+        try { if (!map.hasLayer(bomberosLayer)) map.addLayer(bomberosLayer); } catch(e) {}
+        try { if (!map.hasLayer(universidadesLayer)) map.addLayer(universidadesLayer); } catch(e) {}
+        try { if (!map.hasLayer(colegiosLayer)) map.addLayer(colegiosLayer); } catch(e) {}
+        try { if (!map.hasLayer(edgesLayer)) map.addLayer(edgesLayer); } catch(e) {}
+    } catch (e) { console.warn('startup layer enable failed', e); }
 
     // Provide a button to disable/uncheck all additional layers at runtime
     const disableAllBtn = document.getElementById('disable-all-layers-btn');
