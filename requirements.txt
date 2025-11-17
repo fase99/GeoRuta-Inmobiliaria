@@ -8,3 +8,6 @@ pyproj
 rtree
 beautifulsoup4
 requests
+gurobipy
+networkx
+scipy

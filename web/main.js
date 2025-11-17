@@ -183,6 +183,12 @@
     let universidadesPois = [];
     let colegiosPois = [];
     
+    // Scheduled appointments threat system
+    let scheduledAppointments = new Map(); // houseId -> {houseData, scheduledTime, isCancelled, cancelProbability}
+    let routeRefreshInterval = null;
+    const CANCEL_PROBABILITY = 0.20; // 20% chance of cancellation
+    const ROUTE_REFRESH_INTERVAL = 30000; // 30 seconds
+    
     // Smart Search Filters State
     let smartSearchFilters = {
         enabled: false,
@@ -821,6 +827,8 @@
                                 addBtn.style.background = '#6B7280';
                                 addBtn.disabled = true;
                                 updateItineraryUI();
+                                
+                                // Nota: La agenda y monitoreo se activarán automáticamente al optimizar/calcular ruta
                             }
                         };
                     }
@@ -841,7 +849,17 @@
             const div = document.createElement('div');
             div.style.padding = '6px 4px';
             div.style.borderBottom = '1px solid #f0f0f0';
-            div.innerHTML = `<b>${h.titulo || h.nombre || h.address || 'Propiedad'}</b><br/><span class="small">${h.comuna || ''} — ${h._operation||''}</span>`;
+            
+            // Check if this property is scheduled
+            const isScheduled = scheduledAppointments.has(h.id);
+            const appointment = scheduledAppointments.get(h.id);
+            const isCancelled = appointment && appointment.isCancelled;
+            
+            // Add schedule indicator
+            const scheduleIcon = isScheduled ? (isCancelled ? '❌' : '📅') : '';
+            const scheduleText = isScheduled ? (isCancelled ? ' (Cancelada)' : ' (Agendada)') : '';
+            
+            div.innerHTML = `<b>${scheduleIcon} ${h.titulo || h.nombre || h.address || 'Propiedad'}${scheduleText}</b><br/><span class="small">${h.comuna || ''} — ${h._operation||''}</span>`;
             // remove button
             const rm = document.createElement('button');
             rm.textContent = 'Quitar'; rm.style.float='right'; rm.style.marginLeft='6px'; rm.style.background='#dc3545'; rm.style.color='#fff'; rm.style.border='none'; rm.style.padding='4px 6px';
@@ -851,6 +869,10 @@
                 if (m) m.setIcon(getPropertyIcon(h, false)); // Usar versión normal
                 const idx = selectedProperties.findIndex(s => s.id === h.id);
                 if (idx!==-1) selectedProperties.splice(idx,1);
+                
+                // Remove scheduled appointment if exists
+                removeScheduledAppointment(h.id);
+                
                 updateItineraryUI();
             };
             div.appendChild(rm);
@@ -1206,6 +1228,334 @@
             if (d < bestDist) { bestDist = d; bestId = id; }
         });
         return { id: bestId, distance: bestDist };
+    }
+
+    // =====================
+    // Scheduled Appointments Threat System
+    // =====================
+    
+    // Add a property as a scheduled appointment
+    function scheduleAppointment(house) {
+        if (!house || !house.id) return false;
+        
+        const appointment = {
+            houseData: house,
+            scheduledTime: new Date(),
+            isCancelled: false,
+            cancelProbability: CANCEL_PROBABILITY
+        };
+        
+        scheduledAppointments.set(house.id, appointment);
+        console.log(`📅 Cita agendada para propiedad ${house.id} - Riesgo de cancelación: ${CANCEL_PROBABILITY * 100}%`);
+        updateAppointmentUI();
+        return true;
+    }
+    
+    // Remove a scheduled appointment
+    function removeScheduledAppointment(houseId) {
+        if (scheduledAppointments.has(houseId)) {
+            scheduledAppointments.delete(houseId);
+            console.log(`🗑️ Cita eliminada para propiedad ${houseId}`);
+            updateAppointmentUI();
+            return true;
+        }
+        return false;
+    }
+    
+    // Check if appointments should be cancelled (Monte Carlo simulation)
+    function checkAppointmentCancellations() {
+        let cancelled = false;
+        const cancellations = [];
+        
+        scheduledAppointments.forEach((appointment, houseId) => {
+            if (appointment.isCancelled) return;
+            
+            // Simulate cancellation with 20% probability
+            const random = Math.random();
+            if (random < appointment.cancelProbability) {
+                appointment.isCancelled = true;
+                cancelled = true;
+                cancellations.push({
+                    houseId: houseId,
+                    houseName: appointment.houseData.titulo || appointment.houseData.nombre || 'Propiedad',
+                    random: random.toFixed(3)
+                });
+                console.warn(`❌ CANCELACIÓN: Cita para propiedad ${houseId} cancelada (random=${random.toFixed(3)} < ${appointment.cancelProbability})`);
+                
+                // Remove from selected properties if present
+                const idx = selectedProperties.findIndex(p => p.id === houseId);
+                if (idx !== -1) {
+                    selectedProperties.splice(idx, 1);
+                    console.log(`🔄 Propiedad ${houseId} eliminada de la ruta seleccionada`);
+                }
+            }
+        });
+        
+        if (cancelled) {
+            updateAppointmentUI();
+            showCancellationNotification(cancellations);
+            // Automatically recalculate route when cancellations occur
+            handleRouteCancellation();
+        }
+        
+        return cancelled;
+    }
+    
+    // Show notification when cancellations occur
+    function showCancellationNotification(cancellations) {
+        const message = cancellations.map(c => `• ${c.houseName} (ID: ${c.houseId})`).join('\n');
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: linear-gradient(135deg, #fee 0%, #fdd 100%);
+            border: 2px solid #f44;
+            border-radius: 8px;
+            padding: 16px;
+            max-width: 350px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 10000;
+            font-family: Arial, sans-serif;
+        `;
+        notification.innerHTML = `
+            <div style="font-weight: bold; color: #c33; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 24px;">❌</span>
+                <span>¡Citas Canceladas!</span>
+            </div>
+            <div style="color: #666; font-size: 13px; margin-bottom: 8px;">
+                Las siguientes citas han sido canceladas:
+            </div>
+            <div style="color: #333; font-size: 12px; white-space: pre-line; margin-bottom: 12px;">${message}</div>
+            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 10px; border-radius: 4px; text-align: center; font-weight: bold; font-size: 13px; margin-bottom: 8px;">
+                🔄 Recalculando ruta automáticamente...
+            </div>
+            <button id="dismiss-notification-btn" style="
+                width: 100%;
+                padding: 8px;
+                background: #6c757d;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+            ">Cerrar</button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Add event listener for dismiss button
+        const dismissBtn = document.getElementById('dismiss-notification-btn');
+        
+        if (dismissBtn) {
+            dismissBtn.addEventListener('click', () => {
+                document.body.removeChild(notification);
+            });
+        }
+        
+        // Auto-dismiss after 10 seconds with fade-out
+        setTimeout(() => {
+            if (document.body.contains(notification)) {
+                notification.style.transition = 'opacity 0.5s';
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 500);
+            }
+        }, 10000);
+    }
+    
+    // Handle route recalculation when cancellations occur
+    async function handleRouteCancellation() {
+        console.log('🔄 Recalculando ruta óptima debido a cancelaciones...');
+        
+        // Update UI
+        updateItineraryUI();
+        
+        // Recalculate optimal route if there are still properties selected
+        if (selectedProperties.length > 0 && startPointMarker) {
+            try {
+                // First optimize the order (silent mode - no alerts)
+                await optimizeVisitOrder(true);
+                
+                // Then generate and display the recommended route on the map (silent mode - no alerts)
+                await generateRecommendedRoute(true);
+                
+                console.log('✅ Ruta óptima recalculada y visualizada exitosamente');
+                
+                // Show success notification
+                const successNotif = document.createElement('div');
+                successNotif.style.cssText = `
+                    position: fixed;
+                    top: 150px;
+                    right: 20px;
+                    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+                    border: 2px solid #28a745;
+                    border-radius: 8px;
+                    padding: 16px;
+                    max-width: 320px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                    z-index: 10000;
+                    font-family: Arial, sans-serif;
+                `;
+                successNotif.innerHTML = `
+                    <div style="font-weight: bold; color: #28a745; display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <span style="font-size: 24px;">✅</span>
+                        <span>Ruta Recalculada</span>
+                    </div>
+                    <div style="color: #155724; font-size: 13px;">
+                        La ruta ha sido optimizada y visualizada con las ${selectedProperties.length} propiedades restantes.
+                    </div>
+                `;
+                document.body.appendChild(successNotif);
+                setTimeout(() => {
+                    if (document.body.contains(successNotif)) {
+                        successNotif.style.transition = 'opacity 0.5s';
+                        successNotif.style.opacity = '0';
+                        setTimeout(() => {
+                            if (document.body.contains(successNotif)) {
+                                document.body.removeChild(successNotif);
+                            }
+                        }, 500);
+                    }
+                }, 5000);
+            } catch (err) {
+                console.error('❌ Error recalculando ruta:', err);
+                alert('Error al recalcular la ruta. Por favor, intenta manualmente.');
+            }
+        } else {
+            console.warn('⚠️ No hay propiedades suficientes para recalcular la ruta');
+            
+            // Show warning notification
+            const warningNotif = document.createElement('div');
+            warningNotif.style.cssText = `
+                position: fixed;
+                top: 150px;
+                right: 20px;
+                background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+                border: 2px solid #ffc107;
+                border-radius: 8px;
+                padding: 16px;
+                max-width: 320px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 10000;
+                font-family: Arial, sans-serif;
+            `;
+            warningNotif.innerHTML = `
+                <div style="font-weight: bold; color: #856404; display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                    <span style="font-size: 24px;">⚠️</span>
+                    <span>Sin Propiedades</span>
+                </div>
+                <div style="color: #856404; font-size: 13px;">
+                    No quedan propiedades en la ruta. Todas las citas han sido canceladas.
+                </div>
+            `;
+            document.body.appendChild(warningNotif);
+            setTimeout(() => {
+                if (document.body.contains(warningNotif)) {
+                    warningNotif.style.transition = 'opacity 0.5s';
+                    warningNotif.style.opacity = '0';
+                    setTimeout(() => {
+                        if (document.body.contains(warningNotif)) {
+                            document.body.removeChild(warningNotif);
+                        }
+                    }, 500);
+                }
+            }, 5000);
+            
+            // Stop monitoring if no properties left
+            stopRouteRefresh();
+        }
+    }
+    
+    // Start automatic route refresh with cancellation checks
+    function startRouteRefresh() {
+        if (routeRefreshInterval) {
+            clearInterval(routeRefreshInterval);
+        }
+        
+        console.log(`🔄 Iniciando refresco automático de rutas cada ${ROUTE_REFRESH_INTERVAL/1000} segundos`);
+        
+        routeRefreshInterval = setInterval(() => {
+            if (scheduledAppointments.size === 0) return;
+            
+            console.log('🔍 Verificando cancelaciones de citas agendadas...');
+            const hadCancellations = checkAppointmentCancellations();
+            
+            if (!hadCancellations) {
+                console.log('✓ No hubo cancelaciones en esta verificación');
+            }
+        }, ROUTE_REFRESH_INTERVAL);
+    }
+    
+    // Stop automatic route refresh
+    function stopRouteRefresh() {
+        if (routeRefreshInterval) {
+            clearInterval(routeRefreshInterval);
+            routeRefreshInterval = null;
+            console.log('⏹️ Refresco automático de rutas detenido');
+        }
+    }
+    
+    // Update UI to show scheduled appointments
+    function updateAppointmentUI() {
+        // Try to find or create appointments panel
+        let panel = document.getElementById('scheduled-appointments-panel');
+        
+        if (!panel) {
+            // Create panel if it doesn't exist
+            const controls = document.getElementById('controls');
+            if (controls) {
+                panel = document.createElement('div');
+                panel.id = 'scheduled-appointments-panel';
+                panel.style.cssText = `
+                    margin-top: 16px;
+                    padding: 12px;
+                    background: #fff3cd;
+                    border: 2px solid #ffc107;
+                    border-radius: 8px;
+                `;
+                controls.appendChild(panel);
+            }
+        }
+        
+        if (!panel) return;
+        
+        // Update panel content
+        if (scheduledAppointments.size === 0) {
+            panel.innerHTML = `
+                <div style="font-weight: bold; color: #856404; margin-bottom: 4px;">📅 Citas Agendadas</div>
+                <div style="color: #856404; font-size: 13px;">No hay citas agendadas actualmente.</div>
+            `;
+        } else {
+            let html = `
+                <div style="font-weight: bold; color: #856404; margin-bottom: 8px;">📅 Citas Agendadas (${scheduledAppointments.size})</div>
+                <div style="font-size: 12px; color: #856404; margin-bottom: 8px;">⚠️ Cada cita tiene ${CANCEL_PROBABILITY * 100}% de probabilidad de cancelación</div>
+            `;
+            
+            scheduledAppointments.forEach((appointment, houseId) => {
+                const status = appointment.isCancelled ? '❌ Cancelada' : '✅ Activa';
+                const statusColor = appointment.isCancelled ? '#dc3545' : '#28a745';
+                const houseName = appointment.houseData.titulo || appointment.houseData.nombre || `Propiedad ${houseId}`;
+                
+                html += `
+                    <div style="
+                        margin: 8px 0;
+                        padding: 8px;
+                        background: white;
+                        border-left: 4px solid ${statusColor};
+                        border-radius: 4px;
+                    ">
+                        <div style="font-weight: bold; font-size: 13px; color: #333;">${houseName}</div>
+                        <div style="font-size: 11px; color: #666; margin-top: 4px;">Estado: <span style="color: ${statusColor};">${status}</span></div>
+                        <div style="font-size: 11px; color: #666;">ID: ${houseId}</div>
+                    </div>
+                `;
+            });
+            
+            panel.innerHTML = html;
+        }
     }
 
     // Simple Dijkstra on the adjacency map. Returns array of node ids or null
@@ -2070,16 +2420,27 @@
         return order;
     }
 
-    async function optimizeVisitOrder() {
-        if (!startPointMarker) return alert('Define punto de partida antes de optimizar');
-        if (selectedProperties.length < 1) return alert('Selecciona al menos una propiedad');
+    async function optimizeVisitOrder(silent = false) {
+        if (!startPointMarker) {
+            console.warn('No hay punto de partida definido');
+            if (!silent) return alert('Define punto de partida antes de optimizar');
+            return false;
+        }
+        if (selectedProperties.length < 1) {
+            console.warn('No hay propiedades seleccionadas');
+            if (!silent) return alert('Selecciona al menos una propiedad');
+            return false;
+        }
         // ensure graph loaded
         if (!nodesGeoJSON) await loadNodes();
         if (!edgesGeoJSON) await loadEdges();
 
         const startLatLng = startPointMarker.getLatLng();
         const startSnap = snapToNearestNode(startLatLng.lat, startLatLng.lng);
-        if (!startSnap || startSnap.id===null) return alert('No se pudo snapear el punto de inicio a la red');
+        if (!startSnap || startSnap.id===null) {
+            if (!silent) return alert('No se pudo snapear el punto de inicio a la red');
+            return false;
+        }
         const startNode = startSnap.id;
 
         // snap each property to nearest node
@@ -2098,8 +2459,65 @@
         }
         // replace selectedProperties with ordered version
         selectedProperties = orderedProps;
+        
+        // Automatically schedule all selected properties as appointments
+        console.log('🔄 Agendando automáticamente todas las propiedades seleccionadas...');
+        orderedProps.forEach(house => {
+            if (!scheduledAppointments.has(house.id)) {
+                scheduleAppointment(house);
+            }
+        });
+        
+        // Automatically start threat monitoring
+        if (!routeRefreshInterval) {
+            console.log('▶️ Activando monitoreo automático de amenazas...');
+            startRouteRefresh();
+            
+            // Show activation notification
+            const activationNotif = document.createElement('div');
+            activationNotif.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                border: 2px solid #047857;
+                border-radius: 8px;
+                padding: 16px;
+                max-width: 320px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 10000;
+                font-family: Arial, sans-serif;
+                color: white;
+            `;
+            activationNotif.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 24px;">🛡️</span>
+                    <span>Sistema de Amenazas Activado</span>
+                </div>
+                <div style="font-size: 13px; margin-bottom: 8px; opacity: 0.95;">
+                    ✅ ${orderedProps.length} propiedades agendadas<br/>
+                    🔍 Monitoreo cada 30 segundos<br/>
+                    ⚠️ 20% probabilidad de cancelación por cita
+                </div>
+                <div style="font-size: 11px; opacity: 0.85; font-style: italic; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.3);">
+                    El sistema recalculará automáticamente la ruta si hay cancelaciones.
+                </div>
+            `;
+            document.body.appendChild(activationNotif);
+            setTimeout(() => {
+                if (document.body.contains(activationNotif)) {
+                    activationNotif.style.transition = 'opacity 0.5s';
+                    activationNotif.style.opacity = '0';
+                    setTimeout(() => document.body.removeChild(activationNotif), 500);
+                }
+            }, 6000);
+        }
+        
         updateItineraryUI();
-        alert('Orden optimizado. Revisa el itinerario.');
+        if (!silent) {
+            alert('✅ Orden optimizado exitosamente.\n\n🛡️ Sistema de monitoreo de amenazas activado automáticamente.');
+        }
+        return true;
     }
 
     // =====================
@@ -2116,9 +2534,15 @@
         return { paradero: best, distance: bd };
     }
 
-    async function generateRecommendedRoute() {
-        if (!startPointMarker) return alert('Define punto de partida');
-        if (selectedProperties.length === 0) return alert('Selecciona propiedades primero');
+    async function generateRecommendedRoute(silent = false) {
+        if (!startPointMarker) {
+            if (!silent) return alert('Define punto de partida');
+            return false;
+        }
+        if (selectedProperties.length === 0) {
+            if (!silent) return alert('Selecciona propiedades primero');
+            return false;
+        }
         // ensure graph loaded
         if (!nodesGeoJSON) await loadNodes();
         if (!edgesGeoJSON) await loadEdges();
@@ -2526,6 +2950,59 @@
         }
 
         try { map.fitBounds(recommendedLayer.getBounds(), { padding: [20, 20] }); } catch (e) { }
+        
+        // Automatically schedule all selected properties as appointments
+        console.log('🔄 Agendando automáticamente todas las propiedades en la ruta...');
+        selectedProperties.forEach(house => {
+            if (!scheduledAppointments.has(house.id)) {
+                scheduleAppointment(house);
+            }
+        });
+        
+        // Automatically start threat monitoring
+        if (!routeRefreshInterval) {
+            console.log('▶️ Activando monitoreo automático de amenazas...');
+            startRouteRefresh();
+            
+            // Show notification
+            const monitorNotif = document.createElement('div');
+            monitorNotif.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                border: 2px solid #047857;
+                border-radius: 8px;
+                padding: 16px;
+                max-width: 320px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 10000;
+                font-family: Arial, sans-serif;
+                color: white;
+            `;
+            monitorNotif.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                    <span style="font-size: 24px;">🛡️</span>
+                    <span>Sistema de Amenazas Activado</span>
+                </div>
+                <div style="font-size: 13px; margin-bottom: 8px; opacity: 0.95;">
+                    ✅ ${selectedProperties.length} propiedades agendadas<br/>
+                    🔍 Monitoreo cada 30 segundos<br/>
+                    ⚠️ 20% probabilidad de cancelación por cita
+                </div>
+                <div style="font-size: 11px; opacity: 0.85; font-style: italic; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.3);">
+                    El sistema es resiliente y recalculará rutas automáticamente si detecta cancelaciones.
+                </div>
+            `;
+            document.body.appendChild(monitorNotif);
+            setTimeout(() => {
+                if (document.body.contains(monitorNotif)) {
+                    monitorNotif.style.transition = 'opacity 0.5s';
+                    monitorNotif.style.opacity = '0';
+                    setTimeout(() => document.body.removeChild(monitorNotif), 500);
+                }
+            }, 6000);
+        }
     }
 
     // Wire up optimize & recommended buttons
@@ -2533,6 +3010,9 @@
     if (optimizeBtn) optimizeBtn.addEventListener('click', () => { optimizeVisitOrder(); });
     const genRecBtn = document.getElementById('generate-recommended-route-btn');
     if (genRecBtn) genRecBtn.addEventListener('click', () => { generateRecommendedRoute(); });
+
+    // Note: Manual threat monitoring buttons are removed from UI
+    // The system activates automatically when calculating optimal routes
 
     // Load everything (including paraderos, nodes and edges if present)
     Promise.all([
