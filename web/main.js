@@ -2248,6 +2248,71 @@
         });
     }
 
+    // Ensure additional layers are OFF on startup: uncheck controls and remove layers
+    try {
+        const layerCheckboxIds = [
+            'show-health-layer',
+            'show-metro-layer',
+            'show-paraderos-layer',
+            'show-carabineros-layer',
+            'show-ferias-layer',
+            'show-bomberos-layer',
+            'show-universidades-layer',
+            'show-colegios-layer',
+            'show-edges-layer'
+        ];
+
+        layerCheckboxIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.checked = false;
+        });
+
+        // remove layers if accidentally added
+        try { map.removeLayer(healthLayer); } catch(e) {}
+        try { map.removeLayer(metroLayer); } catch(e) {}
+        try { map.removeLayer(paraderosLayer); } catch(e) {}
+        try { map.removeLayer(carabinerosLayer); } catch(e) {}
+        try { map.removeLayer(feriasLayer); } catch(e) {}
+        try { map.removeLayer(bomberosLayer); } catch(e) {}
+        try { map.removeLayer(universidadesLayer); } catch(e) {}
+        try { map.removeLayer(colegiosLayer); } catch(e) {}
+        try { map.removeLayer(edgesLayer); } catch(e) {}
+        try { map.removeLayer(routeOSMLayer); } catch(e) {}
+    } catch (e) { console.warn('startup layer disable failed', e); }
+
+    // Provide a button to disable/uncheck all additional layers at runtime
+    const disableAllBtn = document.getElementById('disable-all-layers-btn');
+    if (disableAllBtn) disableAllBtn.addEventListener('click', () => {
+        const mapping = [
+            {id: 'show-health-layer', layer: healthLayer},
+            {id: 'show-metro-layer', layer: metroLayer},
+            {id: 'show-paraderos-layer', layer: paraderosLayer},
+            {id: 'show-carabineros-layer', layer: carabinerosLayer},
+            {id: 'show-ferias-layer', layer: feriasLayer},
+            {id: 'show-bomberos-layer', layer: bomberosLayer},
+            {id: 'show-universidades-layer', layer: universidadesLayer},
+            {id: 'show-colegios-layer', layer: colegiosLayer},
+            {id: 'show-edges-layer', layer: edgesLayer},
+            {id: 'show-route-osm', layer: routeOSMLayer}
+        ];
+
+        mapping.forEach(item => {
+            try {
+                const el = document.getElementById(item.id);
+                if (el) el.checked = false;
+            } catch (e) {}
+            try { if (item.layer && map.hasLayer(item.layer)) map.removeLayer(item.layer); } catch (e) {}
+        });
+
+        // also hide any active threat layers or probability overlays
+        try { if (map.hasLayer(activeThreatsLayer)) map.removeLayer(activeThreatsLayer); } catch(e) {}
+        try { if (map.hasLayer(threatProbabilitiesLayer)) map.removeLayer(threatProbabilitiesLayer); } catch(e) {}
+
+        // update any debug UI counters
+        try { setText('debug-edges', '0'); } catch(e) {}
+        try { setText('debug-metro', '0'); } catch(e) {}
+    });
+
     if (applyPoiFiltersBtn) applyPoiFiltersBtn.addEventListener('click', () => applyPoiFilters());
 
     // Start point
