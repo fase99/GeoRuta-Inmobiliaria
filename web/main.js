@@ -1,5 +1,81 @@
 // Execute immediately (IIFE) so dynamically injected script always runs
 (function(){
+        // --- Filtros de Preferencia de Pago (Colegios) ---
+        const filtroPagoMatricula = document.getElementById('filtro-pago-matricula');
+        const filtroPagoMensual = document.getElementById('filtro-pago-mensual');
+        const filtroPaesPromedio = document.getElementById('filtro-paes-promedio');
+        const aplicarFiltroPagoBtn = document.getElementById('aplicar-filtro-pago-btn');
+        const limpiarFiltroPagoBtn = document.getElementById('limpiar-filtro-pago-btn');
+
+        let filtroPagoMatriculaValor = '';
+        let filtroPagoMensualValor = '';
+        let filtroPaesPromedioValor = '';
+
+        function aplicarFiltroPagoColegios() {
+            filtroPagoMatriculaValor = filtroPagoMatricula ? filtroPagoMatricula.value : '';
+            filtroPagoMensualValor = filtroPagoMensual ? filtroPagoMensual.value : '';
+            filtroPaesPromedioValor = filtroPaesPromedio ? filtroPaesPromedio.value : '';
+            renderColegiosFiltrados();
+        }
+
+        function limpiarFiltroPagoColegios() {
+            if (filtroPagoMatricula) filtroPagoMatricula.value = '';
+            if (filtroPagoMensual) filtroPagoMensual.value = '';
+            if (filtroPaesPromedio) filtroPaesPromedio.value = '';
+            filtroPagoMatriculaValor = '';
+            filtroPagoMensualValor = '';
+            filtroPaesPromedioValor = '';
+            renderColegiosFiltrados();
+        }
+
+        function renderColegiosFiltrados() {
+            colegiosLayer.clearLayers();
+            let filtrados = colegiosPois;
+            if (filtroPagoMatriculaValor) {
+                filtrados = filtrados.filter(c => (c.pago_matricula || '').toUpperCase() === filtroPagoMatriculaValor.toUpperCase());
+            }
+            if (filtroPagoMensualValor) {
+                filtrados = filtrados.filter(c => (c.pago_mensual || '').toUpperCase() === filtroPagoMensualValor.toUpperCase());
+            }
+            if (filtroPaesPromedioValor) {
+                filtrados = filtrados.filter(c => {
+                    const paes = Number(c.paes_promedio);
+                    if (isNaN(paes)) return false;
+                    if (filtroPaesPromedioValor === '300-400') return paes >= 300 && paes < 400;
+                    if (filtroPaesPromedioValor === '400-500') return paes >= 400 && paes < 500;
+                    if (filtroPaesPromedioValor === '500-800') return paes >= 500 && paes <= 800;
+                    return true;
+                });
+            }
+            filtrados.forEach(p => {
+                const popupContent = `
+                    <div style="width:260px;">
+                        <h4 style="margin:0 0 10px 0; color:#10B981; font-size:14px;">
+                            🏫 ${p.nombre}
+                        </h4>
+                        <div style="font-size:12px; line-height:1.6;">
+                            <p style="margin:4px 0;">
+                                <b>🏷️ RBD:</b> ${p.rbd}<br/>
+                                <b>📚 Niveles:</b> ${p.niveles}<br/>
+                                <b>🎓 Tipo:</b> ${p.tipo}<br/>
+                                <b>👥 Matrícula:</b> ${p.matricula} estudiantes<br/>
+                                <b>📍 ${p.comuna}</b><br/>
+                                <b>💵 Matrícula:</b> ${p.pago_matricula}<br/>
+                                <b>💸 Mensualidad:</b> ${p.pago_mensual}<br/>
+                                <b>📊 PAES promedio:</b> ${typeof p.paes_promedio === 'number' && !isNaN(p.paes_promedio) ? p.paes_promedio : 'N/D'}
+                            </p>
+                        </div>
+                    </div>
+                `;
+                const m = L.marker([p.lat, p.lon], { icon: icons.colegio }).bindPopup(popupContent);
+                colegiosLayer.addLayer(m);
+            });
+            setText('debug-colegios', `colegios cargados: ${filtrados.length}`);
+            setText('colegios-count', filtrados.length);
+        }
+
+        if (aplicarFiltroPagoBtn) aplicarFiltroPagoBtn.addEventListener('click', aplicarFiltroPagoColegios);
+        if (limpiarFiltroPagoBtn) limpiarFiltroPagoBtn.addEventListener('click', limpiarFiltroPagoColegios);
     // Early guard: ensure Leaflet (L) is available to avoid uncaught ReferenceError
     const dmElem = document.getElementById('debug-mainjs');
     if (typeof L === 'undefined') {
@@ -1814,12 +1890,11 @@
     }
 
     function loadColegios() {
-        return fetch('data/Establecimientos_Educacionales_providencia.json').then(r => r.json()).then(data => {
+        return fetch('data/Establecimientos_Educacionales_providencia_con_paes.json').then(r => r.json()).then(data => {
             colegiosPois = data.map(item => {
                 // Convertir coordenadas con coma a punto
                 const lat = parseFloat(item.LATITUD.replace(',', '.'));
                 const lon = parseFloat(item.LONGITUD.replace(',', '.'));
-                
                 // Determinar tipo de establecimiento
                 let tipoEstab = 'Establecimiento Educacional';
                 if (item.COD_DEPE === '1' || item.COD_DEPE === '2') {
@@ -1831,13 +1906,11 @@
                 } else if (item.COD_DEPE === '5') {
                     tipoEstab = 'Corporación de Administración Delegada';
                 }
-                
                 // Determinar niveles educativos
                 const niveles = [];
                 if (item.ENS_01 && item.ENS_01 !== '0') niveles.push('Parvularia');
                 if (item.ENS_02 && item.ENS_02 !== '0') niveles.push('Básica');
                 if (item.ENS_03 && item.ENS_03 !== '0') niveles.push('Media');
-                
                 return {
                     nombre: item.NOM_RBD,
                     rbd: item.RBD,
@@ -1849,33 +1922,13 @@
                     matricula: item.MAT_TOTAL || '0',
                     religiosa: item.ORI_RELIGIOSA === '1' ? 'Sí' : 'No',
                     rural: item.RURAL_RBD === '1' ? 'Rural' : 'Urbano',
-                    estado: item.ESTADO_ESTAB === '1' ? 'Activo' : 'Inactivo'
+                    estado: item.ESTADO_ESTAB === '1' ? 'Activo' : 'Inactivo',
+                    pago_matricula: item.PAGO_MATRICULA || 'SIN INFORMACION',
+                    pago_mensual: item.PAGO_MENSUAL || 'SIN INFORMACION',
+                    paes_promedio: item.PAES_PROMEDIO
                 };
             }).filter(p => !isNaN(p.lat) && !isNaN(p.lon) && p.estado === 'Activo');
-            
-            colegiosPois.forEach(p => {
-                const popupContent = `
-                    <div style="width:260px;">
-                        <h4 style="margin:0 0 10px 0; color:#10B981; font-size:14px;">
-                            🏫 ${p.nombre}
-                        </h4>
-                        <div style="font-size:12px; line-height:1.6;">
-                            <p style="margin:4px 0;">
-                                <b>🏷️ RBD:</b> ${p.rbd}<br/>
-                                <b>📚 Niveles:</b> ${p.niveles}<br/>
-                                <b>🎓 Tipo:</b> ${p.tipo}<br/>
-                                <b>👥 Matrícula:</b> ${p.matricula} estudiantes<br/>
-                                <b>📍 ${p.comuna}</b>
-                            </p>
-                        </div>
-                    </div>
-                `;
-                const m = L.marker([p.lat, p.lon], { icon: icons.colegio }).bindPopup(popupContent);
-                colegiosLayer.addLayer(m);
-            });
-            
-            setText('debug-colegios', `colegios cargados: ${colegiosPois.length}`);
-            setText('colegios-count', colegiosPois.length);
+            renderColegiosFiltrados();
         }).catch(e => { console.warn('colegios load error', e); const d=document.getElementById('debug-colegios'); if(d)d.textContent='error'; });
     }
 
