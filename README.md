@@ -45,6 +45,37 @@ Para desplegar y ejecutar el proyecto en tu entorno local, sigue estos pasos.
     docker-compose up --build -d
     ```
 
+## Desarrollo y ejecución
+
+### Generador Docplex (ruta optimizada)
+
+Hay un script Python que construye el modelo Docplex y escribe la salida en `web/data/docplex_route.json`:
+
+- `scripts/generate_docplex_route.py` — construye y resuelve el modelo, y escribe `web/data/docplex_route.json`.
+
+Notas rápidas para ejecutar localmente (PowerShell):
+
+1) Crear/activar el virtualenv (opcional):
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+```
+
+2) Instalar la dependencia `docplex`:
+
+```powershell
+pip install docplex
+```
+
+3) Ejecutar el script para generar el JSON:
+
+```powershell
+python scripts/generate_docplex_route.py
+```
+
+Si no tienes `docplex` o no quieres instalarlo, hay un archivo de respaldo `web/data/docplex_route.json` con una ruta de ejemplo para evitar un HTTP 404 desde la UI.
+
 3.  **Accede a la aplicación web**:
     Una vez que los contenedores estén en funcionamiento, abre tu navegador web y navega a la siguiente dirección:
     
