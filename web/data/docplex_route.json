@@ -1,0 +1,11 @@
+{
+  "feasible": true,
+  "objective": 0,
+  "route": [
+    { "from": 0, "to": 1, "mode": "drive" },
+    { "from": 1, "to": 2, "mode": "drive" },
+    { "from": 2, "to": 3, "mode": "drive" },
+    { "from": 3, "to": 4, "mode": "drive" },
+    { "from": 4, "to": 0, "mode": "drive" }
+  ]
+}
