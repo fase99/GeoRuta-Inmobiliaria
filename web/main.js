@@ -226,9 +226,11 @@ async function generateDocplexRoute(silent=false) {
     let routeOSMGeoJson = null; // hold L.geoJSON layer when loaded
     const carabinerosLayer = L.layerGroup().addTo(map);
     const feriasLayer = L.layerGroup().addTo(map);
-    const bomberosLayer = L.layerGroup().addTo(map);
-    const universidadesLayer = L.layerGroup().addTo(map);
+    const institutosLayer = L.layerGroup().addTo(map);
+    const universidadesPrivadasLayer = L.layerGroup().addTo(map);
+    const universidadesEstatalesLayer = L.layerGroup().addTo(map);
     const colegiosLayer = L.layerGroup().addTo(map);
+    const jardinesLayer = L.layerGroup().addTo(map);
     
     // Amenazas layers
     const activeThreatsLayer = L.layerGroup(); // not added by default
@@ -250,14 +252,14 @@ async function generateDocplexRoute(silent=false) {
     const icons = {
         // Casas - Orange (tipo) + Red/Gold (operación)
         casaVenta: L.divIcon({
-            html: '<div style="width: 30px; height: 30px; background: linear-gradient(90deg, #FFA500 50%, #DC143C 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>',
+            html: '<div style="width: 30px; height: 30px; background: linear-gradient(90deg, #FB8C00 50%, #E53935 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>',
             className: 'custom-div-icon',
             iconSize: [24, 24],
             iconAnchor: [12, 24],
             popupAnchor: [0, -24]
         }),
         casaArriendo: L.divIcon({
-            html: '<div style="width: 30px; height: 30px; background: linear-gradient(90deg, #FFA500 50%, #FFD700 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>',
+            html: '<div style="width: 30px; height: 30px; background: linear-gradient(90deg, #FB8C00 50%, #8E24AA 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>',
             className: 'custom-div-icon',
             iconSize: [24, 24],
             iconAnchor: [12, 24],
@@ -265,14 +267,14 @@ async function generateDocplexRoute(silent=false) {
         }),
         // Departamentos - Blue (tipo) + Red/Gold (operación)
         deptoVenta: L.divIcon({
-            html: '<div style="width: 30px; height: 30px; background: linear-gradient(90deg, #2A81CB 50%, #DC143C 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M17 11V3H7v4H3v14h8v-4h2v4h8V11h-4zM7 19H5v-2h2v2zm0-4H5v-2h2v2zm0-4H5V9h2v2zm4 4H9v-2h2v2zm0-4H9V9h2v2zm0-4H9V5h2v2zm4 8h-2v-2h2v2zm0-4h-2V9h2v2zm0-4h-2V5h2v2zm4 12h-2v-2h2v2zm0-4h-2v-2h2v2z"/></svg></div>',
+            html: '<div style="width: 30px; height: 30px; background: linear-gradient(90deg, #039BE5 50%, #E53935 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M17 11V3H7v4H3v14h8v-4h2v4h8V11h-4zM7 19H5v-2h2v2zm0-4H5v-2h2v2zm0-4H5V9h2v2zm4 4H9v-2h2v2zm0-4H9V9h2v2zm0-4H9V5h2v2zm4 8h-2v-2h2v2zm0-4h-2V9h2v2zm0-4h-2V5h2v2zm4 12h-2v-2h2v2zm0-4h-2v-2h2v2z"/></svg></div>',
             className: 'custom-div-icon',
             iconSize: [24, 24],
             iconAnchor: [12, 24],
             popupAnchor: [0, -24]
         }),
         deptoArriendo: L.divIcon({
-            html: '<div style="width: 30px; height: 30px; background: linear-gradient(90deg, #2A81CB 50%, #FFD700 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M17 11V3H7v4H3v14h8v-4h2v4h8V11h-4zM7 19H5v-2h2v2zm0-4H5v-2h2v2zm0-4H5V9h2v2zm4 4H9v-2h2v2zm0-4H9V9h2v2zm0-4H9V5h2v2zm4 8h-2v-2h2v2zm0-4h-2V9h2v2zm0-4h-2V5h2v2zm4 12h-2v-2h2v2zm0-4h-2v-2h2v2z"/></svg></div>',
+            html: '<div style="width: 30px; height: 30px; background: linear-gradient(90deg, #039BE5 50%, #8E24AA 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M17 11V3H7v4H3v14h8v-4h2v4h8V11h-4zM7 19H5v-2h2v2zm0-4H5v-2h2v2zm0-4H5V9h2v2zm4 4H9v-2h2v2zm0-4H9V9h2v2zm0-4H9V5h2v2zm4 8h-2v-2h2v2zm0-4h-2V9h2v2zm0-4h-2V5h2v2zm4 12h-2v-2h2v2zm0-4h-2v-2h2v2z"/></svg></div>',
             className: 'custom-div-icon',
             iconSize: [24, 24],
             iconAnchor: [12, 24],
@@ -280,68 +282,94 @@ async function generateDocplexRoute(silent=false) {
         }),
         // Iconos seleccionados (con borde verde)
         casaVentaSelected: L.divIcon({
-            html: '<div style="width: 30px; height: 30px; background: linear-gradient(90deg, #FFA500 50%, #DC143C 50%); border-radius: 50%; border: 4px solid #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.6), 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>',
+            html: '<div style="width: 30px; height: 30px; background: linear-gradient(90deg, #FB8C00 50%, #E53935 50%); border-radius: 50%; border: 4px solid #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.6), 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>',
             className: 'custom-div-icon',
             iconSize: [24, 24],
             iconAnchor: [12, 24],
             popupAnchor: [0, -24]
         }),
         casaArriendoSelected: L.divIcon({
-            html: '<div style="width: 30px; height: 30px; background: linear-gradient(90deg, #FFA500 50%, #FFD700 50%); border-radius: 50%; border: 4px solid #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.6), 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>',
+            html: '<div style="width: 30px; height: 30px; background: linear-gradient(90deg, #FB8C00 50%, #8E24AA 50%); border-radius: 50%; border: 4px solid #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.6), 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg></div>',
             className: 'custom-div-icon',
             iconSize: [24, 24],
             iconAnchor: [12, 24],
             popupAnchor: [0, -24]
         }),
         deptoVentaSelected: L.divIcon({
-            html: '<div style="width: 33px; height: 33px; background: linear-gradient(90deg, #2A81CB 50%, #DC143C 50%); border-radius: 50%; border: 4px solid #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.6), 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M17 11V3H7v4H3v14h8v-4h2v4h8V11h-4zM7 19H5v-2h2v2zm0-4H5v-2h2v2zm0-4H5V9h2v2zm4 4H9v-2h2v2zm0-4H9V9h2v2zm0-4H9V5h2v2zm4 8h-2v-2h2v2zm0-4h-2V9h2v2zm0-4h-2V5h2v2zm4 12h-2v-2h2v2zm0-4h-2v-2h2v2z"/></svg></div>',
+            html: '<div style="width: 33px; height: 33px; background: linear-gradient(90deg, #039BE5 50%, #E53935 50%); border-radius: 50%; border: 4px solid #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.6), 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M17 11V3H7v4H3v14h8v-4h2v4h8V11h-4zM7 19H5v-2h2v2zm0-4H5v-2h2v2zm0-4H5V9h2v2zm4 4H9v-2h2v2zm0-4H9V9h2v2zm0-4H9V5h2v2zm4 8h-2v-2h2v2zm0-4h-2V9h2v2zm0-4h-2V5h2v2zm4 12h-2v-2h2v2zm0-4h-2v-2h2v2z"/></svg></div>',
             className: 'custom-div-icon',
             iconSize: [24, 24],
             iconAnchor: [12, 24],
             popupAnchor: [0, -24]
         }),
         deptoArriendoSelected: L.divIcon({
-            html: '<div style="width: 33px; height: 33px; background: linear-gradient(90deg, #2A81CB 50%, #FFD700 50%); border-radius: 50%; border: 4px solid #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.6), 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M17 11V3H7v4H3v14h8v-4h2v4h8V11h-4zM7 19H5v-2h2v2zm0-4H5v-2h2v2zm0-4H5V9h2v2zm4 4H9v-2h2v2zm0-4H9V9h2v2zm0-4H9V5h2v2zm4 8h-2v-2h2v2zm0-4h-2V9h2v2zm0-4h-2V5h2v2zm4 12h-2v-2h2v2zm0-4h-2v-2h2v2z"/></svg></div>',
+            html: '<div style="width: 33px; height: 33px; background: linear-gradient(90deg, #039BE5 50%, #8E24AA 50%); border-radius: 50%; border: 4px solid #28a745; box-shadow: 0 0 10px rgba(40,167,69,0.6), 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M17 11V3H7v4H3v14h8v-4h2v4h8V11h-4zM7 19H5v-2h2v2zm0-4H5v-2h2v2zm0-4H5V9h2v2zm4 4H9v-2h2v2zm0-4H9V9h2v2zm0-4H9V5h2v2zm4 8h-2v-2h2v2zm0-4h-2V9h2v2zm0-4h-2V5h2v2zm4 12h-2v-2h2v2zm0-4h-2v-2h2v2z"/></svg></div>',
             className: 'custom-div-icon',
             iconSize: [24, 24],
             iconAnchor: [12, 24],
             popupAnchor: [0, -24]
         }),
         // Iconos auxiliares
-        health: L.icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        health: L.divIcon({
+            html: '<div style="width: 28px; height: 28px; background: #E53935; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><span style="color: white; font-weight: bold; font-size: 18px; font-family: Arial, sans-serif;">H</span></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
         }),
-        metro: L.icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        metro: L.divIcon({
+            html: '<div style="width: 28px; height: 28px; background: white; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><img src="icon/metro_icon.png" style="width: 20px; height: 20px; object-fit: contain;"/></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
         }),
-        carabineros: L.icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-black.png',
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        carabineros: L.divIcon({
+            html: '<div style="width: 28px; height: 28px; background: #E53935; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><img src="icon/police_pinlet.svg" style="width: 16px; height: 16px; object-fit: contain; filter: brightness(0) invert(1);"/></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
         }),
         ferias: L.icon({
             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png',
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
             iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
         }),
-        bomberos: L.icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png',
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        universidad: L.divIcon({
+            html: '<div style="width: 28px; height: 28px; background: #757575; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/></svg></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
         }),
-        universidad: L.icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        universidadPrivada: L.divIcon({
+            html: '<div style="width: 28px; height: 28px; background: #9333EA; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/></svg></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
         }),
-        colegio: L.icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-yellow.png',
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-            iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+        universidadEstatal: L.divIcon({
+            html: '<div style="width: 28px; height: 28px; background: #2563EB; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/></svg></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
+        }),
+        colegio: L.divIcon({
+            html: '<div style="width: 28px; height: 28px; background: #757575; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82zM12 3L1 9l11 6 9-4.91V17h2V9L12 3z"/></svg></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
+        }),
+        jardin: L.divIcon({
+            html: '<div style="width: 28px; height: 28px; background: #757575; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M12 2C10.34 2 9 3.34 9 5c0 1.1.6 2.05 1.5 2.57V9H9.5C8.67 9 8 9.67 8 10.5v3c0 .83.67 1.5 1.5 1.5h1v7h3v-7h1c.83 0 1.5-.67 1.5-1.5v-3c0-.83-.67-1.5-1.5-1.5H13.5V7.57c.9-.52 1.5-1.47 1.5-2.57 0-1.66-1.34-3-3-3z"/></svg></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
         })
     };
     icons.selectedHome = L.icon({
@@ -350,10 +378,12 @@ async function generateDocplexRoute(silent=false) {
         iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
     });
     // paradero icon
-    icons.paradero = L.icon({
-        iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
-        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-        iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+    icons.paradero = L.divIcon({
+        html: '<div style="width: 28px; height: 28px; background: #000000; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M4 16c0 .88.39 1.67 1 2.22V20c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h8v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1c-.83 0-1.5-.67-1.5-1.5S6.67 14 7.5 14s1.5.67 1.5 1.5S8.33 17 7.5 17zm9 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm1.5-6H6V6h12v5z"/></svg></div>',
+        className: 'custom-div-icon',
+        iconSize: [24, 24],
+        iconAnchor: [12, 24],
+        popupAnchor: [0, -24]
     });
 
     // State
@@ -367,9 +397,11 @@ async function generateDocplexRoute(silent=false) {
     let selectedProperties = [];
     let carabinerosPois = [];
     let feriasPois = [];
-    let bomberosPois = [];
-    let universidadesPois = [];
+    let institutosPois = [];
+    let universidadesPrivadasPois = [];
+    let universidadesEstatalesPois = [];
     let colegiosPois = [];
+    let jardinesPois = [];
     // Layers/markers for recommended route rendered from Docplex output
     let recommendedRouteLayer = null;
     let recommendedMarkers = [];
@@ -412,9 +444,11 @@ async function generateDocplexRoute(silent=false) {
     const filterByParaderosCb = document.getElementById('filter-by-paraderos');
     const filterByCarabinerosCb = document.getElementById('filter-by-carabineros');
     const filterByFeriasCb = document.getElementById('filter-by-ferias');
-    const filterByBomberosCb = document.getElementById('filter-by-bomberos');
-    const filterByUniversidadesCb = document.getElementById('filter-by-universidades');
+    const filterByInstitutosCb = document.getElementById('filter-by-institutos');
+    const filterByUniversidadesPrivadasCb = document.getElementById('filter-by-universidades-privadas');
+    const filterByUniversidadesEstatalesCb = document.getElementById('filter-by-universidades-estatales');
     const filterByColegiosCb = document.getElementById('filter-by-colegios');
+    const filterByJardinesCb = document.getElementById('filter-by-jardines');
     const metroRadiusInput = document.getElementById('metro-radius'); // legacy
     const proximityRadiusInput = document.getElementById('proximity-radius');
     const applyProximityFiltersBtn = document.getElementById('apply-proximity-filters-btn');
@@ -1146,13 +1180,15 @@ async function generateDocplexRoute(silent=false) {
         const paraderosEnabled = filterByParaderosCb && filterByParaderosCb.checked;
         const carabinerosEnabled = filterByCarabinerosCb && filterByCarabinerosCb.checked;
         const feriasEnabled = filterByFeriasCb && filterByFeriasCb.checked;
-        const bomberosEnabled = filterByBomberosCb && filterByBomberosCb.checked;
-        const universidadesEnabled = filterByUniversidadesCb && filterByUniversidadesCb.checked;
+        const institutosEnabled = filterByInstitutosCb && filterByInstitutosCb.checked;
+        const universidadesPrivadasEnabled = filterByUniversidadesPrivadasCb && filterByUniversidadesPrivadasCb.checked;
+        const universidadesEstatalesEnabled = filterByUniversidadesEstatalesCb && filterByUniversidadesEstatalesCb.checked;
         const colegiosEnabled = filterByColegiosCb && filterByColegiosCb.checked;
+        const jardinesEnabled = filterByJardinesCb && filterByJardinesCb.checked;
         
         // if no proximity filter enabled, redisplay all houses (respecting smart search filters)
         if (!metroEnabled && !healthEnabled && !paraderosEnabled && !carabinerosEnabled && 
-            !feriasEnabled && !bomberosEnabled && !universidadesEnabled && !colegiosEnabled) { 
+            !feriasEnabled && !institutosEnabled && !universidadesPrivadasEnabled && !universidadesEstatalesEnabled && !colegiosEnabled && !jardinesEnabled) { 
             displayHouses(housesData); 
             return; 
         }
@@ -1161,65 +1197,75 @@ async function generateDocplexRoute(silent=false) {
         const radius = proximityRadiusInput ? parseFloat(proximityRadiusInput.value) : 
                        (metroRadiusInput ? parseFloat(metroRadiusInput.value) : 500);
         
+        console.log(`🔍 Aplicando filtros de proximidad con radio: ${radius}m`);
+        
         // Prepare point arrays for each enabled filter
         const metroPoints = metroPois.map(m => ({ lat: m.lat, lon: m.lon }));
         const healthPoints = healthPois.map(h => ({ lat: h.lat, lon: h.lon }));
         const paraderosPoints = paraderos.map(p => ({ lat: p.lat, lon: p.lon }));
         const carabinerosPoints = carabinerosPois.map(c => ({ lat: c.lat, lon: c.lon }));
         const feriasPoints = feriasPois.map(f => ({ lat: f.lat, lon: f.lon }));
-        const bomberosPoints = bomberosPois.map(b => ({ lat: b.lat, lon: b.lon }));
-        const universidadesPoints = universidadesPois.map(u => ({ lat: u.lat, lon: u.lon }));
+        const institutosPoints = institutosPois.map(u => ({ lat: u.lat, lon: u.lon }));
+        const universidadesPrivadasPoints = universidadesPrivadasPois.map(u => ({ lat: u.lat, lon: u.lon }));
+        const universidadesEstatalesPoints = universidadesEstatalesPois.map(u => ({ lat: u.lat, lon: u.lon }));
         const colegiosPoints = colegiosPois.map(c => ({ lat: c.lat, lon: c.lon }));
+        const jardinesPoints = jardinesPois.map(j => ({ lat: j.lat, lon: j.lon }));
 
-        // First, regenerate all markers with current filters
-        displayHouses(housesData);
-
-        // Then apply proximity filtering
-        const matched = [];
-        housesLayer.clearLayers();
-        houseMarkers.forEach(marker => {
-            const h = marker.houseData;
-            if (!h) return; // skip if no data
-            const point = { lat: h.lat, lon: h.lon };
-            let ok = true;
+        // Filter houses based on proximity criteria AND smart search filters
+        const filtered = housesData.filter(house => {
+            // First check if house passes smart search filters
+            if (!matchesTypeOperation(house)) return false;
             
+            const point = { lat: house.lat, lon: house.lon };
+            
+            // Check each enabled proximity filter (all must pass)
             if (metroEnabled) {
                 const nearMetro = metroPoints.some(mp => haversineDistance(point, mp) <= radius);
-                if (!nearMetro) ok = false;
+                if (!nearMetro) return false;
             }
             if (healthEnabled) {
                 const nearHealth = healthPoints.some(hp => haversineDistance(point, hp) <= radius);
-                if (!nearHealth) ok = false;
+                if (!nearHealth) return false;
             }
             if (paraderosEnabled) {
                 const nearParaderos = paraderosPoints.some(pp => haversineDistance(point, pp) <= radius);
-                if (!nearParaderos) ok = false;
+                if (!nearParaderos) return false;
             }
             if (carabinerosEnabled) {
                 const nearCarabineros = carabinerosPoints.some(cp => haversineDistance(point, cp) <= radius);
-                if (!nearCarabineros) ok = false;
+                if (!nearCarabineros) return false;
             }
             if (feriasEnabled) {
                 const nearFerias = feriasPoints.some(fp => haversineDistance(point, fp) <= radius);
-                if (!nearFerias) ok = false;
+                if (!nearFerias) return false;
             }
-            if (bomberosEnabled) {
-                const nearBomberos = bomberosPoints.some(bp => haversineDistance(point, bp) <= radius);
-                if (!nearBomberos) ok = false;
+            if (institutosEnabled) {
+                const nearInstitutos = institutosPoints.some(up => haversineDistance(point, up) <= radius);
+                if (!nearInstitutos) return false;
             }
-            if (universidadesEnabled) {
-                const nearUniversidades = universidadesPoints.some(up => haversineDistance(point, up) <= radius);
-                if (!nearUniversidades) ok = false;
+            if (universidadesPrivadasEnabled) {
+                const nearUniversidadesPrivadas = universidadesPrivadasPoints.some(up => haversineDistance(point, up) <= radius);
+                if (!nearUniversidadesPrivadas) return false;
+            }
+            if (universidadesEstatalesEnabled) {
+                const nearUniversidadesEstatales = universidadesEstatalesPoints.some(up => haversineDistance(point, up) <= radius);
+                if (!nearUniversidadesEstatales) return false;
             }
             if (colegiosEnabled) {
                 const nearColegios = colegiosPoints.some(cp => haversineDistance(point, cp) <= radius);
-                if (!nearColegios) ok = false;
+                if (!nearColegios) return false;
+            }
+            if (jardinesEnabled) {
+                const nearJardines = jardinesPoints.some(jp => haversineDistance(point, jp) <= radius);
+                if (!nearJardines) return false;
             }
             
-            if (ok) { matched.push(h); housesLayer.addLayer(marker); }
+            return true;
         });
-        setText('houses-filtered-count', matched.length);
-        console.log(`✅ Filtros de proximidad aplicados. ${matched.length} propiedades coinciden.`);
+
+        // Display filtered houses
+        displayHouses(filtered);
+        console.log(`✅ Filtros de proximidad aplicados. ${filtered.length} propiedades coinciden.`);
     }
 
     if (filterByMetroCb) filterByMetroCb.addEventListener('change', applyProximityFilters);
@@ -1227,8 +1273,9 @@ async function generateDocplexRoute(silent=false) {
     if (filterByParaderosCb) filterByParaderosCb.addEventListener('change', applyProximityFilters);
     if (filterByCarabinerosCb) filterByCarabinerosCb.addEventListener('change', applyProximityFilters);
     if (filterByFeriasCb) filterByFeriasCb.addEventListener('change', applyProximityFilters);
-    if (filterByBomberosCb) filterByBomberosCb.addEventListener('change', applyProximityFilters);
-    if (filterByUniversidadesCb) filterByUniversidadesCb.addEventListener('change', applyProximityFilters);
+    if (filterByInstitutosCb) filterByInstitutosCb.addEventListener('change', applyProximityFilters);
+    if (filterByUniversidadesPrivadasCb) filterByUniversidadesPrivadasCb.addEventListener('change', applyProximityFilters);
+    if (filterByUniversidadesEstatalesCb) filterByUniversidadesEstatalesCb.addEventListener('change', applyProximityFilters);
     if (filterByColegiosCb) filterByColegiosCb.addEventListener('change', applyProximityFilters);
     if (metroRadiusInput) metroRadiusInput.addEventListener('change', applyProximityFilters);
     if (proximityRadiusInput) proximityRadiusInput.addEventListener('change', applyProximityFilters);
@@ -1249,9 +1296,11 @@ async function generateDocplexRoute(silent=false) {
             if (filterByParaderosCb) filterByParaderosCb.checked = false;
             if (filterByCarabinerosCb) filterByCarabinerosCb.checked = false;
             if (filterByFeriasCb) filterByFeriasCb.checked = false;
-            if (filterByBomberosCb) filterByBomberosCb.checked = false;
-            if (filterByUniversidadesCb) filterByUniversidadesCb.checked = false;
+            if (filterByInstitutosCb) filterByInstitutosCb.checked = false;
+            if (filterByUniversidadesPrivadasCb) filterByUniversidadesPrivadasCb.checked = false;
+            if (filterByUniversidadesEstatalesCb) filterByUniversidadesEstatalesCb.checked = false;
             if (filterByColegiosCb) filterByColegiosCb.checked = false;
+            if (filterByJardinesCb) filterByJardinesCb.checked = false;
             
             // Reset radius to default
             if (proximityRadiusInput) proximityRadiusInput.value = '500';
@@ -1908,40 +1957,9 @@ async function generateDocplexRoute(silent=false) {
         }).catch(e => { console.warn('ferias load error', e); const d=document.getElementById('debug-ferias'); if(d)d.textContent='error'; });
     }
 
-    function loadBomberos() {
-        return fetch('data/Bombero.json').then(r => r.json()).then(data => {
-            // El archivo puede ser un objeto único o un array
-            const items = Array.isArray(data) ? data : [data];
-            bomberosPois = items.map(item => ({
-                ciudad: item.ciudad || '',
-                direccion: item.direccion || '',
-                telefono: item.telefono || '',
-                comunas_servidas: item.comunas_servidas || '',
-                lat: item.latitud || item.lat,
-                lon: item.longitud || item.lon
-            })).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
-            
-            bomberosPois.forEach(p => {
-                const popupContent = `
-                    <div style="width:220px">
-                        <b>🚒 Bomberos ${p.ciudad}</b><br/>
-                        <span style="font-size:12px">
-                            <b>Dirección:</b> ${p.direccion}<br/>
-                            <b>Teléfono:</b> ${p.telefono}<br/>
-                            <b>Comunas servidas:</b><br/>${p.comunas_servidas}
-                        </span>
-                    </div>
-                `;
-                const m = L.marker([p.lat, p.lon], { icon: icons.bomberos }).bindPopup(popupContent);
-                bomberosLayer.addLayer(m);
-            });
-            setText('debug-bomberos', `bomberos cargados: ${bomberosPois.length}`);
-            setText('bomberos-count', bomberosPois.length);
-        }).catch(e => { console.warn('bomberos load error', e); const d=document.getElementById('debug-bomberos'); if(d)d.textContent='error'; });
-    }
-
-    function loadUniversidades() {
-        return fetch('data/Instituciones_Educacion_Superior_providencia.json').then(r => r.json()).then(data => {
+    function loadInstitutos() {
+        // Cargar solo el archivo JSON de institutos
+        return fetch('data/institutos_providencia.json').then(r => r.json()).then(data => {
             // Agrupar por ubicación para evitar marcadores duplicados en la misma dirección
             const grouped = new Map();
             data.forEach(item => {
@@ -1964,9 +1982,9 @@ async function generateDocplexRoute(silent=false) {
                 });
             });
             
-            universidadesPois = Array.from(grouped.values()).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+            institutosPois = Array.from(grouped.values()).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
             
-            universidadesPois.forEach(p => {
+            institutosPois.forEach(p => {
                 // Crear lista de instituciones en esta ubicación
                 const instList = p.instituciones.map(inst => {
                     return `<div style="margin-bottom:8px; padding:6px; background:#f5f3ff; border-radius:4px;">
@@ -1981,7 +1999,7 @@ async function generateDocplexRoute(silent=false) {
                 const popupContent = `
                     <div style="width:280px; max-height:300px; overflow-y:auto;">
                         <h4 style="margin:0 0 10px 0; color:#7C3AED; font-size:14px;">
-                            🎓 Educación Superior
+                            🎓 Institutos de Educación Superior
                         </h4>
                         <p style="margin:0 0 10px 0; font-size:12px;">
                             <b>📍 ${p.direccion}</b><br/>
@@ -1996,12 +2014,142 @@ async function generateDocplexRoute(silent=false) {
                     </div>
                 `;
                 const m = L.marker([p.lat, p.lon], { icon: icons.universidad }).bindPopup(popupContent);
-                universidadesLayer.addLayer(m);
+                institutosLayer.addLayer(m);
             });
             
-            setText('debug-universidades', `universidades cargadas: ${universidadesPois.length} ubicaciones (${data.length} inmuebles)`);
-            setText('universidades-count', universidadesPois.length);
-        }).catch(e => { console.warn('universidades load error', e); const d=document.getElementById('debug-universidades'); if(d)d.textContent='error'; });
+            setText('debug-institutos', `institutos cargados: ${institutosPois.length} ubicaciones (${data.length} inmuebles)`);
+            setText('institutos-count', institutosPois.length);
+        }).catch(e => { console.warn('institutos load error', e); const d=document.getElementById('debug-institutos'); if(d)d.textContent='error'; });
+    }
+
+    function loadUniversidadesPrivadas() {
+        // Cargar solo el archivo JSON de universidades privadas
+        return fetch('data/universidades_privadas_providencia.json').then(r => r.json()).then(data => {
+            // Agrupar por ubicación para evitar marcadores duplicados en la misma dirección
+            const grouped = new Map();
+            data.forEach(item => {
+                const key = `${item.LATITUD}_${item.LONGITUD}`;
+                if (!grouped.has(key)) {
+                    grouped.set(key, {
+                        instituciones: [],
+                        lat: parseFloat(item.LATITUD),
+                        lon: parseFloat(item.LONGITUD),
+                        direccion: `${item.DIRECCION} ${item.NUMERO_DI}`,
+                        comuna: item.COMUNA
+                    });
+                }
+                grouped.get(key).instituciones.push({
+                    nombre: item.NOMBRE_INS,
+                    tipo: item.TIPO_INST,
+                    inmueble: item.NOMBRE_INM,
+                    direccion: `${item.DIRECCION} ${item.NUMERO_DI}`,
+                    referencia: item.LUGAR_REFE
+                });
+            });
+            
+            universidadesPrivadasPois = Array.from(grouped.values()).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+            
+            universidadesPrivadasPois.forEach(p => {
+                // Crear lista de instituciones en esta ubicación
+                const instList = p.instituciones.map(inst => {
+                    return `<div style="margin-bottom:8px; padding:6px; background:#f5f3ff; border-radius:4px;">
+                        <b>${inst.nombre}</b><br/>
+                        <span style="font-size:11px; color:#6D28D9;">
+                            📚 ${inst.tipo}<br/>
+                            🏢 ${inst.inmueble}${inst.referencia ? '<br/>📍 ' + inst.referencia : ''}
+                        </span>
+                    </div>`;
+                }).join('');
+                
+                const popupContent = `
+                    <div style="width:280px; max-height:300px; overflow-y:auto;">
+                        <h4 style="margin:0 0 10px 0; color:#9333EA; font-size:14px;">
+                            🏛️ Universidades Privadas
+                        </h4>
+                        <p style="margin:0 0 10px 0; font-size:12px;">
+                            <b>📍 ${p.direccion}</b><br/>
+                            <span style="color:#666;">${p.comuna}</span>
+                        </p>
+                        <div style="font-size:12px;">
+                            <b>${p.instituciones.length} Institución${p.instituciones.length > 1 ? 'es' : ''}:</b>
+                        </div>
+                        <div style="margin-top:8px; max-height:200px; overflow-y:auto;">
+                            ${instList}
+                        </div>
+                    </div>
+                `;
+                const m = L.marker([p.lat, p.lon], { icon: icons.universidadPrivada }).bindPopup(popupContent);
+                universidadesPrivadasLayer.addLayer(m);
+            });
+            
+            setText('debug-universidades-privadas', `universidades privadas cargadas: ${universidadesPrivadasPois.length} ubicaciones (${data.length} inmuebles)`);
+            setText('universidades-privadas-count', universidadesPrivadasPois.length);
+        }).catch(e => { console.warn('universidades privadas load error', e); const d=document.getElementById('debug-universidades-privadas'); if(d)d.textContent='error'; });
+    }
+
+    function loadUniversidadesEstatales() {
+        // Cargar solo el archivo JSON de universidades estatales
+        return fetch('data/universidades_estatales_providencia.json').then(r => r.json()).then(data => {
+            // Agrupar por ubicación para evitar marcadores duplicados en la misma dirección
+            const grouped = new Map();
+            data.forEach(item => {
+                const key = `${item.LATITUD}_${item.LONGITUD}`;
+                if (!grouped.has(key)) {
+                    grouped.set(key, {
+                        instituciones: [],
+                        lat: parseFloat(item.LATITUD),
+                        lon: parseFloat(item.LONGITUD),
+                        direccion: `${item.DIRECCION} ${item.NUMERO_DI}`,
+                        comuna: item.COMUNA
+                    });
+                }
+                grouped.get(key).instituciones.push({
+                    nombre: item.NOMBRE_INS,
+                    tipo: item.TIPO_INST,
+                    inmueble: item.NOMBRE_INM,
+                    direccion: `${item.DIRECCION} ${item.NUMERO_DI}`,
+                    referencia: item.LUGAR_REFE
+                });
+            });
+            
+            universidadesEstatalesPois = Array.from(grouped.values()).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+            
+            universidadesEstatalesPois.forEach(p => {
+                // Crear lista de instituciones en esta ubicación
+                const instList = p.instituciones.map(inst => {
+                    return `<div style="margin-bottom:8px; padding:6px; background:#eff6ff; border-radius:4px;">
+                        <b>${inst.nombre}</b><br/>
+                        <span style="font-size:11px; color:#1E40AF;">
+                            📚 ${inst.tipo}<br/>
+                            🏢 ${inst.inmueble}${inst.referencia ? '<br/>📍 ' + inst.referencia : ''}
+                        </span>
+                    </div>`;
+                }).join('');
+                
+                const popupContent = `
+                    <div style="width:280px; max-height:300px; overflow-y:auto;">
+                        <h4 style="margin:0 0 10px 0; color:#2563EB; font-size:14px;">
+                            🏛️ Universidades Estatales
+                        </h4>
+                        <p style="margin:0 0 10px 0; font-size:12px;">
+                            <b>📍 ${p.direccion}</b><br/>
+                            <span style="color:#666;">${p.comuna}</span>
+                        </p>
+                        <div style="font-size:12px;">
+                            <b>${p.instituciones.length} Institución${p.instituciones.length > 1 ? 'es' : ''}:</b>
+                        </div>
+                        <div style="margin-top:8px; max-height:200px; overflow-y:auto;">
+                            ${instList}
+                        </div>
+                    </div>
+                `;
+                const m = L.marker([p.lat, p.lon], { icon: icons.universidadEstatal }).bindPopup(popupContent);
+                universidadesEstatalesLayer.addLayer(m);
+            });
+            
+            setText('debug-universidades-estatales', `universidades estatales cargadas: ${universidadesEstatalesPois.length} ubicaciones (${data.length} inmuebles)`);
+            setText('universidades-estatales-count', universidadesEstatalesPois.length);
+        }).catch(e => { console.warn('universidades estatales load error', e); const d=document.getElementById('debug-universidades-estatales'); if(d)d.textContent='error'; });
     }
 
     function loadColegios() {
@@ -2023,9 +2171,13 @@ async function generateDocplexRoute(silent=false) {
                 }
                 // Determinar niveles educativos
                 const niveles = [];
+                const tieneBasica = item.ENS_02 && item.ENS_02 !== '0';
+                const tieneMedia = item.ENS_03 && item.ENS_03 !== '0';
+                
                 if (item.ENS_01 && item.ENS_01 !== '0') niveles.push('Parvularia');
-                if (item.ENS_02 && item.ENS_02 !== '0') niveles.push('Básica');
-                if (item.ENS_03 && item.ENS_03 !== '0') niveles.push('Media');
+                if (tieneBasica) niveles.push('Básica');
+                if (tieneMedia) niveles.push('Media');
+                
                 return {
                     nombre: item.NOM_RBD,
                     rbd: item.RBD,
@@ -2040,11 +2192,41 @@ async function generateDocplexRoute(silent=false) {
                     estado: item.ESTADO_ESTAB === '1' ? 'Activo' : 'Inactivo',
                     pago_matricula: item.PAGO_MATRICULA || 'SIN INFORMACION',
                     pago_mensual: item.PAGO_MENSUAL || 'SIN INFORMACION',
-                    paes_promedio: item.PAES_PROMEDIO
+                    paes_promedio: item.PAES_PROMEDIO,
+                    tieneBasica: tieneBasica,
+                    tieneMedia: tieneMedia
                 };
-            }).filter(p => !isNaN(p.lat) && !isNaN(p.lon) && p.estado === 'Activo');
+            }).filter(p => !isNaN(p.lat) && !isNaN(p.lon) && p.estado === 'Activo' && (p.tieneBasica || p.tieneMedia));
             renderColegiosFiltrados();
         }).catch(e => { console.warn('colegios load error', e); const d=document.getElementById('debug-colegios'); if(d)d.textContent='error'; });
+    }
+
+    function loadJardines() {
+        return fetch('data/jardines_sala_cuna_providencia.json').then(r => r.json()).then(data => {
+            jardinesPois = [];
+            const grouped = new Map();
+            data.forEach(item => {
+                const lat = parseFloat(item.LATITUD?.replace(',', '.') || 0);
+                const lon = parseFloat(item.LONGITUD?.replace(',', '.') || 0);
+                if (!lat || !lon) return;
+                const key = `${lat.toFixed(6)}_${lon.toFixed(6)}`;
+                if (!grouped.has(key)) grouped.set(key, []);
+                grouped.get(key).push(item);
+            });
+            grouped.forEach((items, key) => {
+                const lat = parseFloat(key.split('_')[0]);
+                const lon = parseFloat(key.split('_')[1]);
+                jardinesPois.push({ lat, lon });
+                const marker = L.marker([lat, lon], { icon: icons.jardin });
+                const popupHtml = items.map(p => `<strong>${p.NOM_RBD || 'Sin nombre'}</strong><br>RBD: ${p.RBD || 'N/A'}<br>Comuna: ${p.NOM_COM_RBD || 'N/A'}`).join('<hr>');
+                marker.bindPopup(popupHtml);
+                jardinesLayer.addLayer(marker);
+            });
+            setText('jardines-count', jardinesPois.length);
+        }).catch(e => { 
+            console.warn('jardines load error', e); 
+            setText('jardines-count', 0);
+        });
     }
 
     function loadEdges() {
@@ -2329,17 +2511,21 @@ async function generateDocplexRoute(silent=false) {
     const showEdgesCb = document.getElementById('show-edges-layer');
     const showCarabinerosCb = document.getElementById('show-carabineros-layer');
     const showFeriasCb = document.getElementById('show-ferias-layer');
-    const showBomberosCb = document.getElementById('show-bomberos-layer');
-    const showUniversidadesCb = document.getElementById('show-universidades-layer');
+    const showInstitutosCb = document.getElementById('show-institutos-layer');
+    const showUniversidadesPrivadasCb = document.getElementById('show-universidades-privadas-layer');
+    const showUniversidadesEstatalesCb = document.getElementById('show-universidades-estatales-layer');
     const showColegiosCb = document.getElementById('show-colegios-layer');
+    const showJardinesCb = document.getElementById('show-jardines-layer');
     
     if (showParaderosCb) showParaderosCb.addEventListener('change', e => { if (e.target.checked) paraderosLayer.addTo(map); else map.removeLayer(paraderosLayer); });
     if (showEdgesCb) showEdgesCb.addEventListener('change', e => { if (e.target.checked) edgesLayer.addTo(map); else map.removeLayer(edgesLayer); });
     if (showCarabinerosCb) showCarabinerosCb.addEventListener('change', e => { if (e.target.checked) carabinerosLayer.addTo(map); else map.removeLayer(carabinerosLayer); });
     if (showFeriasCb) showFeriasCb.addEventListener('change', e => { if (e.target.checked) feriasLayer.addTo(map); else map.removeLayer(feriasLayer); });
-    if (showBomberosCb) showBomberosCb.addEventListener('change', e => { if (e.target.checked) bomberosLayer.addTo(map); else map.removeLayer(bomberosLayer); });
-    if (showUniversidadesCb) showUniversidadesCb.addEventListener('change', e => { if (e.target.checked) universidadesLayer.addTo(map); else map.removeLayer(universidadesLayer); });
+    if (showInstitutosCb) showInstitutosCb.addEventListener('change', e => { if (e.target.checked) institutosLayer.addTo(map); else map.removeLayer(institutosLayer); });
+    if (showUniversidadesPrivadasCb) showUniversidadesPrivadasCb.addEventListener('change', e => { if (e.target.checked) universidadesPrivadasLayer.addTo(map); else map.removeLayer(universidadesPrivadasLayer); });
+    if (showUniversidadesEstatalesCb) showUniversidadesEstatalesCb.addEventListener('change', e => { if (e.target.checked) universidadesEstatalesLayer.addTo(map); else map.removeLayer(universidadesEstatalesLayer); });
     if (showColegiosCb) showColegiosCb.addEventListener('change', e => { if (e.target.checked) colegiosLayer.addTo(map); else map.removeLayer(colegiosLayer); });
+    if (showJardinesCb) showJardinesCb.addEventListener('change', e => { if (e.target.checked) jardinesLayer.addTo(map); else map.removeLayer(jardinesLayer); });
 
     // Amenazas toggles
     const showActiveThreats = document.getElementById('show-active-threats');
@@ -2416,6 +2602,16 @@ async function generateDocplexRoute(silent=false) {
         });
     }
 
+    // Activar capa de jardines por defecto
+    if (showJardinesCb) {
+        showJardinesCb.checked = true;
+        if (map.hasLayer(jardinesLayer)) {
+            // already added
+        } else {
+            jardinesLayer.addTo(map);
+        }
+    }
+
     // Ensure additional layers are ON on startup: check controls and add layers
     try {
         const layerCheckboxIds = [
@@ -2424,8 +2620,9 @@ async function generateDocplexRoute(silent=false) {
             'show-paraderos-layer',
             'show-carabineros-layer',
             'show-ferias-layer',
-            'show-bomberos-layer',
-            'show-universidades-layer',
+            'show-institutos-layer',
+            'show-universidades-privadas-layer',
+            'show-universidades-estatales-layer',
             'show-colegios-layer',
             'show-edges-layer'
         ];
@@ -2441,9 +2638,11 @@ async function generateDocplexRoute(silent=false) {
         try { if (!map.hasLayer(paraderosLayer)) map.addLayer(paraderosLayer); } catch(e) {}
         try { if (!map.hasLayer(carabinerosLayer)) map.addLayer(carabinerosLayer); } catch(e) {}
         try { if (!map.hasLayer(feriasLayer)) map.addLayer(feriasLayer); } catch(e) {}
-        try { if (!map.hasLayer(bomberosLayer)) map.addLayer(bomberosLayer); } catch(e) {}
-        try { if (!map.hasLayer(universidadesLayer)) map.addLayer(universidadesLayer); } catch(e) {}
+        try { if (!map.hasLayer(institutosLayer)) map.addLayer(institutosLayer); } catch(e) {}
+        try { if (!map.hasLayer(universidadesPrivadasLayer)) map.addLayer(universidadesPrivadasLayer); } catch(e) {}
+        try { if (!map.hasLayer(universidadesEstatalesLayer)) map.addLayer(universidadesEstatalesLayer); } catch(e) {}
         try { if (!map.hasLayer(colegiosLayer)) map.addLayer(colegiosLayer); } catch(e) {}
+        try { if (!map.hasLayer(jardinesLayer)) map.addLayer(jardinesLayer); } catch(e) {}
         try { if (!map.hasLayer(edgesLayer)) map.addLayer(edgesLayer); } catch(e) {}
     } catch (e) { console.warn('startup layer enable failed', e); }
 
@@ -2457,9 +2656,11 @@ async function generateDocplexRoute(silent=false) {
             {id: 'show-paraderos-layer', layer: paraderosLayer},
             {id: 'show-carabineros-layer', layer: carabinerosLayer},
             {id: 'show-ferias-layer', layer: feriasLayer},
-            {id: 'show-bomberos-layer', layer: bomberosLayer},
-            {id: 'show-universidades-layer', layer: universidadesLayer},
+            {id: 'show-institutos-layer', layer: institutosLayer},
+            {id: 'show-universidades-privadas-layer', layer: universidadesPrivadasLayer},
+            {id: 'show-universidades-estatales-layer', layer: universidadesEstatalesLayer},
             {id: 'show-colegios-layer', layer: colegiosLayer},
+            {id: 'show-jardines-layer', layer: jardinesLayer},
             {id: 'show-edges-layer', layer: edgesLayer},
             {id: 'show-route-osm', layer: routeOSMLayer}
         ];
@@ -3432,9 +3633,11 @@ async function generateDocplexRoute(silent=false) {
         loadParaderos(), 
         loadCarabineros(),
         loadFerias(),
-        loadBomberos(),
-        loadUniversidades(),
+        loadInstitutos(),
+        loadUniversidadesPrivadas(),
+        loadUniversidadesEstatales(),
         loadColegios(),
+        loadJardines(),
         loadNodes(), 
         loadEdges()
         // load edge/node probabilities (optional)

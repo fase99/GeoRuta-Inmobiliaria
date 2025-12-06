@@ -200,17 +200,25 @@
         <input type="checkbox" id="filter-by-ferias" />
         <span>🛒 Ferias libres</span>
       </label>
-      <!-- <label class="checkbox-label">
-        <input type="checkbox" id="filter-by-bomberos" />
-        <span>🚒 Bomberos</span>
-      </label> -->
       <label class="checkbox-label">
-        <input type="checkbox" id="filter-by-universidades" />
-        <span>🎓 Universidades</span>
+        <input type="checkbox" id="filter-by-institutos" />
+        <span>🎓 Institutos Profesionales</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-universidades-privadas" />
+        <span>🏛️ Universidades Privadas</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-universidades-estatales" />
+        <span>🏛️ Universidades Estatales</span>
       </label>
       <label class="checkbox-label">
         <input type="checkbox" id="filter-by-colegios" />
-        <span>🏫 Establecimientos de Educación</span>
+        <span>🏫 Colegios e Institutos</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-jardines" />
+        <span>👶 Jardines/Salas Cuna</span>
       </label>
       
       <div class="input-group" style="margin-top: 12px;">
@@ -369,15 +377,23 @@
           <span class="stat-value" id="ferias-count">0</span>
         </div>
         <div class="stat-item">
-          <span class="stat-label">Bomberos</span>
-          <span class="stat-value" id="bomberos-count">0</span>
+          <span class="stat-label">Institutos Profesionales</span>
+          <span class="stat-value" id="institutos-count">0</span>
         </div>
         <div class="stat-item">
-          <span class="stat-label">Universidades</span>
-          <span class="stat-value" id="universidades-count">0</span>
+          <span class="stat-label">Univ. Privadas</span>
+          <span class="stat-value" id="universidades-privadas-count">0</span>
         </div>
         <div class="stat-item">
-          <span class="stat-label">Colegios</span>
+          <span class="stat-label">Univ. Estatales</span>
+          <span class="stat-value" id="universidades-estatales-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Jardines/Salas Cuna</span>
+          <span class="stat-value" id="jardines-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Colegios e Institutos</span>
           <span class="stat-value" id="colegios-count">0</span>
         </div>
       </div>
@@ -406,16 +422,24 @@
         <span>🛒 Ferias libres</span>
       </label>
       <label class="checkbox-label">
-        <input type="checkbox" id="show-bomberos-layer" />
-        <span>🚒 Bomberos</span>
+        <input type="checkbox" id="show-institutos-layer" />
+        <span>🎓 Institutos Profesionales</span>
       </label>
       <label class="checkbox-label">
-        <input type="checkbox" id="show-universidades-layer" />
-        <span>🎓 Universidades</span>
+        <input type="checkbox" id="show-jardines-layer" />
+        <span>👶 Jardines/Salas Cuna</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-universidades-privadas-layer" />
+        <span>🏛️ Universidades Privadas</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-universidades-estatales-layer" />
+        <span>🏛️ Universidades Estatales</span>
       </label>
       <label class="checkbox-label">
         <input type="checkbox" id="show-colegios-layer" />
-        <span>🏫 Colegios y Liceos</span>
+        <span>🏫 Colegios e Institutos</span>
       </label>
       <label class="checkbox-label">
         <input type="checkbox" id="show-edges-layer" />
@@ -447,8 +471,9 @@
         <p class="debug">Paraderos: <span id="debug-paraderos">-</span></p>
         <p class="debug">Carabineros: <span id="debug-carabineros">-</span></p>
         <p class="debug">Ferias: <span id="debug-ferias">-</span></p>
-        <p class="debug">Bomberos: <span id="debug-bomberos">-</span></p>
-        <p class="debug">Universidades: <span id="debug-universidades">-</span></p>
+        <p class="debug">Institutos: <span id="debug-institutos">-</span></p>
+        <p class="debug">Univ. Privadas: <span id="debug-universidades-privadas">-</span></p>
+        <p class="debug">Univ. Estatales: <span id="debug-universidades-estatales">-</span></p>
         <p class="debug">Colegios: <span id="debug-colegios">-</span></p>
         <p class="debug">Aristas: <span id="debug-edges">-</span></p>
         <p class="debug">Ruta OSM: <span id="debug-route">-</span></p>
@@ -572,12 +597,12 @@
             Lado Izquierdo = Tipo de Propiedad
           </h4>
           <div class="legend-item" style="margin-bottom: 10px; display: flex; align-items: center; gap: 12px;">
-            <div style="width: 28px; height: 28px; background: #FFA500; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
-            <span style="font-size: 14px; font-weight: 500;">🏠 Casa (Orange/Naranja)</span>
+            <div style="width: 28px; height: 28px; background: #FB8C00; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
+            <span style="font-size: 14px; font-weight: 500;">🏠 Casa (Naranja)</span>
           </div>
           <div class="legend-item" style="margin-bottom: 10px; display: flex; align-items: center; gap: 12px;">
-            <div style="width: 28px; height: 28px; background: #2A81CB; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
-            <span style="font-size: 14px; font-weight: 500;">🏢 Departamento (Blue/Azul)</span>
+            <div style="width: 28px; height: 28px; background: #039BE5; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
+            <span style="font-size: 14px; font-weight: 500;">🏢 Departamento (Azul Cielo)</span>
           </div>
         </div>
 
@@ -586,12 +611,12 @@
             Lado Derecho = Tipo de Operación
           </h4>
           <div class="legend-item" style="margin-bottom: 10px; display: flex; align-items: center; gap: 12px;">
-            <div style="width: 28px; height: 28px; background: #DC143C; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
-            <span style="font-size: 14px; font-weight: 500;">💰 Venta (Red/Rojo)</span>
+            <div style="width: 28px; height: 28px; background: #E53935; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
+            <span style="font-size: 14px; font-weight: 500;">💰 Venta (Rojo)</span>
           </div>
           <div class="legend-item" style="margin-bottom: 10px; display: flex; align-items: center; gap: 12px;">
-            <div style="width: 28px; height: 28px; background: #FFD700; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
-            <span style="font-size: 14px; font-weight: 500;">🏘️ Arriendo (Gold/Dorado)</span>
+            <div style="width: 28px; height: 28px; background: #8E24AA; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
+            <span style="font-size: 14px; font-weight: 500;">🏘️ Arriendo (Violeta)</span>
           </div>
         </div>
 
@@ -600,26 +625,26 @@
             📌 Ejemplos de Combinaciones:
           </h4>
           <div class="legend-item" style="margin-bottom: 10px; display: flex; align-items: center; gap: 12px;">
-            <div style="width: 32px; height: 32px; background: linear-gradient(90deg, #FFA500 50%, #DC143C 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
+            <div style="width: 32px; height: 32px; background: linear-gradient(90deg, #FB8C00 50%, #E53935 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
             <span style="font-size: 14px;">🏠 + 💰 = Casa en Venta</span>
           </div>
           <div class="legend-item" style="margin-bottom: 10px; display: flex; align-items: center; gap: 12px;">
-            <div style="width: 32px; height: 32px; background: linear-gradient(90deg, #FFA500 50%, #FFD700 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
+            <div style="width: 32px; height: 32px; background: linear-gradient(90deg, #FB8C00 50%, #8E24AA 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
             <span style="font-size: 14px;">🏠 + 🏘️ = Casa en Arriendo</span>
           </div>
           <div class="legend-item" style="margin-bottom: 10px; display: flex; align-items: center; gap: 12px;">
-            <div style="width: 32px; height: 32px; background: linear-gradient(90deg, #2A81CB 50%, #DC143C 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
+            <div style="width: 32px; height: 32px; background: linear-gradient(90deg, #039BE5 50%, #E53935 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
             <span style="font-size: 14px;">🏢 + 💰 = Depto en Venta</span>
           </div>
           <div class="legend-item" style="margin-bottom: 10px; display: flex; align-items: center; gap: 12px;">
-            <div style="width: 32px; height: 32px; background: linear-gradient(90deg, #2A81CB 50%, #FFD700 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
+            <div style="width: 32px; height: 32px; background: linear-gradient(90deg, #039BE5 50%, #8E24AA 50%); border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
             <span style="font-size: 14px;">🏢 + 🏘️ = Depto en Arriendo</span>
           </div>
         </div>
 
         <div style="padding: 16px; background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%); border-radius: 8px; border: 2px solid #28a745;">
           <div class="legend-item" style="margin-bottom: 0; display: flex; align-items: center; gap: 12px;">
-            <div style="width: 32px; height: 32px; background: linear-gradient(90deg, #FFA500 50%, #DC143C 50%); border-radius: 50%; border: 4px solid #28a745; box-shadow: 0 0 12px rgba(40,167,69,0.6); flex-shrink: 0;"></div>
+            <div style="width: 32px; height: 32px; background: linear-gradient(90deg, #FB8C00 50%, #E53935 50%); border-radius: 50%; border: 4px solid #28a745; box-shadow: 0 0 12px rgba(40,167,69,0.6); flex-shrink: 0;"></div>
             <span style="font-size: 14px; font-weight: 600; color: #28a745;">✓ Propiedad Seleccionada (borde verde brillante)</span>
           </div>
         </div>
@@ -633,26 +658,28 @@
           <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
             <!-- Paraderos -->
             <div class="legend-item" style="display: flex; align-items: center; gap: 8px;">
-              <div style="width: 20px; height: 28px; background: #28a745; clip-path: polygon(50% 0%, 100% 35%, 100% 100%, 0% 100%, 0% 35%); box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
-              <span style="font-size: 13px;">🚏 Paraderos (Verde)</span>
+              <div style="width: 28px; height: 28px; background: #000000; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px;">🚌</div>
+              <span style="font-size: 13px;">🚏 Paraderos (Negro)</span>
             </div>
 
             <!-- Metro -->
             <div class="legend-item" style="display: flex; align-items: center; gap: 8px;">
-              <div style="width: 20px; height: 28px; background: #DC143C; clip-path: polygon(50% 0%, 100% 35%, 100% 100%, 0% 100%, 0% 35%); box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
-              <span style="font-size: 13px;">🚇 Metro (Rojo)</span>
+              <div style="width: 28px; height: 28px; background: white; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                <img src="icon/metro_icon.png" style="width: 20px; height: 20px; object-fit: contain;"/>
+              </div>
+              <span style="font-size: 13px;">🚇 Metro (Logo Metro)</span>
             </div>
 
             <!-- Salud -->
             <div class="legend-item" style="display: flex; align-items: center; gap: 8px;">
-              <div style="width: 20px; height: 28px; background: #2196F3; clip-path: polygon(50% 0%, 100% 35%, 100% 100%, 0% 100%, 0% 35%); box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
-              <span style="font-size: 13px;">🏥 Salud (Azul)</span>
+              <div style="width: 28px; height: 28px; background: #E53935; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 16px;">H</div>
+              <span style="font-size: 13px;">🏥 Salud (Rojo con H)</span>
             </div>
 
             <!-- Carabineros -->
             <div class="legend-item" style="display: flex; align-items: center; gap: 8px;">
-              <div style="width: 20px; height: 28px; background: #000000; clip-path: polygon(50% 0%, 100% 35%, 100% 100%, 0% 100%, 0% 35%); box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
-              <span style="font-size: 13px;">👮 Carabineros (Negro)</span>
+              <div style="width: 28px; height: 28px; background: #E53935; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px;">🛡️</div>
+              <span style="font-size: 13px;">👮 Carabineros (Rojo)</span>
             </div>
 
             <!-- Ferias -->
@@ -661,22 +688,34 @@
               <span style="font-size: 13px;">🥬 Ferias (Gris)</span>
             </div>
 
-            <!-- Bomberos -->
+            <!-- Jardines/Salas Cuna -->
             <div class="legend-item" style="display: flex; align-items: center; gap: 8px;">
-              <div style="width: 20px; height: 28px; background: #FFD700; clip-path: polygon(50% 0%, 100% 35%, 100% 100%, 0% 100%, 0% 35%); box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
-              <span style="font-size: 13px;">🚒 Bomberos (Dorado)</span>
+              <div style="width: 20px; height: 20px; background: #757575; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
+              <span style="font-size: 13px;">👶 Jardines/Salas Cuna (Gris)</span>
             </div>
 
-            <!-- Universidades -->
+            <!-- Institutos -->
             <div class="legend-item" style="display: flex; align-items: center; gap: 8px;">
-              <div style="width: 20px; height: 28px; background: #FF6F00; clip-path: polygon(50% 0%, 100% 35%, 100% 100%, 0% 100%, 0% 35%); box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
-              <span style="font-size: 13px;">🎓 Universidades (Naranja)</span>
+              <div style="width: 28px; height: 28px; background: #757575; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px;">🎓</div>
+              <span style="font-size: 13px;">🎓 Institutos (Gris)</span>
+            </div>
+
+            <!-- Universidades Privadas -->
+            <div class="legend-item" style="display: flex; align-items: center; gap: 8px;">
+              <div style="width: 28px; height: 28px; background: #9333EA; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px;">🏛️</div>
+              <span style="font-size: 13px;">🏛️ Universidades Privadas (Morado)</span>
+            </div>
+
+            <!-- Universidades Estatales -->
+            <div class="legend-item" style="display: flex; align-items: center; gap: 8px;">
+              <div style="width: 28px; height: 28px; background: #2563EB; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px;">🏛️</div>
+              <span style="font-size: 13px;">🏛️ Universidades Estatales (Azul)</span>
             </div>
 
             <!-- Colegios -->
             <div class="legend-item" style="display: flex; align-items: center; gap: 8px;">
-              <div style="width: 20px; height: 28px; background: #FFEB3B; clip-path: polygon(50% 0%, 100% 35%, 100% 100%, 0% 100%, 0% 35%); box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0;"></div>
-              <span style="font-size: 13px;">🏫 Colegios (Amarillo)</span>
+              <div style="width: 28px; height: 28px; background: #757575; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.3); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 14px;">🎓</div>
+              <span style="font-size: 13px;">🏫 Colegios (Gris)</span>
             </div>
           </div>
 
