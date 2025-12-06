@@ -1,26 +1,90 @@
-# Proyecto de Ruteo Inmobiliario Resiliente
+# GeoRuta Inmobiliaria - Sistema de Ruteo Resiliente
 
-Este proyecto implementa una aplicación de georuteo para determinar la ruta más óptima y resiliente para visitar propiedades inmobiliarias en una zona específica, considerando posibles amenazas o incidentes en tiempo real.
+Este proyecto implementa una plataforma avanzada de georuteo diseñada para optimizar la planificación de visitas a propiedades inmobiliarias. El sistema no solo calcula la ruta más eficiente en términos de distancia y tiempo, sino que también integra un análisis de "resiliencia", considerando amenazas en tiempo real, infraestructura urbana y datos históricos para garantizar recorridos seguros y predecibles.
 
-## 📜 Descripción
+## 🌟 Funcionalidades Principales
 
-La aplicación calcula rutas eficientes entre múltiples puntos (propiedades) y ajusta estas rutas dinámicamente basándose en datos de amenazas, como congestión vehicular, accidentes o cualquier otro incidente que pueda afectar el recorrido. El objetivo es proporcionar una "ruta resiliente" que minimice el tiempo de viaje y evite interrupciones.
+1.  **Visualización Geoespacial**: Mapa interactivo con capas de propiedades, infraestructura y amenazas.
+2.  **Ruteo Resiliente**: Cálculo de rutas que evitan zonas de alto riesgo o congestión.
+3.  **Filtrado Avanzado**: Búsqueda de propiedades y colegios basada en criterios específicos (precio, puntaje PAES, mensualidad).
+4.  **Simulación de Escenarios**: Evaluación de rutas bajo condiciones de incidentes simulados (accidentes, cierres viales).
 
-## 🏗️ Arquitectura
+## 📊 Variables del Sistema
 
-El sistema está containerizado usando Docker y se compone de los siguientes servicios orquestados por `docker-compose`:
+El sistema integra múltiples fuentes de datos que interactúan para determinar la mejor ruta y evaluar el entorno de cada propiedad.
 
-1.  **Base de Datos (`db`)**:
-    *   **Imagen**: `postgis/postgis`
-    *   **Propósito**: Almacena todos los datos geoespaciales, incluyendo la infraestructura vial, ubicaciones de propiedades, estaciones de servicio y datos de amenazas. Se utiliza PostGIS por su capacidad para manejar consultas espaciales complejas.
+### 1. Variables Inmobiliarias
+Datos provenientes de portales inmobiliarios (ej. TocToc) para la oferta de viviendas.
+*   **Tipo de Propiedad**: Casa, Departamento.
+*   **Operación**: Venta, Arriendo.
+*   **Económicas**:
+    *   Precio (UF y Pesos).
+    *   Gastos Comunes.
+*   **Físicas**: Ubicación (Latitud/Longitud), Superficie, Dormitorios, Baños.
 
-2.  **Proceso ETL (`etl`)**:
-    *   **Imagen**: Construida a partir del `Dockerfile` local.
-    *   **Propósito**: Contenedor responsable de la Extracción, Transformación y Carga (ETL) de datos. Ejecuta los scripts de Python (`main.py`) para poblar la base de datos a partir de diversas fuentes. Este proceso se ejecuta una vez y finaliza.
+### 2. Variables de Infraestructura (POIs)
+Puntos de interés que enriquecen el contexto de cada propiedad.
+*   **Educación**:
+    *   **Colegios**: Nombre, RBD, Niveles, Tipo de enseñanza.
+    *   **Métricas Educativas**: Promedio PAES, Costo de Matrícula, Mensualidad.
+    *   **Educación Superior**: Universidades e Institutos.
+*   **Seguridad y Emergencia**:
+    *   **Carabineros**: Comisarías y retenes.
+    *   **Bomberos**: Compañías de bomberos.
+    *   **Salud**: Hospitales, clínicas y centros de salud.
+*   **Transporte y Servicios**:
+    *   **Metro**: Estaciones de Metro de Santiago.
+    *   **Transantiago**: Paraderos de buses.
+    *   **Comercio**: Ferias libres y persas.
 
-3.  **Servidor Web (`web`)**:
-    *   **Imagen**: `nginx:alpine`
-    *   **Propósito**: Sirve la aplicación web frontend al usuario. Está configurado para mostrar el contenido de la carpeta `web/`, que incluye el `index.html` y la lógica de JavaScript para la visualización del mapa y las rutas.
+### 3. Variables de Ruteo y Grafo
+Elementos utilizados para el cálculo matemático de las rutas.
+*   **Nodos y Aristas**: Representación de la red vial (basado en OpenStreetMap).
+*   **Probabilidad de Fallo**: Probabilidad asignada a cada arista (calle) de estar bloqueada o congestionada.
+*   **Costos**: Distancia (metros) y Tiempo (minutos).
+
+---
+
+## ⚠️ Amenazas y Riesgos
+
+El sistema monitorea y simula diversos tipos de incidentes que pueden afectar la planificación de la ruta. Estas amenazas se clasifican por tipo y severidad.
+
+### Tipos de Amenazas
+*   **🚗 Accidente**: Colisiones vehiculares que pueden reducir la velocidad o bloquear vías.
+*   **🚦 Congestión**: Flujo vehicular lento o detenido (tacos).
+*   **🚧 Cierre Vial**: Bloqueos por obras, eventos o mantenimiento.
+*   **🏠 Robos**: Datos históricos de robos en viviendas (utilizados para mapas de calor de seguridad).
+
+### Clasificación de Severidad
+Cada amenaza tiene un nivel de impacto asociado:
+*   **BAJA**: Impacto menor en el tiempo de viaje (ej. accidente leve).
+*   **MEDIA**: Retrasos considerables (ej. congestión moderada).
+*   **ALTA**: Bloqueo total o retrasos críticos (ej. cierre vial, accidente grave).
+
+### Probabilidad
+*   Se asigna un valor entre **0.0 y 1.0** a los incidentes para modelar la incertidumbre de que un evento afecte la ruta en un momento dado.
+
+---
+
+## ⏱️ Tiempos y Simulación
+
+El factor tiempo es crítico tanto para la logística de las visitas como para la simulación de eventos.
+
+### Tiempos de Viaje
+*   **Cálculo Dinámico**: El sistema estima la duración de los traslados (caminata, transporte público, vehículo) basándose en la distancia y la velocidad promedio de la vía.
+*   **Penalización por Amenazas**: Los incidentes aumentan el "costo" temporal de las aristas afectadas, forzando al algoritmo a buscar alternativas más rápidas.
+
+### Tiempos de Simulación
+*   **Ventanas de Tiempo**: Los datos de incidentes están asociados a marcas de tiempo específicas (ej. `2025-11-16T12:00:00Z`), permitiendo simular condiciones de tráfico en horas punta o momentos específicos del día.
+*   **Timeouts de Respuesta**: El sistema web tiene configurados tiempos de espera (ej. 8 segundos) para consultas de datos en tiempo real, garantizando que la interfaz no se congele si un servicio externo falla.
+*   **Agenda de Visitas**: El sistema gestiona una agenda (`scheduledAppointments`) donde se calculan los tiempos de llegada y duración de las visitas a las propiedades.
+
+## 🏗️ Arquitectura Técnica
+
+*   **Frontend**: HTML5, CSS3, JavaScript (Leaflet para mapas).
+*   **Backend/ETL**: Python (Scripts de carga y procesamiento).
+*   **Base de Datos**: PostgreSQL con extensión PostGIS para consultas espaciales.
+*   **Contenedores**: Docker y Docker Compose para orquestación.
 
 ## 🚀 Cómo ejecutar la aplicación
 
