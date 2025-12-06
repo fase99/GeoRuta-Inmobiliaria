@@ -18,6 +18,118 @@
             renderColegiosFiltrados();
         }
 
+// Load and render a route produced by the Docplex script (web/data/docplex_route.json).
+// Assumption: the Docplex route references node indices where `0` is the office/start and
+// positive integers 1..n map to the selectedProperties list in order (1 -> selectedProperties[0]).
+// If counts mismatch the handler will try to do a best-effort mapping and show the route steps.
+async function generateDocplexRoute(silent=false) {
+    try {
+        const res = await fetch('data/docplex_route.json', {cache: 'no-store'});
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        if (!data || !data.route) {
+            alert('docplex_route.json no contiene un campo "route" válido.');
+            return;
+        }
+
+        if (!data.feasible) {
+            if (!silent) alert('El modelo Docplex devolvió una solución no factible.');
+            return;
+        }
+
+        // Expected structure: { feasible: true, objective: ..., route: [ {from:0,to:1,mode:'drive'}, ... ] }
+        const routeEdges = data.route;
+
+        if (!Array.isArray(selectedProperties) || selectedProperties.length === 0) {
+            if (!silent) alert('No hay propiedades seleccionadas para mapear la ruta Docplex. Selecciona propiedades primero.');
+            return;
+        }
+
+        // Build an ordered list of property objects according to the 'to' sequence in the route
+        // Skip any 'to' equal to 0 (office/start). Map positive integers 1..n to selectedProperties[0..n-1].
+        const orderIdxs = routeEdges.map(e => e.to).filter(v => v !== 0);
+        const mappedStops = [];
+        for (const idx of orderIdxs) {
+            const propIndex = idx - 1; // mapping: 1 -> selectedProperties[0]
+            if (propIndex >= 0 && propIndex < selectedProperties.length) {
+                mappedStops.push(selectedProperties[propIndex]);
+            } else {
+                // Out-of-range: push placeholder or skip
+                console.warn('Docplex route index out of range:', idx);
+            }
+        }
+
+        if (mappedStops.length === 0) {
+            if (!silent) alert('No se pudo mapear ninguna parada desde la ruta Docplex a las propiedades seleccionadas.');
+            return;
+        }
+
+        // Clear previous recommended route layers
+        if (recommendedRouteLayer) {
+            map.removeLayer(recommendedRouteLayer);
+            recommendedRouteLayer = null;
+        }
+        if (recommendedMarkers.length) {
+            recommendedMarkers.forEach(m => map.removeLayer(m));
+            recommendedMarkers = [];
+        }
+
+        // Build coordinates: start from currentOfficeLatLng (if available) else first stop
+        const coords = [];
+        if (typeof currentOfficeLatLng !== 'undefined' && currentOfficeLatLng) {
+            coords.push([currentOfficeLatLng.lat, currentOfficeLatLng.lng]);
+        } else {
+            const first = mappedStops[0];
+            coords.push([first.lat, first.lon]);
+        }
+
+        mappedStops.forEach((p, i) => {
+            coords.push([p.lat, p.lon]);
+            const m = L.marker([p.lat, p.lon], {title: p.title || `Parada ${i+1}`});
+            m.addTo(map);
+            recommendedMarkers.push(m);
+        });
+
+        // Draw polyline
+        recommendedRouteLayer = L.polyline(coords, {color: 'blue', weight: 5, opacity: 0.8}).addTo(map);
+        map.fitBounds(recommendedRouteLayer.getBounds(), {padding: [40,40]});
+
+        // Populate steps panel with simple textual directions based on mapped stops
+        const stepsContainer = document.getElementById('route-steps-container');
+        if (stepsContainer) {
+            stepsContainer.innerHTML = '';
+            mappedStops.forEach((p, i) => {
+                const el = document.createElement('div');
+                el.className = 'route-step';
+                el.innerText = `${i+1}. ${p.title || (p.address || 'Propiedad')} — ${p.price ? ('$'+p.price) : ''}`;
+                stepsContainer.appendChild(el);
+            });
+        }
+
+        // Optionally schedule appointments for these properties (existing logic expects property objects)
+        mappedStops.forEach((p, i) => scheduleAppointment(p));
+
+        // Start monitoring route / threats as the existing flow does
+        startRouteRefresh();
+
+        if (!silent) {
+            console.log('Docplex route rendered. Objective:', data.objective);
+            // show legend / summary
+            const legend = document.getElementById('legend-recommended-route');
+            if (legend) legend.innerText = `Docplex: objective=${data.objective}`;
+        }
+
+    } catch (err) {
+        console.error('Error loading docplex route:', err);
+        if (!silent) alert('Error cargando docplex_route.json: ' + err.message);
+    }
+}
+
+        // Wire the Docplex button (if present) to the handler
+        const genDocplexBtn = document.getElementById('generate-docplex-route-btn');
+        if (genDocplexBtn) genDocplexBtn.addEventListener('click', () => generateDocplexRoute(false));
+
         function limpiarFiltroPagoColegios() {
             if (filtroPagoMatricula) filtroPagoMatricula.value = '';
             if (filtroPagoMensual) filtroPagoMensual.value = '';
@@ -258,6 +370,9 @@
     let bomberosPois = [];
     let universidadesPois = [];
     let colegiosPois = [];
+    // Layers/markers for recommended route rendered from Docplex output
+    let recommendedRouteLayer = null;
+    let recommendedMarkers = [];
     
     // Scheduled appointments threat system
     let scheduledAppointments = new Map(); // houseId -> {houseData, scheduledTime, isCancelled, cancelProbability}
