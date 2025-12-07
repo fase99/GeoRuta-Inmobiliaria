@@ -218,7 +218,22 @@ async function generateDocplexRoute(silent=false) {
 
     // Layers
     const housesLayer = L.layerGroup().addTo(map);
-    const healthLayer = L.layerGroup().addTo(map);
+    const cecosfLayer = L.layerGroup().addTo(map);
+    const cosamLayer = L.layerGroup().addTo(map);
+    const coninLayer = L.layerGroup().addTo(map);
+    const cesfamLayer = L.layerGroup().addTo(map);
+    const centroSaludLayer = L.layerGroup().addTo(map);
+    const centroMedicoLayer = L.layerGroup().addTo(map);
+    const clinicaDentalLayer = L.layerGroup().addTo(map);
+    const clinicaLayer = L.layerGroup().addTo(map);
+    const cdtLayer = L.layerGroup().addTo(map);
+    const direccionSaludLayer = L.layerGroup().addTo(map);
+    const hospitalLayer = L.layerGroup().addTo(map);
+    const laboratorioLayer = L.layerGroup().addTo(map);
+    const praisLayer = L.layerGroup().addTo(map);
+    const sapuLayer = L.layerGroup().addTo(map);
+    const unidadSaludFuncionariosLayer = L.layerGroup().addTo(map);
+    const vacunatorioLayer = L.layerGroup().addTo(map);
     const metroLayer = L.layerGroup().addTo(map);
     const paraderosLayer = L.layerGroup().addTo(map);
     const edgesLayer = L.layerGroup().addTo(map);
@@ -317,6 +332,118 @@ async function generateDocplexRoute(silent=false) {
             iconAnchor: [12, 24],
             popupAnchor: [0, -24]
         }),
+        cecosf: L.divIcon({
+            html: '<div style="width: 28px; height: 28px; background: #E53935; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><span style="color: white; font-weight: bold; font-size: 18px; font-family: Arial, sans-serif;">H</span></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
+        }),
+        cosam: L.divIcon({
+            html: '<div style="width: 28px; height: 28px; background: #E53935; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><span style="color: white; font-weight: bold; font-size: 18px; font-family: Arial, sans-serif;">H</span></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
+        }),
+        conin: L.divIcon({
+            html: '<div style="width: 28px; height: 28px; background: #E53935; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><span style="color: white; font-weight: bold; font-size: 18px; font-family: Arial, sans-serif;">H</span></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
+        }),
+        cesfam: L.divIcon({
+            html: '<div style="width: 28px; height: 28px; background: #E53935; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><span style="color: white; font-weight: bold; font-size: 18px; font-family: Arial, sans-serif;">H</span></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
+        }),
+        centroSalud: L.divIcon({
+            html: '<div style="width: 28px; height: 28px; background: #E53935; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><span style="color: white; font-weight: bold; font-size: 18px; font-family: Arial, sans-serif;">H</span></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
+        }),
+        centroMedico: L.divIcon({
+            html: '<div style="width: 28px; height: 28px; background: #E53935; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><span style="color: white; font-weight: bold; font-size: 18px; font-family: Arial, sans-serif;">H</span></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
+        }),
+        clinicaDental: L.divIcon({
+            html: '<div style="width: 28px; height: 28px; background: #E53935; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><span style="color: white; font-weight: bold; font-size: 18px; font-family: Arial, sans-serif;">H</span></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
+        }),
+        clinica: L.divIcon({
+            html: '<div style="width: 28px; height: 28px; background: #E53935; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><span style="color: white; font-weight: bold; font-size: 18px; font-family: Arial, sans-serif;">H</span></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
+        }),
+        cdt: L.divIcon({
+            html: '<div style="width: 28px; height: 28px; background: #E53935; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><span style="color: white; font-weight: bold; font-size: 18px; font-family: Arial, sans-serif;">H</span></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
+        }),
+        direccionSalud: L.divIcon({
+            html: '<div style="width: 28px; height: 28px; background: #E53935; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><span style="color: white; font-weight: bold; font-size: 18px; font-family: Arial, sans-serif;">H</span></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
+        }),
+        hospital: L.divIcon({
+            html: '<div style="width: 28px; height: 28px; background: #E53935; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><span style="color: white; font-weight: bold; font-size: 18px; font-family: Arial, sans-serif;">H</span></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
+        }),
+        laboratorio: L.divIcon({
+            html: '<div style="width: 28px; height: 28px; background: #E53935; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><span style="color: white; font-weight: bold; font-size: 18px; font-family: Arial, sans-serif;">H</span></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
+        }),
+        prais: L.divIcon({
+            html: '<div style="width: 28px; height: 28px; background: #E53935; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><span style="color: white; font-weight: bold; font-size: 18px; font-family: Arial, sans-serif;">H</span></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
+        }),
+        sapu: L.divIcon({
+            html: '<div style="width: 28px; height: 28px; background: #E53935; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><span style="color: white; font-weight: bold; font-size: 18px; font-family: Arial, sans-serif;">H</span></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
+        }),
+        unidadSaludFuncionarios: L.divIcon({
+            html: '<div style="width: 28px; height: 28px; background: #E53935; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><span style="color: white; font-weight: bold; font-size: 18px; font-family: Arial, sans-serif;">H</span></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
+        }),
+        vacunatorio: L.divIcon({
+            html: '<div style="width: 28px; height: 28px; background: #E53935; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><span style="color: white; font-weight: bold; font-size: 18px; font-family: Arial, sans-serif;">H</span></div>',
+            className: 'custom-div-icon',
+            iconSize: [24, 24],
+            iconAnchor: [12, 24],
+            popupAnchor: [0, -24]
+        }),
         metro: L.divIcon({
             html: '<div style="width: 28px; height: 28px; background: white; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center;"><img src="icon/metro_icon.png" style="width: 20px; height: 20px; object-fit: contain;"/></div>',
             className: 'custom-div-icon',
@@ -390,7 +517,22 @@ async function generateDocplexRoute(silent=false) {
     let housesData = [];
     let additionalHouses = [];
     let houseMarkers = [];
-    let healthPois = [];
+    let cecosfPois = [];
+    let cosamPois = [];
+    let coninPois = [];
+    let cesfamPois = [];
+    let centroSaludPois = [];
+    let centroMedicoPois = [];
+    let clinicaDentalPois = [];
+    let clinicaPois = [];
+    let cdtPois = [];
+    let direccionSaludPois = [];
+    let hospitalPois = [];
+    let laboratorioPois = [];
+    let praisPois = [];
+    let sapuPois = [];
+    let unidadSaludFuncionariosPois = [];
+    let vacunatorioPois = [];
     let metroPois = [];
     let startPointMarker = null;
     let paraderos = [];
@@ -440,7 +582,22 @@ async function generateDocplexRoute(silent=false) {
     const comunaFilter = null; // comuna filter removed from UI
     const startPointBtn = document.getElementById('start-point-btn');
     const filterByMetroCb = document.getElementById('filter-by-metro');
-    const filterByHealthCb = document.getElementById('filter-by-health');
+    const filterByCecosfCb = document.getElementById('filter-by-cecosf');
+    const filterByCosamCb = document.getElementById('filter-by-cosam');
+    const filterByConinCb = document.getElementById('filter-by-conin');
+    const filterByCesfamCb = document.getElementById('filter-by-cesfam');
+    const filterByCentroSaludCb = document.getElementById('filter-by-centro-salud');
+    const filterByCentroMedicoCb = document.getElementById('filter-by-centro-medico');
+    const filterByClinicaDentalCb = document.getElementById('filter-by-clinica-dental');
+    const filterByClinicaCb = document.getElementById('filter-by-clinica');
+    const filterByCdtCb = document.getElementById('filter-by-cdt');
+    const filterByDireccionSaludCb = document.getElementById('filter-by-direccion-salud');
+    const filterByHospitalCb = document.getElementById('filter-by-hospital');
+    const filterByLaboratorioCb = document.getElementById('filter-by-laboratorio');
+    const filterByPraisCb = document.getElementById('filter-by-prais');
+    const filterBySapuCb = document.getElementById('filter-by-sapu');
+    const filterByUnidadSaludFuncionariosCb = document.getElementById('filter-by-unidad-salud-funcionarios');
+    const filterByVacunatorioCb = document.getElementById('filter-by-vacunatorio');
     const filterByParaderosCb = document.getElementById('filter-by-paraderos');
     const filterByCarabinerosCb = document.getElementById('filter-by-carabineros');
     const filterByFeriasCb = document.getElementById('filter-by-ferias');
@@ -1176,7 +1333,22 @@ async function generateDocplexRoute(silent=false) {
     // Unified proximity filtering: houses must satisfy all enabled proximity checks (AND logic)
     function applyProximityFilters() {
         const metroEnabled = filterByMetroCb && filterByMetroCb.checked;
-        const healthEnabled = filterByHealthCb && filterByHealthCb.checked;
+        const cecosfEnabled = filterByCecosfCb && filterByCecosfCb.checked;
+        const cosamEnabled = filterByCosamCb && filterByCosamCb.checked;
+        const coninEnabled = filterByConinCb && filterByConinCb.checked;
+        const cesfamEnabled = filterByCesfamCb && filterByCesfamCb.checked;
+        const centroSaludEnabled = filterByCentroSaludCb && filterByCentroSaludCb.checked;
+        const centroMedicoEnabled = filterByCentroMedicoCb && filterByCentroMedicoCb.checked;
+        const clinicaDentalEnabled = filterByClinicaDentalCb && filterByClinicaDentalCb.checked;
+        const clinicaEnabled = filterByClinicaCb && filterByClinicaCb.checked;
+        const cdtEnabled = filterByCdtCb && filterByCdtCb.checked;
+        const direccionSaludEnabled = filterByDireccionSaludCb && filterByDireccionSaludCb.checked;
+        const hospitalEnabled = filterByHospitalCb && filterByHospitalCb.checked;
+        const laboratorioEnabled = filterByLaboratorioCb && filterByLaboratorioCb.checked;
+        const praisEnabled = filterByPraisCb && filterByPraisCb.checked;
+        const sapuEnabled = filterBySapuCb && filterBySapuCb.checked;
+        const unidadSaludFuncionariosEnabled = filterByUnidadSaludFuncionariosCb && filterByUnidadSaludFuncionariosCb.checked;
+        const vacunatorioEnabled = filterByVacunatorioCb && filterByVacunatorioCb.checked;
         const paraderosEnabled = filterByParaderosCb && filterByParaderosCb.checked;
         const carabinerosEnabled = filterByCarabinerosCb && filterByCarabinerosCb.checked;
         const feriasEnabled = filterByFeriasCb && filterByFeriasCb.checked;
@@ -1187,8 +1359,10 @@ async function generateDocplexRoute(silent=false) {
         const jardinesEnabled = filterByJardinesCb && filterByJardinesCb.checked;
         
         // if no proximity filter enabled, redisplay all houses (respecting smart search filters)
-        if (!metroEnabled && !healthEnabled && !paraderosEnabled && !carabinerosEnabled && 
-            !feriasEnabled && !institutosEnabled && !universidadesPrivadasEnabled && !universidadesEstatalesEnabled && !colegiosEnabled && !jardinesEnabled) { 
+        if (!metroEnabled && !cecosfEnabled && !cosamEnabled && !coninEnabled && !cesfamEnabled && !centroSaludEnabled && 
+            !centroMedicoEnabled && !clinicaDentalEnabled && !clinicaEnabled && !cdtEnabled && !direccionSaludEnabled && !hospitalEnabled && !laboratorioEnabled && 
+            !praisEnabled && !sapuEnabled && !unidadSaludFuncionariosEnabled && !vacunatorioEnabled &&
+            !paraderosEnabled && !carabinerosEnabled && !feriasEnabled && !institutosEnabled && !universidadesPrivadasEnabled && !universidadesEstatalesEnabled && !colegiosEnabled && !jardinesEnabled) { 
             displayHouses(housesData); 
             return; 
         }
@@ -1201,7 +1375,22 @@ async function generateDocplexRoute(silent=false) {
         
         // Prepare point arrays for each enabled filter
         const metroPoints = metroPois.map(m => ({ lat: m.lat, lon: m.lon }));
-        const healthPoints = healthPois.map(h => ({ lat: h.lat, lon: h.lon }));
+        const cecosfPoints = cecosfPois.map(h => ({ lat: h.lat, lon: h.lon }));
+        const cosamPoints = cosamPois.map(h => ({ lat: h.lat, lon: h.lon }));
+        const coninPoints = coninPois.map(h => ({ lat: h.lat, lon: h.lon }));
+        const cesfamPoints = cesfamPois.map(h => ({ lat: h.lat, lon: h.lon }));
+        const centroSaludPoints = centroSaludPois.map(h => ({ lat: h.lat, lon: h.lon }));
+        const centroMedicoPoints = centroMedicoPois.map(h => ({ lat: h.lat, lon: h.lon }));
+        const clinicaDentalPoints = clinicaDentalPois.map(h => ({ lat: h.lat, lon: h.lon }));
+        const clinicaPoints = clinicaPois.map(h => ({ lat: h.lat, lon: h.lon }));
+        const cdtPoints = cdtPois.map(h => ({ lat: h.lat, lon: h.lon }));
+        const direccionSaludPoints = direccionSaludPois.map(h => ({ lat: h.lat, lon: h.lon }));
+        const hospitalPoints = hospitalPois.map(h => ({ lat: h.lat, lon: h.lon }));
+        const laboratorioPoints = laboratorioPois.map(h => ({ lat: h.lat, lon: h.lon }));
+        const praisPoints = praisPois.map(h => ({ lat: h.lat, lon: h.lon }));
+        const sapuPoints = sapuPois.map(h => ({ lat: h.lat, lon: h.lon }));
+        const unidadSaludFuncionariosPoints = unidadSaludFuncionariosPois.map(h => ({ lat: h.lat, lon: h.lon }));
+        const vacunatorioPoints = vacunatorioPois.map(h => ({ lat: h.lat, lon: h.lon }));
         const paraderosPoints = paraderos.map(p => ({ lat: p.lat, lon: p.lon }));
         const carabinerosPoints = carabinerosPois.map(c => ({ lat: c.lat, lon: c.lon }));
         const feriasPoints = feriasPois.map(f => ({ lat: f.lat, lon: f.lon }));
@@ -1223,9 +1412,69 @@ async function generateDocplexRoute(silent=false) {
                 const nearMetro = metroPoints.some(mp => haversineDistance(point, mp) <= radius);
                 if (!nearMetro) return false;
             }
-            if (healthEnabled) {
-                const nearHealth = healthPoints.some(hp => haversineDistance(point, hp) <= radius);
-                if (!nearHealth) return false;
+            if (cecosfEnabled) {
+                const nearCecosf = cecosfPoints.some(hp => haversineDistance(point, hp) <= radius);
+                if (!nearCecosf) return false;
+            }
+            if (cosamEnabled) {
+                const nearCosam = cosamPoints.some(hp => haversineDistance(point, hp) <= radius);
+                if (!nearCosam) return false;
+            }
+            if (coninEnabled) {
+                const nearConin = coninPoints.some(hp => haversineDistance(point, hp) <= radius);
+                if (!nearConin) return false;
+            }
+            if (cesfamEnabled) {
+                const nearCesfam = cesfamPoints.some(hp => haversineDistance(point, hp) <= radius);
+                if (!nearCesfam) return false;
+            }
+            if (centroSaludEnabled) {
+                const nearCentroSalud = centroSaludPoints.some(hp => haversineDistance(point, hp) <= radius);
+                if (!nearCentroSalud) return false;
+            }
+            if (centroMedicoEnabled) {
+                const nearCentroMedico = centroMedicoPoints.some(hp => haversineDistance(point, hp) <= radius);
+                if (!nearCentroMedico) return false;
+            }
+            if (clinicaDentalEnabled) {
+                const nearClinicaDental = clinicaDentalPoints.some(hp => haversineDistance(point, hp) <= radius);
+                if (!nearClinicaDental) return false;
+            }
+            if (clinicaEnabled) {
+                const nearClinica = clinicaPoints.some(hp => haversineDistance(point, hp) <= radius);
+                if (!nearClinica) return false;
+            }
+            if (cdtEnabled) {
+                const nearCdt = cdtPoints.some(hp => haversineDistance(point, hp) <= radius);
+                if (!nearCdt) return false;
+            }
+            if (direccionSaludEnabled) {
+                const nearDireccionSalud = direccionSaludPoints.some(hp => haversineDistance(point, hp) <= radius);
+                if (!nearDireccionSalud) return false;
+            }
+            if (hospitalEnabled) {
+                const nearHospital = hospitalPoints.some(hp => haversineDistance(point, hp) <= radius);
+                if (!nearHospital) return false;
+            }
+            if (laboratorioEnabled) {
+                const nearLaboratorio = laboratorioPoints.some(hp => haversineDistance(point, hp) <= radius);
+                if (!nearLaboratorio) return false;
+            }
+            if (praisEnabled) {
+                const nearPrais = praisPoints.some(hp => haversineDistance(point, hp) <= radius);
+                if (!nearPrais) return false;
+            }
+            if (sapuEnabled) {
+                const nearSapu = sapuPoints.some(hp => haversineDistance(point, hp) <= radius);
+                if (!nearSapu) return false;
+            }
+            if (unidadSaludFuncionariosEnabled) {
+                const nearUnidadSaludFuncionarios = unidadSaludFuncionariosPoints.some(hp => haversineDistance(point, hp) <= radius);
+                if (!nearUnidadSaludFuncionarios) return false;
+            }
+            if (vacunatorioEnabled) {
+                const nearVacunatorio = vacunatorioPoints.some(hp => haversineDistance(point, hp) <= radius);
+                if (!nearVacunatorio) return false;
             }
             if (paraderosEnabled) {
                 const nearParaderos = paraderosPoints.some(pp => haversineDistance(point, pp) <= radius);
@@ -1269,7 +1518,22 @@ async function generateDocplexRoute(silent=false) {
     }
 
     if (filterByMetroCb) filterByMetroCb.addEventListener('change', applyProximityFilters);
-    if (filterByHealthCb) filterByHealthCb.addEventListener('change', applyProximityFilters);
+    if (filterByCecosfCb) filterByCecosfCb.addEventListener('change', applyProximityFilters);
+    if (filterByCosamCb) filterByCosamCb.addEventListener('change', applyProximityFilters);
+    if (filterByConinCb) filterByConinCb.addEventListener('change', applyProximityFilters);
+    if (filterByCesfamCb) filterByCesfamCb.addEventListener('change', applyProximityFilters);
+    if (filterByCentroSaludCb) filterByCentroSaludCb.addEventListener('change', applyProximityFilters);
+    if (filterByCentroMedicoCb) filterByCentroMedicoCb.addEventListener('change', applyProximityFilters);
+    if (filterByClinicaDentalCb) filterByClinicaDentalCb.addEventListener('change', applyProximityFilters);
+    if (filterByClinicaCb) filterByClinicaCb.addEventListener('change', applyProximityFilters);
+    if (filterByCdtCb) filterByCdtCb.addEventListener('change', applyProximityFilters);
+    if (filterByDireccionSaludCb) filterByDireccionSaludCb.addEventListener('change', applyProximityFilters);
+    if (filterByHospitalCb) filterByHospitalCb.addEventListener('change', applyProximityFilters);
+    if (filterByLaboratorioCb) filterByLaboratorioCb.addEventListener('change', applyProximityFilters);
+    if (filterByPraisCb) filterByPraisCb.addEventListener('change', applyProximityFilters);
+    if (filterBySapuCb) filterBySapuCb.addEventListener('change', applyProximityFilters);
+    if (filterByUnidadSaludFuncionariosCb) filterByUnidadSaludFuncionariosCb.addEventListener('change', applyProximityFilters);
+    if (filterByVacunatorioCb) filterByVacunatorioCb.addEventListener('change', applyProximityFilters);
     if (filterByParaderosCb) filterByParaderosCb.addEventListener('change', applyProximityFilters);
     if (filterByCarabinerosCb) filterByCarabinerosCb.addEventListener('change', applyProximityFilters);
     if (filterByFeriasCb) filterByFeriasCb.addEventListener('change', applyProximityFilters);
@@ -1277,6 +1541,7 @@ async function generateDocplexRoute(silent=false) {
     if (filterByUniversidadesPrivadasCb) filterByUniversidadesPrivadasCb.addEventListener('change', applyProximityFilters);
     if (filterByUniversidadesEstatalesCb) filterByUniversidadesEstatalesCb.addEventListener('change', applyProximityFilters);
     if (filterByColegiosCb) filterByColegiosCb.addEventListener('change', applyProximityFilters);
+    if (filterByJardinesCb) filterByJardinesCb.addEventListener('change', applyProximityFilters);
     if (metroRadiusInput) metroRadiusInput.addEventListener('change', applyProximityFilters);
     if (proximityRadiusInput) proximityRadiusInput.addEventListener('change', applyProximityFilters);
 
@@ -1292,7 +1557,22 @@ async function generateDocplexRoute(silent=false) {
         clearProximityFiltersBtn.addEventListener('click', () => {
             // Uncheck all proximity filters
             if (filterByMetroCb) filterByMetroCb.checked = false;
-            if (filterByHealthCb) filterByHealthCb.checked = false;
+            if (filterByCecosfCb) filterByCecosfCb.checked = false;
+            if (filterByCosamCb) filterByCosamCb.checked = false;
+            if (filterByConinCb) filterByConinCb.checked = false;
+            if (filterByCesfamCb) filterByCesfamCb.checked = false;
+            if (filterByCentroSaludCb) filterByCentroSaludCb.checked = false;
+            if (filterByCentroMedicoCb) filterByCentroMedicoCb.checked = false;
+            if (filterByClinicaDentalCb) filterByClinicaDentalCb.checked = false;
+            if (filterByClinicaCb) filterByClinicaCb.checked = false;
+            if (filterByCdtCb) filterByCdtCb.checked = false;
+            if (filterByDireccionSaludCb) filterByDireccionSaludCb.checked = false;
+            if (filterByHospitalCb) filterByHospitalCb.checked = false;
+            if (filterByLaboratorioCb) filterByLaboratorioCb.checked = false;
+      if (filterByPraisCb) filterByPraisCb.checked = false;
+      if (filterBySapuCb) filterBySapuCb.checked = false;
+      if (filterByUnidadSaludFuncionariosCb) filterByUnidadSaludFuncionariosCb.checked = false;
+      if (filterByVacunatorioCb) filterByVacunatorioCb.checked = false;
             if (filterByParaderosCb) filterByParaderosCb.checked = false;
             if (filterByCarabinerosCb) filterByCarabinerosCb.checked = false;
             if (filterByFeriasCb) filterByFeriasCb.checked = false;
@@ -1402,22 +1682,356 @@ async function generateDocplexRoute(silent=false) {
         return rows;
     }
 
-    function loadHealth() {
-        return fetch('data/Establecimientos_de_Salud.csv').then(r => r.text()).then(t => {
-            const parsed = parsePipeCSV(t);
-            healthPois = parsed.map(p => ({
-                name: p.NOMBRE || p.NOM_COM || p.DIRECCION || '',
-                lat: parseFloat(p.LATITUD),
-                lon: parseFloat(p.LONGITUD),
-                tipo: p.TIPO || ''
+    function loadCecosf() {
+        return fetch('data/establecimientos_por_tipo/Centro_Comunitario_de_Salud_Familiar_CECOSF.json').then(r => r.json()).then(data => {
+            cecosfPois = data.map(item => ({
+                nombre: item.NOMBRE || 'CECOSF',
+                tipo: item.TIPO || 'Centro Comunitario de Salud Familiar',
+                lat: item.LATITUD,
+                lon: item.LONGITUD,
+                direccion: item.DIRECCION || '',
+                numero: item.NUMERO || '',
+                comuna: item.NOM_COM || ''
             })).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
-            healthPois.forEach(p => {
-                const m = L.marker([p.lat, p.lon], { icon: icons.health }).bindPopup(`<b>${p.name}</b><br>${p.tipo}`);
-                healthLayer.addLayer(m);
+            
+            cecosfPois.forEach(p => {
+                const marker = L.marker([p.lat, p.lon], { icon: icons.cecosf })
+                    .bindPopup(`<b>${p.nombre}</b><br>${p.tipo}<br>${p.direccion} ${p.numero}<br>${p.comuna}`);
+                cecosfLayer.addLayer(marker);
             });
-            setText('debug-health', `salud cargados: ${healthPois.length}`);
-            setText('health-count', healthPois.length);
-        }).catch(e => { console.error('failed parse health csv', e); const d=document.getElementById('debug-health'); if(d)d.textContent='salud load error'; });
+            setText('debug-cecosf', `CECOSF cargados: ${cecosfPois.length}`);
+            setText('cecosf-count', cecosfPois.length);
+        }).catch(e => { console.warn('CECOSF load error', e); setText('cecosf-count', 0); });
+    }
+
+    function loadCosam() {
+        return fetch('data/establecimientos_por_tipo/Centro_Comunitario_de_Salud_Mental_COSAM.json').then(r => r.json()).then(data => {
+            cosamPois = data.map(item => ({
+                nombre: item.NOMBRE || 'COSAM',
+                tipo: item.TIPO || 'Centro Comunitario de Salud Mental',
+                lat: item.LATITUD,
+                lon: item.LONGITUD,
+                direccion: item.DIRECCION || '',
+                numero: item.NUMERO || '',
+                comuna: item.NOM_COM || ''
+            })).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+            
+            cosamPois.forEach(p => {
+                const marker = L.marker([p.lat, p.lon], { icon: icons.cosam })
+                    .bindPopup(`<b>${p.nombre}</b><br>${p.tipo}<br>${p.direccion} ${p.numero}<br>${p.comuna}`);
+                cosamLayer.addLayer(marker);
+            });
+            setText('debug-cosam', `COSAM cargados: ${cosamPois.length}`);
+            setText('cosam-count', cosamPois.length);
+        }).catch(e => { console.warn('COSAM load error', e); setText('cosam-count', 0); });
+    }
+
+    function loadConin() {
+        return fetch('data/establecimientos_por_tipo/Centro_Corporación_para_la_Nutrición_Infantil_CONIN.json').then(r => r.json()).then(data => {
+            coninPois = data.map(item => ({
+                nombre: item.NOMBRE || 'CONIN',
+                tipo: item.TIPO || 'Centro Corporación para la Nutrición Infantil',
+                lat: item.LATITUD,
+                lon: item.LONGITUD,
+                direccion: item.DIRECCION || '',
+                numero: item.NUMERO || '',
+                comuna: item.NOM_COM || ''
+            })).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+            
+            coninPois.forEach(p => {
+                const marker = L.marker([p.lat, p.lon], { icon: icons.conin })
+                    .bindPopup(`<b>${p.nombre}</b><br>${p.tipo}<br>${p.direccion} ${p.numero}<br>${p.comuna}`);
+                coninLayer.addLayer(marker);
+            });
+            setText('debug-conin', `CONIN cargados: ${coninPois.length}`);
+            setText('conin-count', coninPois.length);
+        }).catch(e => { console.warn('CONIN load error', e); setText('conin-count', 0); });
+    }
+
+    function loadCesfam() {
+        return fetch('data/establecimientos_por_tipo/Centro_de_Salud_Familiar_CESFAM.json').then(r => r.json()).then(data => {
+            cesfamPois = data.map(item => ({
+                nombre: item.NOMBRE || 'CESFAM',
+                tipo: item.TIPO || 'Centro de Salud Familiar',
+                lat: item.LATITUD,
+                lon: item.LONGITUD,
+                direccion: item.DIRECCION || '',
+                numero: item.NUMERO || '',
+                comuna: item.NOM_COM || ''
+            })).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+            
+            cesfamPois.forEach(p => {
+                const marker = L.marker([p.lat, p.lon], { icon: icons.cesfam })
+                    .bindPopup(`<b>${p.nombre}</b><br>${p.tipo}<br>${p.direccion} ${p.numero}<br>${p.comuna}`);
+                cesfamLayer.addLayer(marker);
+            });
+            setText('debug-cesfam', `CESFAM cargados: ${cesfamPois.length}`);
+            setText('cesfam-count', cesfamPois.length);
+        }).catch(e => { console.warn('CESFAM load error', e); setText('cesfam-count', 0); });
+    }
+
+    function loadCentroSalud() {
+        return fetch('data/establecimientos_por_tipo/Centro_de_Salud.json').then(r => r.json()).then(data => {
+            centroSaludPois = data.map(item => ({
+                nombre: item.NOMBRE || 'Centro de Salud',
+                tipo: item.TIPO || 'Centro de Salud',
+                lat: item.LATITUD,
+                lon: item.LONGITUD,
+                direccion: item.DIRECCION || '',
+                numero: item.NUMERO || '',
+                comuna: item.NOM_COM || ''
+            })).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+            
+            centroSaludPois.forEach(p => {
+                const marker = L.marker([p.lat, p.lon], { icon: icons.centroSalud })
+                    .bindPopup(`<b>${p.nombre}</b><br>${p.tipo}<br>${p.direccion} ${p.numero}<br>${p.comuna}`);
+                centroSaludLayer.addLayer(marker);
+            });
+            setText('debug-centro-salud', `Centros de Salud cargados: ${centroSaludPois.length}`);
+            setText('centro-salud-count', centroSaludPois.length);
+        }).catch(e => { console.warn('Centro de Salud load error', e); setText('centro-salud-count', 0); });
+    }
+
+    function loadCentroMedico() {
+        return fetch('data/establecimientos_por_tipo/Centro_Médico_y_Dental.json').then(r => r.json()).then(data => {
+            centroMedicoPois = data.map(item => ({
+                nombre: item.NOMBRE || 'Centro Médico y Dental',
+                tipo: item.TIPO || 'Centro Médico y Dental',
+                lat: item.LATITUD,
+                lon: item.LONGITUD,
+                direccion: item.DIRECCION || '',
+                numero: item.NUMERO || '',
+                comuna: item.NOM_COM || ''
+            })).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+            
+            centroMedicoPois.forEach(p => {
+                const marker = L.marker([p.lat, p.lon], { icon: icons.centroMedico })
+                    .bindPopup(`<b>${p.nombre}</b><br>${p.tipo}<br>${p.direccion} ${p.numero}<br>${p.comuna}`);
+                centroMedicoLayer.addLayer(marker);
+            });
+            setText('debug-centro-medico', `Centros Médicos cargados: ${centroMedicoPois.length}`);
+            setText('centro-medico-count', centroMedicoPois.length);
+        }).catch(e => { console.warn('Centro Médico load error', e); setText('centro-medico-count', 0); });
+    }
+
+    function loadClinicaDental() {
+        return fetch('data/establecimientos_por_tipo/Clínica_Dental.json').then(r => r.json()).then(data => {
+            clinicaDentalPois = data.map(item => ({
+                nombre: item.NOMBRE || 'Clínica Dental',
+                tipo: item.TIPO || 'Clínica Dental',
+                lat: item.LATITUD,
+                lon: item.LONGITUD,
+                direccion: item.DIRECCION || '',
+                numero: item.NUMERO || '',
+                comuna: item.NOM_COM || ''
+            })).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+            
+            clinicaDentalPois.forEach(p => {
+                const marker = L.marker([p.lat, p.lon], { icon: icons.clinicaDental })
+                    .bindPopup(`<b>${p.nombre}</b><br>${p.tipo}<br>${p.direccion} ${p.numero}<br>${p.comuna}`);
+                clinicaDentalLayer.addLayer(marker);
+            });
+            setText('debug-clinica-dental', `Clínicas Dentales cargadas: ${clinicaDentalPois.length}`);
+            setText('clinica-dental-count', clinicaDentalPois.length);
+        }).catch(e => { console.warn('Clínica Dental load error', e); setText('clinica-dental-count', 0); });
+    }
+
+    function loadClinica() {
+        return fetch('data/establecimientos_por_tipo/Clínica.json').then(r => r.json()).then(data => {
+            clinicaPois = data.map(item => ({
+                nombre: item.NOMBRE || 'Clínica',
+                tipo: item.TIPO || 'Clínica',
+                lat: item.LATITUD,
+                lon: item.LONGITUD,
+                direccion: item.DIRECCION || '',
+                numero: item.NUMERO || '',
+                comuna: item.NOM_COM || ''
+            })).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+            
+            clinicaPois.forEach(p => {
+                const marker = L.marker([p.lat, p.lon], { icon: icons.clinica })
+                    .bindPopup(`<b>${p.nombre}</b><br>${p.tipo}<br>${p.direccion} ${p.numero}<br>${p.comuna}`);
+                clinicaLayer.addLayer(marker);
+            });
+            setText('debug-clinica', `Clínicas cargadas: ${clinicaPois.length}`);
+            setText('clinica-count', clinicaPois.length);
+        }).catch(e => { console.warn('Clínica load error', e); setText('clinica-count', 0); });
+    }
+
+    function loadCdt() {
+        return fetch('data/establecimientos_por_tipo/Consultorio_de_Diagnóstico_y_Tratamiento_CDT.json').then(r => r.json()).then(data => {
+            cdtPois = data.map(item => ({
+                nombre: item.NOMBRE || 'CDT',
+                tipo: item.TIPO || 'Consultorio de Diagnóstico y Tratamiento',
+                lat: item.LATITUD,
+                lon: item.LONGITUD,
+                direccion: item.DIRECCION || '',
+                numero: item.NUMERO || '',
+                comuna: item.NOM_COM || ''
+            })).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+            
+            cdtPois.forEach(p => {
+                const marker = L.marker([p.lat, p.lon], { icon: icons.cdt })
+                    .bindPopup(`<b>${p.nombre}</b><br>${p.tipo}<br>${p.direccion} ${p.numero}<br>${p.comuna}`);
+                cdtLayer.addLayer(marker);
+            });
+            setText('debug-cdt', `CDT cargados: ${cdtPois.length}`);
+            setText('cdt-count', cdtPois.length);
+        }).catch(e => { console.warn('CDT load error', e); setText('cdt-count', 0); });
+    }
+
+    function loadDireccionSalud() {
+        return fetch('data/establecimientos_por_tipo/Dirección_Servicio_de_Salud.json').then(r => r.json()).then(data => {
+            direccionSaludPois = data.map(item => ({
+                nombre: item.NOMBRE || 'Dirección Servicio de Salud',
+                tipo: item.TIPO || 'Dirección Servicio de Salud',
+                lat: item.LATITUD,
+                lon: item.LONGITUD,
+                direccion: item.DIRECCION || '',
+                numero: item.NUMERO || '',
+                comuna: item.NOM_COM || ''
+            })).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+            
+            direccionSaludPois.forEach(p => {
+                const marker = L.marker([p.lat, p.lon], { icon: icons.direccionSalud })
+                    .bindPopup(`<b>${p.nombre}</b><br>${p.tipo}<br>${p.direccion} ${p.numero}<br>${p.comuna}`);
+                direccionSaludLayer.addLayer(marker);
+            });
+            setText('debug-direccion-salud', `Direcciones de Salud cargadas: ${direccionSaludPois.length}`);
+            setText('direccion-salud-count', direccionSaludPois.length);
+        }).catch(e => { console.warn('Dirección Salud load error', e); setText('direccion-salud-count', 0); });
+    }
+
+    function loadHospital() {
+        return fetch('data/establecimientos_por_tipo/Hospital.json').then(r => r.json()).then(data => {
+            hospitalPois = data.map(item => ({
+                nombre: item.NOMBRE || 'Hospital',
+                tipo: item.TIPO || 'Hospital',
+                lat: item.LATITUD,
+                lon: item.LONGITUD,
+                direccion: item.DIRECCION || '',
+                numero: item.NUMERO || '',
+                comuna: item.NOM_COM || ''
+            })).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+            
+            hospitalPois.forEach(p => {
+                const marker = L.marker([p.lat, p.lon], { icon: icons.hospital })
+                    .bindPopup(`<b>${p.nombre}</b><br>${p.tipo}<br>${p.direccion} ${p.numero}<br>${p.comuna}`);
+                hospitalLayer.addLayer(marker);
+            });
+            setText('debug-hospital', `Hospitales cargados: ${hospitalPois.length}`);
+            setText('hospital-count', hospitalPois.length);
+        }).catch(e => { console.warn('Hospital load error', e); setText('hospital-count', 0); });
+    }
+
+    function loadLaboratorio() {
+        return fetch('data/establecimientos_por_tipo/Laboratorio_Clínico_o_Dental.json').then(r => r.json()).then(data => {
+            laboratorioPois = data.map(item => ({
+                nombre: item.NOMBRE || 'Laboratorio',
+                tipo: item.TIPO || 'Laboratorio Clínico o Dental',
+                lat: item.LATITUD,
+                lon: item.LONGITUD,
+                direccion: item.DIRECCION || '',
+                numero: item.NUMERO || '',
+                comuna: item.NOM_COM || ''
+            })).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+            
+            laboratorioPois.forEach(p => {
+                const marker = L.marker([p.lat, p.lon], { icon: icons.laboratorio })
+                    .bindPopup(`<b>${p.nombre}</b><br>${p.tipo}<br>${p.direccion} ${p.numero}<br>${p.comuna}`);
+                laboratorioLayer.addLayer(marker);
+            });
+            setText('debug-laboratorio', `Laboratorios cargados: ${laboratorioPois.length}`);
+            setText('laboratorio-count', laboratorioPois.length);
+        }).catch(e => { console.warn('Laboratorio load error', e); setText('laboratorio-count', 0); });
+    }
+
+    function loadPrais() {
+        return fetch('data/establecimientos_por_tipo/Programa_de_Reparación_y_Atención_Integral_de_Salud.json').then(r => r.json()).then(data => {
+            praisPois = data.map(item => ({
+                nombre: item.NOMBRE || 'PRAIS',
+                tipo: item.TIPO || 'Programa de Reparación y Atención Integral de Salud',
+                lat: item.LATITUD,
+                lon: item.LONGITUD,
+                direccion: item.DIRECCION || '',
+                numero: item.NUMERO || '',
+                comuna: item.NOM_COM || ''
+            })).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+            
+            praisPois.forEach(p => {
+                const marker = L.marker([p.lat, p.lon], { icon: icons.prais })
+                    .bindPopup(`<b>${p.nombre}</b><br>${p.tipo}<br>${p.direccion} ${p.numero}<br>${p.comuna}`);
+                praisLayer.addLayer(marker);
+            });
+            setText('debug-prais', `PRAIS cargados: ${praisPois.length}`);
+            setText('prais-count', praisPois.length);
+        }).catch(e => { console.warn('PRAIS load error', e); setText('prais-count', 0); });
+    }
+
+    function loadSapu() {
+        return fetch('data/establecimientos_por_tipo/Servicio_de_Atención_Primaria_de_Urgencia_SAPU.json').then(r => r.json()).then(data => {
+            sapuPois = data.map(item => ({
+                nombre: item.NOMBRE || 'SAPU',
+                tipo: item.TIPO || 'Servicio de Atención Primaria de Urgencia',
+                lat: item.LATITUD,
+                lon: item.LONGITUD,
+                direccion: item.DIRECCION || '',
+                numero: item.NUMERO || '',
+                comuna: item.NOM_COM || ''
+            })).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+            
+            sapuPois.forEach(p => {
+                const marker = L.marker([p.lat, p.lon], { icon: icons.sapu })
+                    .bindPopup(`<b>${p.nombre}</b><br>${p.tipo}<br>${p.direccion} ${p.numero}<br>${p.comuna}`);
+                sapuLayer.addLayer(marker);
+            });
+            setText('debug-sapu', `SAPU cargados: ${sapuPois.length}`);
+            setText('sapu-count', sapuPois.length);
+        }).catch(e => { console.warn('SAPU load error', e); setText('sapu-count', 0); });
+    }
+
+    function loadUnidadSaludFuncionarios() {
+        return fetch('data/establecimientos_por_tipo/Unidad_de_Salud_Funcionarios.json').then(r => r.json()).then(data => {
+            unidadSaludFuncionariosPois = data.map(item => ({
+                nombre: item.NOMBRE || 'Unidad de Salud',
+                tipo: item.TIPO || 'Unidad de Salud Funcionarios',
+                lat: item.LATITUD,
+                lon: item.LONGITUD,
+                direccion: item.DIRECCION || '',
+                numero: item.NUMERO || '',
+                comuna: item.NOM_COM || ''
+            })).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+            
+            unidadSaludFuncionariosPois.forEach(p => {
+                const marker = L.marker([p.lat, p.lon], { icon: icons.unidadSaludFuncionarios })
+                    .bindPopup(`<b>${p.nombre}</b><br>${p.tipo}<br>${p.direccion} ${p.numero}<br>${p.comuna}`);
+                unidadSaludFuncionariosLayer.addLayer(marker);
+            });
+            setText('debug-unidad-salud-funcionarios', `Unidades de Salud Funcionarios cargadas: ${unidadSaludFuncionariosPois.length}`);
+            setText('unidad-salud-funcionarios-count', unidadSaludFuncionariosPois.length);
+        }).catch(e => { console.warn('Unidad Salud Funcionarios load error', e); setText('unidad-salud-funcionarios-count', 0); });
+    }
+
+    function loadVacunatorio() {
+        return fetch('data/establecimientos_por_tipo/Vacunatorio.json').then(r => r.json()).then(data => {
+            vacunatorioPois = data.map(item => ({
+                nombre: item.NOMBRE || 'Vacunatorio',
+                tipo: item.TIPO || 'Vacunatorio',
+                lat: item.LATITUD,
+                lon: item.LONGITUD,
+                direccion: item.DIRECCION || '',
+                numero: item.NUMERO || '',
+                comuna: item.NOM_COM || ''
+            })).filter(p => !isNaN(p.lat) && !isNaN(p.lon));
+            
+            vacunatorioPois.forEach(p => {
+                const marker = L.marker([p.lat, p.lon], { icon: icons.vacunatorio })
+                    .bindPopup(`<b>${p.nombre}</b><br>${p.tipo}<br>${p.direccion} ${p.numero}<br>${p.comuna}`);
+                vacunatorioLayer.addLayer(marker);
+            });
+            setText('debug-vacunatorio', `Vacunatorios cargados: ${vacunatorioPois.length}`);
+            setText('vacunatorio-count', vacunatorioPois.length);
+        }).catch(e => { console.warn('Vacunatorio load error', e); setText('vacunatorio-count', 0); });
     }
 
     function loadParaderos() {
@@ -2503,7 +3117,38 @@ async function generateDocplexRoute(silent=false) {
     }
 
     // Toggle layers (only attach if control exists)
-    if (showHealthCb) showHealthCb.addEventListener('change', e => { if (e.target.checked) healthLayer.addTo(map); else map.removeLayer(healthLayer); });
+    const showCecosfCb = document.getElementById('show-cecosf-layer');
+    const showCosamCb = document.getElementById('show-cosam-layer');
+    const showConinCb = document.getElementById('show-conin-layer');
+    const showCesfamCb = document.getElementById('show-cesfam-layer');
+    const showCentroSaludCb = document.getElementById('show-centro-salud-layer');
+    const showCentroMedicoCb = document.getElementById('show-centro-medico-layer');
+    const showClinicaDentalCb = document.getElementById('show-clinica-dental-layer');
+    const showClinicaCb = document.getElementById('show-clinica-layer');
+    const showCdtCb = document.getElementById('show-cdt-layer');
+    const showDireccionSaludCb = document.getElementById('show-direccion-salud-layer');
+    const showHospitalCb = document.getElementById('show-hospital-layer');
+    const showLaboratorioCb = document.getElementById('show-laboratorio-layer');
+    const showPraisCb = document.getElementById('show-prais-layer');
+    const showSapuCb = document.getElementById('show-sapu-layer');
+    const showUnidadSaludFuncionariosCb = document.getElementById('show-unidad-salud-funcionarios-layer');
+    const showVacunatorioCb = document.getElementById('show-vacunatorio-layer');
+    if (showCecosfCb) showCecosfCb.addEventListener('change', e => { if (e.target.checked) cecosfLayer.addTo(map); else map.removeLayer(cecosfLayer); });
+    if (showCosamCb) showCosamCb.addEventListener('change', e => { if (e.target.checked) cosamLayer.addTo(map); else map.removeLayer(cosamLayer); });
+    if (showConinCb) showConinCb.addEventListener('change', e => { if (e.target.checked) coninLayer.addTo(map); else map.removeLayer(coninLayer); });
+    if (showCesfamCb) showCesfamCb.addEventListener('change', e => { if (e.target.checked) cesfamLayer.addTo(map); else map.removeLayer(cesfamLayer); });
+    if (showCentroSaludCb) showCentroSaludCb.addEventListener('change', e => { if (e.target.checked) centroSaludLayer.addTo(map); else map.removeLayer(centroSaludLayer); });
+    if (showCentroMedicoCb) showCentroMedicoCb.addEventListener('change', e => { if (e.target.checked) centroMedicoLayer.addTo(map); else map.removeLayer(centroMedicoLayer); });
+    if (showClinicaDentalCb) showClinicaDentalCb.addEventListener('change', e => { if (e.target.checked) clinicaDentalLayer.addTo(map); else map.removeLayer(clinicaDentalLayer); });
+    if (showClinicaCb) showClinicaCb.addEventListener('change', e => { if (e.target.checked) clinicaLayer.addTo(map); else map.removeLayer(clinicaLayer); });
+    if (showCdtCb) showCdtCb.addEventListener('change', e => { if (e.target.checked) cdtLayer.addTo(map); else map.removeLayer(cdtLayer); });
+    if (showDireccionSaludCb) showDireccionSaludCb.addEventListener('change', e => { if (e.target.checked) direccionSaludLayer.addTo(map); else map.removeLayer(direccionSaludLayer); });
+    if (showHospitalCb) showHospitalCb.addEventListener('change', e => { if (e.target.checked) hospitalLayer.addTo(map); else map.removeLayer(hospitalLayer); });
+    if (showLaboratorioCb) showLaboratorioCb.addEventListener('change', e => { if (e.target.checked) laboratorioLayer.addTo(map); else map.removeLayer(laboratorioLayer); });
+    if (showPraisCb) showPraisCb.addEventListener('change', e => { if (e.target.checked) praisLayer.addTo(map); else map.removeLayer(praisLayer); });
+    if (showSapuCb) showSapuCb.addEventListener('change', e => { if (e.target.checked) sapuLayer.addTo(map); else map.removeLayer(sapuLayer); });
+    if (showUnidadSaludFuncionariosCb) showUnidadSaludFuncionariosCb.addEventListener('change', e => { if (e.target.checked) unidadSaludFuncionariosLayer.addTo(map); else map.removeLayer(unidadSaludFuncionariosLayer); });
+    if (showVacunatorioCb) showVacunatorioCb.addEventListener('change', e => { if (e.target.checked) vacunatorioLayer.addTo(map); else map.removeLayer(vacunatorioLayer); });
     if (showMetroCb) showMetroCb.addEventListener('change', e => { if (e.target.checked) metroLayer.addTo(map); else map.removeLayer(metroLayer); });
     if (showHousesCb) showHousesCb.addEventListener('change', e => { if (e.target.checked) housesLayer.addTo(map); else map.removeLayer(housesLayer); });
 
@@ -2615,6 +3260,22 @@ async function generateDocplexRoute(silent=false) {
     // Ensure additional layers are ON on startup: check controls and add layers
     try {
         const layerCheckboxIds = [
+            'show-cecosf-layer',
+            'show-cosam-layer',
+            'show-conin-layer',
+            'show-cesfam-layer',
+            'show-centro-salud-layer',
+            'show-centro-medico-layer',
+            'show-clinica-dental-layer',
+            'show-clinica-layer',
+            'show-cdt-layer',
+            'show-direccion-salud-layer',
+            'show-hospital-layer',
+            'show-laboratorio-layer',
+        'show-prais-layer',
+        'show-sapu-layer',
+        'show-unidad-salud-funcionarios-layer',
+        'show-vacunatorio-layer',
             'show-health-layer',
             'show-metro-layer',
             'show-paraderos-layer',
@@ -2633,6 +3294,22 @@ async function generateDocplexRoute(silent=false) {
         });
 
         // add layers to map
+        try { if (!map.hasLayer(cecosfLayer)) map.addLayer(cecosfLayer); } catch(e) {}
+        try { if (!map.hasLayer(cosamLayer)) map.addLayer(cosamLayer); } catch(e) {}
+        try { if (!map.hasLayer(coninLayer)) map.addLayer(coninLayer); } catch(e) {}
+        try { if (!map.hasLayer(cesfamLayer)) map.addLayer(cesfamLayer); } catch(e) {}
+        try { if (!map.hasLayer(centroSaludLayer)) map.addLayer(centroSaludLayer); } catch(e) {}
+        try { if (!map.hasLayer(centroMedicoLayer)) map.addLayer(centroMedicoLayer); } catch(e) {}
+        try { if (!map.hasLayer(clinicaDentalLayer)) map.addLayer(clinicaDentalLayer); } catch(e) {}
+        try { if (!map.hasLayer(clinicaLayer)) map.addLayer(clinicaLayer); } catch(e) {}
+        try { if (!map.hasLayer(cdtLayer)) map.addLayer(cdtLayer); } catch(e) {}
+        try { if (!map.hasLayer(direccionSaludLayer)) map.addLayer(direccionSaludLayer); } catch(e) {}
+        try { if (!map.hasLayer(hospitalLayer)) map.addLayer(hospitalLayer); } catch(e) {}
+        try { if (!map.hasLayer(laboratorioLayer)) map.addLayer(laboratorioLayer); } catch(e) {}
+        try { if (!map.hasLayer(praisLayer)) map.addLayer(praisLayer); } catch(e) {}
+        try { if (!map.hasLayer(sapuLayer)) map.addLayer(sapuLayer); } catch(e) {}
+        try { if (!map.hasLayer(unidadSaludFuncionariosLayer)) map.addLayer(unidadSaludFuncionariosLayer); } catch(e) {}
+        try { if (!map.hasLayer(vacunatorioLayer)) map.addLayer(vacunatorioLayer); } catch(e) {}
         try { if (!map.hasLayer(healthLayer)) map.addLayer(healthLayer); } catch(e) {}
         try { if (!map.hasLayer(metroLayer)) map.addLayer(metroLayer); } catch(e) {}
         try { if (!map.hasLayer(paraderosLayer)) map.addLayer(paraderosLayer); } catch(e) {}
@@ -2651,7 +3328,22 @@ async function generateDocplexRoute(silent=false) {
     let allLayersDisabled = false;
     if (disableAllBtn) disableAllBtn.addEventListener('click', () => {
         const mapping = [
-            {id: 'show-health-layer', layer: healthLayer},
+            {id: 'show-cecosf-layer', layer: cecosfLayer},
+            {id: 'show-cosam-layer', layer: cosamLayer},
+            {id: 'show-conin-layer', layer: coninLayer},
+            {id: 'show-cesfam-layer', layer: cesfamLayer},
+            {id: 'show-centro-salud-layer', layer: centroSaludLayer},
+            {id: 'show-centro-medico-layer', layer: centroMedicoLayer},
+            {id: 'show-clinica-dental-layer', layer: clinicaDentalLayer},
+            {id: 'show-clinica-layer', layer: clinicaLayer},
+            {id: 'show-cdt-layer', layer: cdtLayer},
+            {id: 'show-direccion-salud-layer', layer: direccionSaludLayer},
+            {id: 'show-hospital-layer', layer: hospitalLayer},
+            {id: 'show-laboratorio-layer', layer: laboratorioLayer},
+            {id: 'show-prais-layer', layer: praisLayer},
+            {id: 'show-sapu-layer', layer: sapuLayer},
+            {id: 'show-unidad-salud-funcionarios-layer', layer: unidadSaludFuncionariosLayer},
+            {id: 'show-vacunatorio-layer', layer: vacunatorioLayer},
             {id: 'show-metro-layer', layer: metroLayer},
             {id: 'show-paraderos-layer', layer: paraderosLayer},
             {id: 'show-carabineros-layer', layer: carabinerosLayer},
@@ -3628,7 +4320,22 @@ async function generateDocplexRoute(silent=false) {
     // Load everything (including paraderos, nodes and edges if present)
     Promise.all([
         loadHouses(), 
-        loadHealth(), 
+        loadCecosf(),
+        loadCosam(),
+        loadConin(),
+        loadCesfam(),
+        loadCentroSalud(),
+        loadCentroMedico(),
+        loadClinicaDental(),
+        loadClinica(),
+        loadCdt(),
+        loadDireccionSalud(),
+        loadHospital(),
+        loadLaboratorio(),
+        loadPrais(),
+        loadSapu(),
+        loadUnidadSaludFuncionarios(),
+        loadVacunatorio(),
         loadMetro(), 
         loadParaderos(), 
         loadCarabineros(),

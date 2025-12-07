@@ -185,8 +185,68 @@
         <span>🚇 Estaciones de metro</span>
       </label>
       <label class="checkbox-label">
-        <input type="checkbox" id="filter-by-health" />
-        <span>🏥 Centros de salud</span>
+        <input type="checkbox" id="filter-by-cecosf" />
+        <span>🏥 CECOSF (Centros Comunitarios de Salud Familiar)</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-cosam" />
+        <span>🧠 COSAM (Centros Comunitarios de Salud Mental)</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-conin" />
+        <span>👶 CONIN (Corporación para la Nutrición Infantil)</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-cesfam" />
+        <span>🏥 CESFAM (Centros de Salud Familiar)</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-centro-salud" />
+        <span>🏥 Centros de Salud</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-centro-medico" />
+        <span>🏥 Centros Médicos y Dentales</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-clinica-dental" />
+        <span>🦷 Clínicas Dentales</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-clinica" />
+        <span>🏥 Clínicas</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-cdt" />
+        <span>🏭 CDT (Consultorios de Diagnóstico y Tratamiento)</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-direccion-salud" />
+        <span>🏢 Dirección Servicio de Salud</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-hospital" />
+        <span>🏭 Hospitales</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-laboratorio" />
+        <span>🧪 Laboratorios Clínicos/Dentales</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-prais" />
+        <span>🏥 PRAIS (Programa de Reparación y Atención Integral de Salud)</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-sapu" />
+        <span>🚑 SAPU (Servicio de Atención Primaria de Urgencia)</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-unidad-salud-funcionarios" />
+        <span>👨‍⚕️ Unidad de Salud Funcionarios</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="filter-by-vacunatorio" />
+        <span>💉 Vacunatorios</span>
       </label>
       <label class="checkbox-label">
         <input type="checkbox" id="filter-by-paraderos" />
@@ -361,8 +421,68 @@
           <span class="stat-value" id="houses-filtered-count">0</span>
         </div>
         <div class="stat-item">
-          <span class="stat-label">Salud</span>
-          <span class="stat-value" id="health-count">0</span>
+          <span class="stat-label">CECOSF</span>
+          <span class="stat-value" id="cecosf-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">COSAM</span>
+          <span class="stat-value" id="cosam-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">CONIN</span>
+          <span class="stat-value" id="conin-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">CESFAM</span>
+          <span class="stat-value" id="cesfam-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Centros de Salud</span>
+          <span class="stat-value" id="centro-salud-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Centros Médicos</span>
+          <span class="stat-value" id="centro-medico-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Clínicas Dentales</span>
+          <span class="stat-value" id="clinica-dental-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Clínicas</span>
+          <span class="stat-value" id="clinica-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">CDT</span>
+          <span class="stat-value" id="cdt-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Dir. Salud</span>
+          <span class="stat-value" id="direccion-salud-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Hospitales</span>
+          <span class="stat-value" id="hospital-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Laboratorios</span>
+          <span class="stat-value" id="laboratorio-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">🏥 PRAIS</span>
+          <span class="stat-value" id="prais-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">🚑 SAPU</span>
+          <span class="stat-value" id="sapu-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">👨‍⚕️ Unidad Salud Func.</span>
+          <span class="stat-value" id="unidad-salud-funcionarios-count">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">💉 Vacunatorios</span>
+          <span class="stat-value" id="vacunatorio-count">0</span>
         </div>
         <div class="stat-item">
           <span class="stat-label">Metro</span>
@@ -402,8 +522,68 @@
     <div class="control-group card">
       <h3 class="section-title">️⚙️ Capas Adicionales</h3>
       <label class="checkbox-label">
-        <input type="checkbox" id="show-health-layer" />
-        <span>🏥 Centros de salud</span>
+        <input type="checkbox" id="show-cecosf-layer" />
+        <span>🏥 CECOSF (Centros Comunitarios de Salud Familiar)</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-cosam-layer" />
+        <span>🧠 COSAM (Centros Comunitarios de Salud Mental)</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-conin-layer" />
+        <span>👶 CONIN (Corporación para la Nutrición Infantil)</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-cesfam-layer" />
+        <span>🏥 CESFAM (Centros de Salud Familiar)</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-centro-salud-layer" />
+        <span>🏥 Centros de Salud</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-centro-medico-layer" />
+        <span>🏭 Centros Médicos y Dentales</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-clinica-dental-layer" />
+        <span>🦷 Clínicas Dentales</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-clinica-layer" />
+        <span>🏥 Clínicas</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-cdt-layer" />
+        <span>🏭 CDT (Consultorios de Diagnóstico y Tratamiento)</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-direccion-salud-layer" />
+        <span>🏢 Dirección Servicio de Salud</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-hospital-layer" />
+        <span>🏭 Hospitales</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-laboratorio-layer" />
+        <span>🧪 Laboratorios Clínicos/Dentales</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-prais-layer" />
+        <span>🏥 PRAIS (Programa de Reparación y Atención Integral de Salud)</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-sapu-layer" />
+        <span>🚑 SAPU (Servicio de Atención Primaria de Urgencia)</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-unidad-salud-funcionarios-layer" />
+        <span>👨‍⚕️ Unidad de Salud Funcionarios</span>
+      </label>
+      <label class="checkbox-label">
+        <input type="checkbox" id="show-vacunatorio-layer" />
+        <span>💉 Vacunatorios</span>
       </label>
       <label class="checkbox-label">
         <input type="checkbox" id="show-metro-layer" />
