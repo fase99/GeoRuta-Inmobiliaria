@@ -147,45 +147,37 @@ Si no tienes `docplex` o no quieres instalarlo, hay un archivo de respaldo `web/
 
     Deberías ver la interfaz de la aplicación de ruteo.
 
-### Benchmarking (automatizado para el paper/tesis)
+### Benchmarking (automatizado)
 
-Para medir tiempos de cómputo de forma estadísticamente robusta, se incluye `scripts/benchmarking.py`, que ejecuta repetidamente el generador de ruta Docplex y exporta resultados por corrida y un resumen a CSV.
+Para medir tiempos de cómputo de forma integral en una ruta completa (origen → 5 casas → retorno al origen), se incluye un simulador en Node (`scripts/simular_usuario_node.js`) que reutiliza los algoritmos de (`web/algorithms.js`). Este script calcula:
 
-- Ejecutar 30 iteraciones (por defecto):
+- Orden de visita con ACO (TSP aproximado) sobre matriz de distancias.
+- Tiempos totales de cómputo para Dijkstra puro y Dijkstra dinámico en todos los tramos de ida y vuelta.
+- Tiempo de cómputo de ACO para obtener el orden.
+- Tiempo de CPLEX para generar `web/data/docplex_route.json` (global).
 
-```powershell
-python scripts/benchmarking.py
-```
+Parámetros e iteraciones:
+- ACO por defecto usa `iterations: 100` y `numAnts: 20` (configurado en `scripts/simular_usuario_node.js`). Cambia estos valores editando la llamada `algorithms.antColonyTSP(distMat, { numAnts: 20, iterations: 100 })`.
+- Dijkstra (puro y dinámico) se ejecuta una vez por tramo en la ruta completa (origen → 5 casas → origen).
+- El simulador corre una sola vez por invocación (no hay lotes/iteraciones múltiples por defecto). Para repetir corridas, ejecuta el comando varias veces o crea un pequeño loop externo.
 
-- Ejecutar 50 iteraciones:
-
-```powershell
-python scripts/benchmarking.py 50
-```
-
-Salidas:
-- `resultados_benchmark_docplex_por_run.csv` — tiempos por iteración y tamaño del JSON generado.
-- `resultados_benchmark_docplex_resumen.csv` — promedio, desviación estándar, mínimo y máximo.
-
-### Simulación de usuario (elección de origen y rutas)
-
-Script para simular que un usuario elige una ubicación inicial, se seleccionan 5 viviendas de interés y se generan rutas de 4 tipos (Dijkstra, Dijkstra dinámico, ACO, CPLEX). Tolera funciones faltantes e igualmente guarda los resultados.
-
-- Ejecutar con origen por defecto (Plaza Baquedano):
+Comandos (PowerShell):
 
 ```powershell
-python scripts/simular_usuario.py
+node scripts/simular_usuario_node.js
+node scripts/simular_usuario_node.js "-33.45,-70.63"
+node scripts/simular_usuario_node.js "metro_nearest_to:-33.45,-70.63"
+node scripts/simular_usuario_node.js "metro:Baquedano"
 ```
 
-- Ejecutar con origen personalizado (`lat,lon`):
+Requisitos de datos:
+- `web/data/nodes.geojson`, `web/data/edges.geojson`.
+- `web/data/edge_probabilities.json`, `web/data/node_probabilities.json` (opcional; el dinámico usa 0 en ausencia).
+- `web/data/Estaciones_actuales_Metro_de_Santiago.csv` para búsqueda de estaciones.
+- Archivos de propiedades TocToc (`casa-venta-toctoc.json`, `casas-arriendo-toctoc.json`, `depto-arriendo-toctoc.json`, `depto-venta-toctoc.json`).
 
-```powershell
-python scripts/simular_usuario.py "-33.45,-70.63"
-```
-
-Salidas:
-- `web/data/simulacion_usuario/prop_<n>_routes.json` — rutas por propiedad.
-- `simulacion_usuario_resumen.csv` — estados por algoritmo.
+Salida:
+- `simulacion_usuario_node_resumen.json` — incluye origen, 5 propiedades, orden ACO y tiempos totales en ms por algoritmo (`dijkstra_puro_total`, `dijkstra_dinamico_total`, `aco_total`, `cplex_total`).
 
 ## 📁 Estructura del Proyecto
 
