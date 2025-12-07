@@ -53,6 +53,9 @@
 // positive integers 1..n map to the selectedProperties list in order (1 -> selectedProperties[0]).
 // If counts mismatch the handler will try to do a best-effort mapping and show the route steps.
 async function generateDocplexRoute(silent=false) {
+    const startTime = performance.now();
+    console.log(`[FLUJO] Iniciando carga de ruta Docplex`);
+    
     try {
         const res = await fetch('data/docplex_route.json', {cache: 'no-store'});
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -143,6 +146,40 @@ async function generateDocplexRoute(silent=false) {
         // Start monitoring route / threats as the existing flow does
         startRouteRefresh();
 
+        const computationTime = performance.now() - startTime;
+        
+        // Calculate total distance from the route
+        let totalDistance = 0;
+        if (routeEdges.length > 1) {
+            for (let i = 0; i < routeEdges.length - 1; i++) {
+                const fromNode = nodeIndex.get(routeEdges[i].to);
+                const toNode = nodeIndex.get(routeEdges[i + 1].to);
+                if (fromNode && toNode) {
+                    totalDistance += haversineDistance(fromNode, toNode);
+                }
+            }
+        }
+        
+        console.log(`[RUTA] Ruta Docplex completada - Algoritmo: CPLEX (optimización exacta)`);
+        console.log(`[RUTA] Tiempo de cómputo: ${computationTime.toFixed(2)} ms (solo carga del archivo)`);
+        console.log(`[RUTA] Distancia total aproximada: ${totalDistance.toFixed(2)} metros`);
+        console.log(`[RUTA] Número de propiedades: ${mappedStops.length}`);
+        console.log(`[RUTA] Óptimo: Sí (solución exacta garantizada)`);
+        console.log(`[RUTA] Valor objetivo: ${data.objective}`);
+        
+        // Store metrics
+        routeMetrics.docplex = {
+            algorithm: 'CPLEX',
+            computationTime: computationTime,
+            totalDistance: totalDistance,
+            numProperties: mappedStops.length,
+            isOptimal: true,
+            optimality: 'Exacto',
+            objective: data.objective
+        };
+        
+        compareRoutes();
+
         if (!silent) {
             console.log('Docplex route rendered. Objective:', data.objective);
             // show legend / summary
@@ -155,6 +192,63 @@ async function generateDocplexRoute(silent=false) {
         if (!silent) alert('Error cargando docplex_route.json: ' + err.message);
     }
 }
+
+    // Function to compare routes and determine the best
+    function compareRoutes() {
+        const routes = Object.values(routeMetrics).filter(r => r !== null);
+        if (routes.length === 0) return;
+        
+        console.log(`[COMPARACIÓN] === COMPARACIÓN DE RUTAS ===`);
+        console.log(`[COMPARACIÓN] Total de rutas generadas: ${routes.length}`);
+        
+        // Find best by distance (for routing algorithms)
+        const routingRoutes = routes.filter(r => r.algorithm !== 'Multimodal');
+        if (routingRoutes.length > 0) {
+            const bestByDistance = routingRoutes.reduce((best, current) => 
+                (current.totalDistance < best.totalDistance) ? current : best
+            );
+            console.log(`[COMPARACIÓN] Mejor ruta por distancia: ${bestByDistance.algorithm} (${bestByDistance.totalDistance.toFixed(2)} m)`);
+        }
+        
+        // Find best by time (for multimodal)
+        const multimodalRoute = routes.find(r => r.algorithm === 'Multimodal');
+        if (multimodalRoute) {
+            console.log(`[COMPARACIÓN] Ruta multimodal: ${multimodalRoute.totalTime.toFixed(1)} min, ${multimodalRoute.totalDistance.toFixed(2)} m`);
+        }
+        
+        // Find fastest computation
+        const fastestComp = routes.reduce((fastest, current) => 
+            (current.computationTime < fastest.computationTime) ? current : fastest
+        );
+        console.log(`[COMPARACIÓN] Algoritmo más rápido: ${fastestComp.algorithm} (${fastestComp.computationTime.toFixed(2)} ms)`);
+        
+        // Determine overall best
+        let bestRoute = null;
+        if (multimodalRoute) {
+            // If multimodal exists, it's probably the most practical
+            bestRoute = multimodalRoute;
+            console.log(`[COMPARACIÓN] 🏆 MEJOR RUTA RECOMENDADA: ${bestRoute.algorithm} (considera transporte público)`);
+        } else if (routingRoutes.length > 0) {
+            // Otherwise, best by distance
+            bestRoute = routingRoutes.reduce((best, current) => 
+                (current.totalDistance < best.totalDistance) ? current : best
+            );
+            console.log(`[COMPARACIÓN] 🏆 MEJOR RUTA RECOMENDADA: ${bestRoute.algorithm} (menor distancia)`);
+        }
+        
+        if (bestRoute) {
+            console.log(`[COMPARACIÓN] Detalles:`);
+            console.log(`[COMPARACIÓN]   - Algoritmo: ${bestRoute.algorithm}`);
+            console.log(`[COMPARACIÓN]   - Tiempo de cómputo: ${bestRoute.computationTime.toFixed(2)} ms`);
+            if (bestRoute.totalTime) {
+                console.log(`[COMPARACIÓN]   - Tiempo total: ${bestRoute.totalTime.toFixed(1)} min`);
+            }
+            console.log(`[COMPARACIÓN]   - Distancia total: ${bestRoute.totalDistance.toFixed(2)} m`);
+            console.log(`[COMPARACIÓN]   - Óptimo: ${bestRoute.optimality}`);
+        }
+        
+        console.log(`[COMPARACIÓN] === FIN COMPARACIÓN ===`);
+    }
 
         // Wire the Docplex button (if present) to the handler
         const genDocplexBtn = document.getElementById('generate-docplex-route-btn');
@@ -577,6 +671,14 @@ async function generateDocplexRoute(silent=false) {
     // Layers/markers for recommended route rendered from Docplex output
     let recommendedRouteLayer = null;
     let recommendedMarkers = [];
+    
+    // Route metrics storage for comparison
+    let routeMetrics = {
+        nearestNeighbor: null,
+        aco: null,
+        multimodal: null,
+        docplex: null
+    };
     
     // Scheduled appointments threat system
     let scheduledAppointments = new Map(); // houseId -> {houseData, scheduledTime, isCancelled, cancelProbability}
@@ -1239,6 +1341,8 @@ async function generateDocplexRoute(silent=false) {
                                 addBtn.style.background = '#6B7280';
                                 addBtn.disabled = true;
                                 updateItineraryUI();
+                                
+                                console.log(`[FLUJO] Propiedad seleccionada: ${house.titulo || 'Sin título'} (ID: ${house.id}) - Total seleccionadas: ${selectedProperties.length}`);
                                 
                                 // Nota: La agenda y monitoreo se activarán automáticamente al optimizar/calcular ruta
                             }
@@ -3460,6 +3564,11 @@ async function generateDocplexRoute(silent=false) {
         startPointMarker = L.marker([lat, lon], { icon: L.icon({ iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25,41], iconAnchor:[12,41] }) }).addTo(map);
         startPointMarker.bindPopup('<b>' + (label||'Inicio') + '</b>').openPopup();
         map.setView([lat, lon], 14);
+        console.log(`[FLUJO] Origen establecido: ${label} en (${lat.toFixed(6)}, ${lon.toFixed(6)})`);
+        
+        // Reset route metrics when origin changes
+        routeMetrics = { nearestNeighbor: null, aco: null, multimodal: null, docplex: null };
+        console.log(`[FLUJO] Métricas de rutas reiniciadas`);
     }
 
     // Clear selection button
@@ -3695,6 +3804,9 @@ async function generateDocplexRoute(silent=false) {
     }
 
     async function optimizeVisitOrderACO(silent = false, opts = {}) {
+        const startTime = performance.now();
+        console.log(`[FLUJO] Iniciando optimización de orden (ACO - Ant Colony Optimization)`);
+        
         if (!startPointMarker) {
             console.warn('No hay punto de partida definido');
             if (!silent) return alert('Define punto de partida antes de optimizar');
@@ -3737,6 +3849,32 @@ async function generateDocplexRoute(silent=false) {
         // replace selectedProperties with ordered version
         selectedProperties = orderedProps;
 
+        // Calculate total distance
+        let totalDistance = 0;
+        for (let i = 0; i < bestTour.length - 1; i++) {
+            totalDistance += distMat[bestTour[i]][bestTour[i + 1]];
+        }
+        
+        const computationTime = performance.now() - startTime;
+        
+        console.log(`[RUTA] Optimización completada - Algoritmo: ACO`);
+        console.log(`[RUTA] Tiempo de cómputo: ${computationTime.toFixed(2)} ms`);
+        console.log(`[RUTA] Distancia total: ${totalDistance.toFixed(2)} metros`);
+        console.log(`[RUTA] Número de propiedades: ${orderedProps.length}`);
+        console.log(`[RUTA] Óptimo: Metaheurístico (aproximadamente óptimo)`);
+        
+        // Store metrics
+        routeMetrics.aco = {
+            algorithm: 'ACO',
+            computationTime: computationTime,
+            totalDistance: totalDistance,
+            numProperties: orderedProps.length,
+            isOptimal: false,
+            optimality: 'Metaheurístico'
+        };
+        
+        compareRoutes();
+
         // schedule appointments automatically
         console.log('🔄 Agendando automáticamente todas las propiedades (ACO)...');
         orderedProps.forEach(house => {
@@ -3752,6 +3890,9 @@ async function generateDocplexRoute(silent=false) {
     }
 
     async function optimizeVisitOrder(silent = false) {
+        const startTime = performance.now();
+        console.log(`[FLUJO] Iniciando optimización de orden (Nearest Neighbor + 2-Opt)`);
+        
         if (!startPointMarker) {
             console.warn('No hay punto de partida definido');
             if (!silent) return alert('Define punto de partida antes de optimizar');
@@ -3790,6 +3931,32 @@ async function generateDocplexRoute(silent=false) {
         }
         // replace selectedProperties with ordered version
         selectedProperties = orderedProps;
+        
+        // Calculate total distance
+        let totalDistance = 0;
+        for (let i = 0; i < order.length - 1; i++) {
+            totalDistance += distMat[order[i]][order[i + 1]];
+        }
+        
+        const computationTime = performance.now() - startTime;
+        
+        console.log(`[RUTA] Optimización completada - Algoritmo: Nearest Neighbor + 2-Opt`);
+        console.log(`[RUTA] Tiempo de cómputo: ${computationTime.toFixed(2)} ms`);
+        console.log(`[RUTA] Distancia total: ${totalDistance.toFixed(2)} metros`);
+        console.log(`[RUTA] Número de propiedades: ${orderedProps.length}`);
+        console.log(`[RUTA] Óptimo: Heurístico (no garantizado óptimo global)`);
+        
+        // Store metrics
+        routeMetrics.nearestNeighbor = {
+            algorithm: 'Nearest Neighbor + 2-Opt',
+            computationTime: computationTime,
+            totalDistance: totalDistance,
+            numProperties: orderedProps.length,
+            isOptimal: false,
+            optimality: 'Heurístico'
+        };
+        
+        compareRoutes();
         
         // Automatically schedule all selected properties as appointments
         console.log('🔄 Agendando automáticamente todas las propiedades seleccionadas...');
@@ -3866,6 +4033,9 @@ async function generateDocplexRoute(silent=false) {
     }
 
     async function generateRecommendedRoute(silent = false) {
+        const startTime = performance.now();
+        console.log(`[FLUJO] Iniciando generación de ruta recomendada (con transporte público)`);
+        
         if (!startPointMarker) {
             if (!silent) return alert('Define punto de partida');
             return false;
@@ -3890,7 +4060,7 @@ async function generateDocplexRoute(silent=false) {
     let currentLatLng = startPointMarker.getLatLng();
     const legs = []; // sequence of {type:'walk'|'transit', distanceM, timeMin, desc, from:{lat,lon,name}, to:{lat,lon,name}, transport}
     const destLegIndices = []; // end index in legs[] for each destination (used to compute ETAs)
-    const startTime = new Date();
+    const startTimeRoute = new Date();
 
         function stopLatLon(s) {
             if (!s) return null;
@@ -4281,6 +4451,28 @@ async function generateDocplexRoute(silent=false) {
         }
 
         try { map.fitBounds(recommendedLayer.getBounds(), { padding: [20, 20] }); } catch (e) { }
+        
+        const computationTime = performance.now() - startTime;
+        
+        console.log(`[RUTA] Ruta recomendada completada - Algoritmo: Búsqueda multimodal (caminar + transporte público)`);
+        console.log(`[RUTA] Tiempo de cómputo: ${computationTime.toFixed(2)} ms`);
+        console.log(`[RUTA] Tiempo total estimado: ${Math.round(totalMinutes)} minutos`);
+        console.log(`[RUTA] Distancia total: ${Math.round(totalMeters)} metros`);
+        console.log(`[RUTA] Número de propiedades: ${selectedProperties.length}`);
+        console.log(`[RUTA] Óptimo: Heurístico (minimiza tiempo considerando transporte público)`);
+        
+        // Store metrics
+        routeMetrics.multimodal = {
+            algorithm: 'Multimodal',
+            computationTime: computationTime,
+            totalTime: totalMinutes,
+            totalDistance: totalMeters,
+            numProperties: selectedProperties.length,
+            isOptimal: false,
+            optimality: 'Heurístico'
+        };
+        
+        compareRoutes();
         
         // Automatically schedule all selected properties as appointments
         console.log('🔄 Agendando automáticamente todas las propiedades en la ruta...');
