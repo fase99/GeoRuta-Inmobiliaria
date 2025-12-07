@@ -1,0 +1,83 @@
+{
+  "origen": {
+    "lat": -33.4372,
+    "lon": -70.6342,
+    "label": "Plaza Baquedano"
+  },
+  "propiedades": [
+    {
+      "etiqueta": 3942813,
+      "lat": -33.42523993,
+      "lon": -70.59219361
+    },
+    {
+      "etiqueta": 3959526,
+      "lat": -33.4301056,
+      "lon": -70.5910669
+    },
+    {
+      "etiqueta": 3580088,
+      "lat": -33.4388518,
+      "lon": -70.6339961
+    },
+    {
+      "etiqueta": 3878986,
+      "lat": -33.4393805,
+      "lon": -70.6287005
+    },
+    {
+      "etiqueta": 3968175,
+      "lat": -33.44636976,
+      "lon": -70.63038435
+    }
+  ],
+  "orden_ACO_indices": [
+    0,
+    3,
+    5,
+    4,
+    2,
+    1,
+    0
+  ],
+  "tiempos_ms": {
+    "dijkstra_puro_total": 2.8512000000000057,
+    "dijkstra_dinamico_total": 10.8142,
+    "aco_total": 5.869399999999999,
+    "cplex_total": 0.31629999999999825
+  },
+  "cplex": {
+    "resultado": {
+      "feasible": true,
+      "objective": 0,
+      "route": [
+        {
+          "from": 0,
+          "to": 1,
+          "mode": "drive"
+        },
+        {
+          "from": 1,
+          "to": 2,
+          "mode": "drive"
+        },
+        {
+          "from": 2,
+          "to": 3,
+          "mode": "drive"
+        },
+        {
+          "from": 3,
+          "to": 4,
+          "mode": "drive"
+        },
+        {
+          "from": 4,
+          "to": 0,
+          "mode": "drive"
+        }
+      ]
+    },
+    "tiempo_ms": 0.31629999999999825
+  }
+}
