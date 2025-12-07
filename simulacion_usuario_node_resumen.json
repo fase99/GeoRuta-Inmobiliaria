@@ -1,50 +1,50 @@
 {
   "origen": {
-    "lat": -33.4372,
-    "lon": -70.6342,
-    "label": "Plaza Baquedano"
+    "lat": -33.415359532997385,
+    "lon": -70.58968090668871,
+    "label": "Metro ALCANTARA"
   },
   "propiedades": [
     {
-      "etiqueta": 3942813,
-      "lat": -33.42523993,
-      "lon": -70.59219361
+      "etiqueta": 3751741,
+      "lat": -33.44381,
+      "lon": -70.59719
     },
     {
-      "etiqueta": 3959526,
-      "lat": -33.4301056,
-      "lon": -70.5910669
+      "etiqueta": 3804331,
+      "lat": -33.438725,
+      "lon": -70.619347
     },
     {
-      "etiqueta": 3580088,
-      "lat": -33.4388518,
-      "lon": -70.6339961
+      "etiqueta": 3927826,
+      "lat": -33.4323004,
+      "lon": -70.5975844
     },
     {
-      "etiqueta": 3878986,
-      "lat": -33.4393805,
-      "lon": -70.6287005
+      "etiqueta": 3967372,
+      "lat": -33.44025,
+      "lon": -70.624536
     },
     {
-      "etiqueta": 3968175,
-      "lat": -33.44636976,
-      "lon": -70.63038435
+      "etiqueta": 3961851,
+      "lat": -33.43044281,
+      "lon": -70.60783051
     }
   ],
   "orden_ACO_indices": [
     0,
     3,
-    5,
-    4,
-    2,
     1,
+    5,
+    2,
+    4,
     0
   ],
   "tiempos_ms": {
-    "dijkstra_puro_total": 2.8512000000000057,
-    "dijkstra_dinamico_total": 10.8142,
-    "aco_total": 5.869399999999999,
-    "cplex_total": 0.31629999999999825
+    "dijkstra_puro_total": 3.631600000000006,
+    "dijkstra_dinamico_total": 12.5094,
+    "aco_total": 6.364400000000003,
+    "cplex_total": 0.32909999999999684
   },
   "cplex": {
     "resultado": {
@@ -78,6 +78,6 @@
         }
       ]
     },
-    "tiempo_ms": 0.31629999999999825
+    "tiempo_ms": 0.32909999999999684
   }
 }
