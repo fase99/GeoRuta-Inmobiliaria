@@ -1,50 +1,50 @@
 {
   "origen": {
-    "lat": -33.415359532997385,
-    "lon": -70.58968090668871,
-    "label": "Metro ALCANTARA"
+    "lat": -33.41848623409742,
+    "lon": -70.60166418997018,
+    "label": "Metro TOBALABA"
   },
   "propiedades": [
     {
-      "etiqueta": 3751741,
-      "lat": -33.44381,
-      "lon": -70.59719
+      "etiqueta": 3927818,
+      "lat": -33.418018,
+      "lon": -70.6029796
     },
     {
-      "etiqueta": 3804331,
-      "lat": -33.438725,
-      "lon": -70.619347
+      "etiqueta": 3753749,
+      "lat": -33.4300183,
+      "lon": -70.6039134
     },
     {
-      "etiqueta": 3927826,
-      "lat": -33.4323004,
-      "lon": -70.5975844
+      "etiqueta": 3418073,
+      "lat": -33.440441,
+      "lon": -70.6251292
     },
     {
-      "etiqueta": 3967372,
-      "lat": -33.44025,
-      "lon": -70.624536
+      "etiqueta": 3510294,
+      "lat": -33.4153675,
+      "lon": -70.6098187
     },
     {
-      "etiqueta": 3961851,
-      "lat": -33.43044281,
-      "lon": -70.60783051
+      "etiqueta": 3898979,
+      "lat": -33.43459741,
+      "lon": -70.59589035
     }
   ],
   "orden_ACO_indices": [
     0,
-    3,
     1,
-    5,
-    2,
     4,
+    2,
+    5,
+    3,
     0
   ],
   "tiempos_ms": {
-    "dijkstra_puro_total": 3.631600000000006,
-    "dijkstra_dinamico_total": 12.5094,
-    "aco_total": 6.364400000000003,
-    "cplex_total": 0.32909999999999684
+    "dijkstra_puro_total": 3.198299999999989,
+    "dijkstra_dinamico_total": 9.796900000000008,
+    "aco_total": 5.77000000000001,
+    "cplex_total": 0.43199999999998795
   },
   "cplex": {
     "resultado": {
@@ -78,6 +78,6 @@
         }
       ]
     },
-    "tiempo_ms": 0.32909999999999684
+    "tiempo_ms": 0.43199999999998795
   }
 }
