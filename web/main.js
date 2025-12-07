@@ -4240,7 +4240,7 @@ async function generateDocplexRoute(silent=false) {
                     // compute cumulative up to this point
                     const cumMinutes = legs.slice(0, legIdx).reduce((s, x) => s + (x.timeMin || 0), 0);
                     const cumMeters = legs.slice(0, legIdx).reduce((s, x) => s + (x.distanceM || 0), 0);
-                    const eta = new Date(startTime.getTime() + Math.round(cumMinutes * 60000));
+                    const eta = new Date(startTimeRoute.getTime() + Math.round(cumMinutes * 60000));
                     // target corresponding is selectedProperties[d]
                     const target = selectedProperties[d];
                     destSummaries[d] = { target, eta, cumMinutes, cumMeters };
