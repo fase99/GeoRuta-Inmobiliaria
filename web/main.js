@@ -1,3 +1,33 @@
+    // Exclusividad visual de botones de ruta (solo uno activo a la vez)
+    (function setupRouteButtonsToggle(){
+        const ids = [
+            'optimize-order-btn',
+            'optimize-order-aco-btn',
+            'generate-recommended-route-btn',
+            'generate-docplex-route-btn'
+        ];
+        const btns = ids.map(id=>document.getElementById(id)).filter(Boolean);
+        if (!btns.length) return;
+        let activeBtn = null;
+        const setPrimary = (btn)=>{ btn.classList.remove('btn-secondary'); btn.classList.add('btn-primary'); btn.dataset.active = 'true'; };
+        const setSecondary = (btn)=>{ btn.classList.remove('btn-primary'); btn.classList.add('btn-secondary'); btn.dataset.active = 'false'; };
+        btns.forEach(btn=>{
+            setSecondary(btn);
+            btn.addEventListener('click', (ev)=>{
+                // If clicking the already active button, deactivate it
+                if (activeBtn === btn){
+                    setSecondary(btn);
+                    activeBtn = null;
+                    return; // allow any existing handler to run as well
+                }
+                // Deactivate previous active
+                if (activeBtn){ setSecondary(activeBtn); activeBtn = null; }
+                // Activate current
+                setPrimary(btn);
+                activeBtn = btn;
+            }, { capture: true });
+        });
+    })();
 // Execute immediately (IIFE) so dynamically injected script always runs
 (function(){
         // --- Filtros de Preferencia de Pago (Colegios) ---
