@@ -3884,6 +3884,13 @@ async function generateDocplexRoute(silent=false) {
         // start monitoring if not already
         if (!routeRefreshInterval) startRouteRefresh();
 
+        // Render the full route using multimodal logic (streets via OSMnx, paraderos/metro)
+        try {
+            await generateRecommendedRoute(true);
+        } catch (e) {
+            console.warn('No se pudo generar la ruta recomendada tras ACO:', e);
+        }
+
         updateItineraryUI();
         if (!silent) alert('✅ Orden optimizado con ACO exitosamente.');
         return true;
@@ -4011,6 +4018,13 @@ async function generateDocplexRoute(silent=false) {
             }, 6000);
         }
         
+        // Render the full route using multimodal logic (streets via OSMnx, paraderos/metro)
+        try {
+            await generateRecommendedRoute(true);
+        } catch (e) {
+            console.warn('No se pudo generar la ruta recomendada tras optimización:', e);
+        }
+        
         updateItineraryUI();
         if (!silent) {
             alert('✅ Orden optimizado exitosamente.\n\n🛡️ Sistema de monitoreo de amenazas activado automáticamente.');
@@ -4022,6 +4036,16 @@ async function generateDocplexRoute(silent=false) {
     // Ruta recomendada: combinar paraderos + caminar
     // =====================
     const recommendedLayer = L.layerGroup().addTo(map);
+    function nodesToLatLngs(pathNodes) {
+        const coords = [];
+        if (!Array.isArray(pathNodes)) return coords;
+        for (let i = 0; i < pathNodes.length; i++) {
+            const nid = pathNodes[i];
+            const n = nodeIndex.get(nid);
+            if (n) coords.push([n.lat, n.lon]);
+        }
+        return coords;
+    }
     function nearestParadero(lat, lon) {
         if (!paraderos || paraderos.length===0) return null;
         let best = null; let bd = Infinity;
@@ -4073,12 +4097,27 @@ async function generateDocplexRoute(silent=false) {
         for (let i = 0; i < selectedProperties.length; i++) {
             const target = selectedProperties[i];
 
-            // If no paraderos loaded, fallback to walking
+            // If no paraderos loaded, fallback to walking via graph
             if (!paraderos || paraderos.length === 0) {
-                const walkM = haversineDistance({ lat: currentLatLng.lat, lon: currentLatLng.lng }, { lat: target.lat, lon: target.lon });
+                const startSnap = snapToNearestNode(currentLatLng.lat, currentLatLng.lng);
+                const endSnap = snapToNearestNode(target.lat, target.lon);
+                let walkM = 0;
+                let edgeFeats = [];
+                if (startSnap && endSnap && startSnap.id !== undefined && endSnap.id !== undefined) {
+                    const pathNodes = dijkstra(startSnap.id, endSnap.id);
+                    if (pathNodes && pathNodes.length >= 2) {
+                        walkM = pathLengthFromNodes(pathNodes);
+                        edgeFeats = nodesPathToEdgeFeatures(pathNodes);
+                    }
+                }
+                if (walkM === 0) walkM = haversineDistance({ lat: currentLatLng.lat, lon: currentLatLng.lng }, { lat: target.lat, lon: target.lon });
                 const timeMin = walkM / walkSpeed;
                 legs.push({ type: 'walk', distanceM: walkM, timeMin, desc: `Camina ${Math.round(walkM)} m hasta la propiedad: ${target.titulo || ''}`, from: { lat: currentLatLng.lat, lon: currentLatLng.lng }, to: { lat: target.lat, lon: target.lon } });
-                recommendedLayer.addLayer(L.polyline([[currentLatLng.lat, currentLatLng.lng], [target.lat, target.lon]], { color: '#1E90FF', dashArray: '6 6', weight: 3, opacity: 0.8 }));
+                if (edgeFeats.length > 0) {
+                    recommendedLayer.addLayer(L.geoJSON({ type: 'FeatureCollection', features: edgeFeats }, { style: { color: '#07192bff', dashArray: '6 6', weight: 3, opacity: 0.8 } }));
+                } else {
+                    recommendedLayer.addLayer(L.polyline([[currentLatLng.lat, currentLatLng.lng], [target.lat, target.lon]], { color: '#0b2136ff', dashArray: '6 6', weight: 3, opacity: 0.8 }));
+                }
                 currentLatLng = L.latLng(target.lat, target.lon);
                 continue;
             }
@@ -4104,7 +4143,7 @@ async function generateDocplexRoute(silent=false) {
             const walkOnlyTime = walkOnlyM / walkSpeed;
             bestOption = { type: 'walk', timeMin: walkOnlyTime, details: { walkM: walkOnlyM } };
 
-            // evaluate paradero-paradero (bus) pairs
+            // evaluar pares paradero-paradero (bus) usando Dijkstra en calles
             for (const f of fromParCandidates) {
                 for (const t of toParCandidates) {
                     const walkFrom = f.distance;
@@ -4122,7 +4161,7 @@ async function generateDocplexRoute(silent=false) {
                 }
             }
 
-            // evaluate metro-metro pairs (metro ride)
+            // evaluar pares metro-metro (trayecto sobre calles entre estaciones)
             for (const f of fromMetroCandidates) {
                 for (const t of toMetroCandidates) {
                     const walkFrom = f.distance;
@@ -4140,7 +4179,7 @@ async function generateDocplexRoute(silent=false) {
                 }
             }
 
-            // evaluate mixed combos: paradero -> metro
+            // evaluar combos mixtos: paradero -> metro (calle entre puntos)
             for (const f of fromParCandidates) {
                 for (const t of toMetroCandidates) {
                     const walkFrom = f.distance;
@@ -4181,7 +4220,20 @@ async function generateDocplexRoute(silent=false) {
                 const m = Math.round(bestOption.details.walkM);
                 const timeMin = bestOption.details.walkM / walkSpeed;
                 legs.push({ type: 'walk', distanceM: bestOption.details.walkM, timeMin, desc: `Camina ${Math.round(bestOption.details.walkM)} m hasta la propiedad: ${target.titulo || ''}`, from: { lat: currentLatLng.lat, lon: currentLatLng.lng }, to: { lat: target.lat, lon: target.lon } });
-                recommendedLayer.addLayer(L.polyline([[currentLatLng.lat, currentLatLng.lng], [target.lat, target.lon]], { color: '#1E90FF', dashArray: '6 6', weight: 3, opacity: 0.8 }));
+                // Render walk via graph
+                const sSnap = snapToNearestNode(currentLatLng.lat, currentLatLng.lng);
+                const eSnap = snapToNearestNode(target.lat, target.lon);
+                if (sSnap && eSnap && sSnap.id !== undefined && eSnap.id !== undefined) {
+                    const pNodes = dijkstra(sSnap.id, eSnap.id);
+                    const edgeFeats = nodesPathToEdgeFeatures(pNodes || []);
+                    if (edgeFeats.length > 0) {
+                        recommendedLayer.addLayer(L.geoJSON({ type: 'FeatureCollection', features: edgeFeats }, { style: { color: '#061627ff', dashArray: '6 6', weight: 3, opacity: 0.8 } }));
+                    } else {
+                        recommendedLayer.addLayer(L.polyline([[currentLatLng.lat, currentLatLng.lng], [target.lat, target.lon]], { color: '#061627ff', dashArray: '6 6', weight: 3, opacity: 0.8 }));
+                    }
+                } else {
+                    recommendedLayer.addLayer(L.polyline([[currentLatLng.lat, currentLatLng.lng], [target.lat, target.lon]], { color: '#061627ff', dashArray: '6 6', weight: 3, opacity: 0.8 }));
+                }
             } else if (bestOption.type === 'transit') {
                 const d = bestOption.details;
                 const transport = d.transport || 'bus';
@@ -4192,7 +4244,20 @@ async function generateDocplexRoute(silent=false) {
                 const walkToFromM = d.walkFrom;
                 const walkToFromMin = walkToFromM / walkSpeed;
                 legs.push({ type: 'walk', distanceM: walkToFromM, timeMin: walkToFromMin, desc: `Camina ${Math.round(walkToFromM)} m hasta el ${transport === 'metro' ? 'andén/estación' : 'paradero'}: ${ (d.from && (d.from.nombre || d.from.codigo)) || '' }`, from: { lat: currentLatLng.lat, lon: currentLatLng.lng }, to: { lat: fromCoords.lat, lon: fromCoords.lon }, transport: transport });
-                recommendedLayer.addLayer(L.polyline([[currentLatLng.lat, currentLatLng.lng], [fromCoords.lat, fromCoords.lon]], { color: '#1E90FF', dashArray: '6 6', weight: 3, opacity: 0.8 }));
+                // Render walk to stop via graph
+                const w1Snap = snapToNearestNode(currentLatLng.lat, currentLatLng.lng);
+                const w1Stop = snapToNearestNode(fromCoords.lat, fromCoords.lon);
+                if (w1Snap && w1Stop && w1Snap.id !== undefined && w1Stop.id !== undefined) {
+                    const w1Path = dijkstra(w1Snap.id, w1Stop.id);
+                    const w1Feats = nodesPathToEdgeFeatures(w1Path || []);
+                    if (w1Feats.length > 0) {
+                        recommendedLayer.addLayer(L.geoJSON({ type: 'FeatureCollection', features: w1Feats }, { style: { color: '#061627ff', dashArray: '6 6', weight: 3, opacity: 0.8 } }));
+                    } else {
+                        recommendedLayer.addLayer(L.polyline([[currentLatLng.lat, currentLatLng.lng], [fromCoords.lat, fromCoords.lon]], { color: '#061627ff', dashArray: '6 6', weight: 3, opacity: 0.8 }));
+                    }
+                } else {
+                    recommendedLayer.addLayer(L.polyline([[currentLatLng.lat, currentLatLng.lng], [fromCoords.lat, fromCoords.lon]], { color: '#061627ff', dashArray: '6 6', weight: 3, opacity: 0.8 }));
+                }
                 L.marker([fromCoords.lat, fromCoords.lon], { icon: transport === 'metro' ? icons.metro : icons.paradero }).bindPopup(`Toma aquí (${transport})`).addTo(recommendedLayer);
 
                 // transit leg along graph
@@ -4214,7 +4279,20 @@ async function generateDocplexRoute(silent=false) {
                 const walkFromDestM = d.walkTo;
                 const walkFromDestMin = walkFromDestM / walkSpeed;
                 legs.push({ type: 'walk', distanceM: walkFromDestM, timeMin: walkFromDestMin, desc: `Camina ${Math.round(walkFromDestM)} m desde ${(d.to.nombre || '')} hasta la propiedad`, from: { lat: toCoords.lat, lon: toCoords.lon }, to: { lat: target.lat, lon: target.lon } });
-                recommendedLayer.addLayer(L.polyline([[toCoords.lat, toCoords.lon], [target.lat, target.lon]], { color: '#1E90FF', dashArray: '6 6', weight: 3, opacity: 0.8 }));
+                // Render walk from stop via graph
+                const w2Stop = snapToNearestNode(toCoords.lat, toCoords.lon);
+                const w2Dest = snapToNearestNode(target.lat, target.lon);
+                if (w2Stop && w2Dest && w2Stop.id !== undefined && w2Dest.id !== undefined) {
+                    const w2Path = dijkstra(w2Stop.id, w2Dest.id);
+                    const w2Feats = nodesPathToEdgeFeatures(w2Path || []);
+                    if (w2Feats.length > 0) {
+                        recommendedLayer.addLayer(L.geoJSON({ type: 'FeatureCollection', features: w2Feats }, { style: { color: '#1E90FF', dashArray: '6 6', weight: 3, opacity: 0.8 } }));
+                    } else {
+                        recommendedLayer.addLayer(L.polyline([[toCoords.lat, toCoords.lon], [target.lat, target.lon]], { color: '#1E90FF', dashArray: '6 6', weight: 3, opacity: 0.8 }));
+                    }
+                } else {
+                    recommendedLayer.addLayer(L.polyline([[toCoords.lat, toCoords.lon], [target.lat, target.lon]], { color: '#1E90FF', dashArray: '6 6', weight: 3, opacity: 0.8 }));
+                }
             }
 
             // mark property
