@@ -147,6 +147,46 @@ Si no tienes `docplex` o no quieres instalarlo, hay un archivo de respaldo `web/
 
     Deberías ver la interfaz de la aplicación de ruteo.
 
+### Benchmarking (automatizado para el paper/tesis)
+
+Para medir tiempos de cómputo de forma estadísticamente robusta, se incluye `scripts/benchmarking.py`, que ejecuta repetidamente el generador de ruta Docplex y exporta resultados por corrida y un resumen a CSV.
+
+- Ejecutar 30 iteraciones (por defecto):
+
+```powershell
+python scripts/benchmarking.py
+```
+
+- Ejecutar 50 iteraciones:
+
+```powershell
+python scripts/benchmarking.py 50
+```
+
+Salidas:
+- `resultados_benchmark_docplex_por_run.csv` — tiempos por iteración y tamaño del JSON generado.
+- `resultados_benchmark_docplex_resumen.csv` — promedio, desviación estándar, mínimo y máximo.
+
+### Simulación de usuario (elección de origen y rutas)
+
+Script para simular que un usuario elige una ubicación inicial, se seleccionan 5 viviendas de interés y se generan rutas de 4 tipos (Dijkstra, Dijkstra dinámico, ACO, CPLEX). Tolera funciones faltantes e igualmente guarda los resultados.
+
+- Ejecutar con origen por defecto (Plaza Baquedano):
+
+```powershell
+python scripts/simular_usuario.py
+```
+
+- Ejecutar con origen personalizado (`lat,lon`):
+
+```powershell
+python scripts/simular_usuario.py "-33.45,-70.63"
+```
+
+Salidas:
+- `web/data/simulacion_usuario/prop_<n>_routes.json` — rutas por propiedad.
+- `simulacion_usuario_resumen.csv` — estados por algoritmo.
+
 ## 📁 Estructura del Proyecto
 
 ```
