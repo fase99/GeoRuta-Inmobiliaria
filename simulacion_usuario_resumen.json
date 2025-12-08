@@ -1,0 +1,83 @@
+{
+  "origen": {
+    "lat": -33.41848623409742,
+    "lon": -70.60166418997018,
+    "label": "Metro TOBALABA"
+  },
+  "propiedades": [
+    {
+      "etiqueta": 3927818,
+      "lat": -33.418018,
+      "lon": -70.6029796
+    },
+    {
+      "etiqueta": 3753749,
+      "lat": -33.4300183,
+      "lon": -70.6039134
+    },
+    {
+      "etiqueta": 3418073,
+      "lat": -33.440441,
+      "lon": -70.6251292
+    },
+    {
+      "etiqueta": 3510294,
+      "lat": -33.4153675,
+      "lon": -70.6098187
+    },
+    {
+      "etiqueta": 3898979,
+      "lat": -33.43459741,
+      "lon": -70.59589035
+    }
+  ],
+  "orden_ACO_indices": [
+    0,
+    1,
+    4,
+    2,
+    5,
+    3,
+    0
+  ],
+  "tiempos_ms": {
+    "dijkstra_puro_total": 3.198299999999989,
+    "dijkstra_dinamico_total": 9.796900000000008,
+    "aco_total": 5.77000000000001,
+    "cplex_total": 0.43199999999998795
+  },
+  "cplex": {
+    "resultado": {
+      "feasible": true,
+      "objective": 0,
+      "route": [
+        {
+          "from": 0,
+          "to": 1,
+          "mode": "drive"
+        },
+        {
+          "from": 1,
+          "to": 2,
+          "mode": "drive"
+        },
+        {
+          "from": 2,
+          "to": 3,
+          "mode": "drive"
+        },
+        {
+          "from": 3,
+          "to": 4,
+          "mode": "drive"
+        },
+        {
+          "from": 4,
+          "to": 0,
+          "mode": "drive"
+        }
+      ]
+    },
+    "tiempo_ms": 0.43199999999998795
+  }
+}
