@@ -1,50 +1,50 @@
 {
   "origen": {
-    "lat": -33.41848623409742,
-    "lon": -70.60166418997018,
-    "label": "Metro TOBALABA"
+    "lat": -33.4372,
+    "lon": -70.6342,
+    "label": "Plaza Baquedano"
   },
   "propiedades": [
     {
-      "etiqueta": 3927818,
-      "lat": -33.418018,
-      "lon": -70.6029796
+      "etiqueta": 3580088,
+      "lat": -33.4388518,
+      "lon": -70.6339961
     },
     {
-      "etiqueta": 3753749,
-      "lat": -33.4300183,
-      "lon": -70.6039134
+      "etiqueta": 3967372,
+      "lat": -33.44025,
+      "lon": -70.624536
     },
     {
-      "etiqueta": 3418073,
-      "lat": -33.440441,
-      "lon": -70.6251292
+      "etiqueta": 2787982,
+      "lat": -33.4313058,
+      "lon": -70.6131958
     },
     {
-      "etiqueta": 3510294,
-      "lat": -33.4153675,
-      "lon": -70.6098187
+      "etiqueta": 3890209,
+      "lat": -33.4202636,
+      "lon": -70.6185657
     },
     {
-      "etiqueta": 3898979,
-      "lat": -33.43459741,
-      "lon": -70.59589035
+      "etiqueta": 3914528,
+      "lat": -33.425121,
+      "lon": -70.593969
     }
   ],
   "orden_ACO_indices": [
     0,
     1,
-    4,
     2,
-    5,
     3,
+    4,
+    5,
     0
   ],
   "tiempos_ms": {
-    "dijkstra_puro_total": 3.198299999999989,
-    "dijkstra_dinamico_total": 9.796900000000008,
-    "aco_total": 5.77000000000001,
-    "cplex_total": 0.43199999999998795
+    "dijkstra_puro_total": 3.6376999999999953,
+    "dijkstra_dinamico_total": 11.707799999999992,
+    "aco_total": 6.288200000000003,
+    "cplex_total": 0.4025999999999925
   },
   "cplex": {
     "resultado": {
@@ -78,6 +78,6 @@
         }
       ]
     },
-    "tiempo_ms": 0.43199999999998795
+    "tiempo_ms": 0.4025999999999925
   }
 }
