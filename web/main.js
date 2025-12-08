@@ -4286,12 +4286,12 @@ async function generateDocplexRoute(silent=false) {
                     const w2Path = dijkstra(w2Stop.id, w2Dest.id);
                     const w2Feats = nodesPathToEdgeFeatures(w2Path || []);
                     if (w2Feats.length > 0) {
-                        recommendedLayer.addLayer(L.geoJSON({ type: 'FeatureCollection', features: w2Feats }, { style: { color: '#1E90FF', dashArray: '6 6', weight: 3, opacity: 0.8 } }));
+                        recommendedLayer.addLayer(L.geoJSON({ type: 'FeatureCollection', features: w2Feats }, { style: { color: '#061627ff', dashArray: '6 6', weight: 3, opacity: 0.8 } }));
                     } else {
-                        recommendedLayer.addLayer(L.polyline([[toCoords.lat, toCoords.lon], [target.lat, target.lon]], { color: '#1E90FF', dashArray: '6 6', weight: 3, opacity: 0.8 }));
+                        recommendedLayer.addLayer(L.polyline([[toCoords.lat, toCoords.lon], [target.lat, target.lon]], { color: '#061627ff', dashArray: '6 6', weight: 3, opacity: 0.8 }));
                     }
                 } else {
-                    recommendedLayer.addLayer(L.polyline([[toCoords.lat, toCoords.lon], [target.lat, target.lon]], { color: '#1E90FF', dashArray: '6 6', weight: 3, opacity: 0.8 }));
+                    recommendedLayer.addLayer(L.polyline([[toCoords.lat, toCoords.lon], [target.lat, target.lon]], { color: '#061627ff', dashArray: '6 6', weight: 3, opacity: 0.8 }));
                 }
             }
 
