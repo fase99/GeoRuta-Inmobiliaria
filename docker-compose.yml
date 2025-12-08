@@ -25,6 +25,20 @@ services:
       - DB_NAME=resilient_routing_db
       - DB_USER=user
       - DB_PASS=password
+  
+  api:
+    build: .
+    container_name: resilient_api
+    command: python api.py
+    volumes:
+      - .:/app
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: always
     
   web:
     image: nginx:alpine
@@ -35,4 +49,5 @@ services:
       - "8080:80"
     depends_on:
       - etl
+      - api
     restart: always

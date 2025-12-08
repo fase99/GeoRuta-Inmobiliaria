@@ -54,51 +54,51 @@
 // If counts mismatch the handler will try to do a best-effort mapping and show the route steps.
 async function generateDocplexRoute(silent=false) {
     const startTime = performance.now();
-    console.log(`[FLUJO] Iniciando carga de ruta Docplex`);
+    console.log(`[FLUJO] Iniciando carga de ruta CPLEX (optimización exacta)`);
     
     try {
         const res = await fetch('data/docplex_route.json', {cache: 'no-store'});
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
-        if (!data || !data.route) {
-            alert('docplex_route.json no contiene un campo "route" válido.');
+        if (!data || !data.order) {
+            alert('docplex_route.json no contiene un campo "order" válido.');
             return;
         }
 
         if (!data.feasible) {
-            if (!silent) alert('El modelo Docplex devolvió una solución no factible.');
+            if (!silent) alert('El modelo CPLEX devolvió una solución no factible.');
             return;
         }
 
-        // Expected structure: { feasible: true, objective: ..., route: [ {from:0,to:1,mode:'drive'}, ... ] }
-        const routeEdges = data.route;
+        // Structure: { feasible: true, objective: ..., order: [0, 2, 1, ...], route: [...], nodes: {...} }
+        const visitOrder = data.order;
+        const routeSegments = data.route || [];
+        const nodeMapping = data.nodes || {};
 
         if (!Array.isArray(selectedProperties) || selectedProperties.length === 0) {
-            if (!silent) alert('No hay propiedades seleccionadas para mapear la ruta Docplex. Selecciona propiedades primero.');
+            if (!silent) alert('No hay propiedades seleccionadas para mapear la ruta CPLEX.');
             return;
         }
 
-        // Build an ordered list of property objects according to the 'to' sequence in the route
-        // Skip any 'to' equal to 0 (office/start). Map positive integers 1..n to selectedProperties[0..n-1].
-        const orderIdxs = routeEdges.map(e => e.to).filter(v => v !== 0);
+        // Map visit order to properties
+        // order[0] is start point (index 0), order[1+] are properties (index 1 = selectedProperties[0])
         const mappedStops = [];
-        for (const idx of orderIdxs) {
-            const propIndex = idx - 1; // mapping: 1 -> selectedProperties[0]
-            if (propIndex >= 0 && propIndex < selectedProperties.length) {
-                mappedStops.push(selectedProperties[propIndex]);
+        for (let i = 1; i < visitOrder.length; i++) {
+            const propIdx = visitOrder[i] - 1; // 1 -> selectedProperties[0]
+            if (propIdx >= 0 && propIdx < selectedProperties.length) {
+                mappedStops.push(selectedProperties[propIdx]);
             } else {
-                // Out-of-range: push placeholder or skip
-                console.warn('Docplex route index out of range:', idx);
+                console.warn('CPLEX visit order out of range:', visitOrder[i]);
             }
         }
 
         if (mappedStops.length === 0) {
-            if (!silent) alert('No se pudo mapear ninguna parada desde la ruta Docplex a las propiedades seleccionadas.');
+            if (!silent) alert('No se pudo mapear ninguna parada desde la ruta CPLEX.');
             return;
         }
 
-        // Clear previous recommended route layers
+        // Clear previous route layers
         if (recommendedRouteLayer) {
             map.removeLayer(recommendedRouteLayer);
             recommendedRouteLayer = null;
@@ -108,68 +108,147 @@ async function generateDocplexRoute(silent=false) {
             recommendedMarkers = [];
         }
 
-        // Build coordinates: start from currentOfficeLatLng (if available) else first stop
-        const coords = [];
-        if (typeof currentOfficeLatLng !== 'undefined' && currentOfficeLatLng) {
-            coords.push([currentOfficeLatLng.lat, currentOfficeLatLng.lng]);
-        } else {
-            const first = mappedStops[0];
-            coords.push([first.lat, first.lon]);
+        // Create a layer group for all CPLEX route segments
+        recommendedRouteLayer = L.layerGroup().addTo(map);
+
+        console.log(`[CPLEX] Orden de visita: ${visitOrder.join(' -> ')}`);
+        console.log(`[CPLEX] Propiedades mapeadas: ${mappedStops.length}`);
+
+        // Render route following OSMnx streets for each segment
+        let totalDistance = 0;
+        const allCoords = [];
+        const stepsContainer = document.getElementById('route-steps-container');
+        if (stepsContainer) stepsContainer.innerHTML = '';
+
+        for (let i = 0; i < visitOrder.length - 1; i++) {
+            const fromPropIdx = visitOrder[i];
+            const toPropIdx = visitOrder[i + 1];
+            
+            // Get snapped nodes from CPLEX output
+            const fromNodeId = nodeMapping[fromPropIdx];
+            const toNodeId = nodeMapping[toPropIdx];
+            
+            if (!fromNodeId || !toNodeId) {
+                console.warn(`Missing node mapping for segment ${fromPropIdx} -> ${toPropIdx}`);
+                continue;
+            }
+
+            // Find mode (if available)
+            const segment = routeSegments.find(s => s.from === fromPropIdx && s.to === toPropIdx);
+            const mode = segment ? segment.mode : 'caminata';
+            const cost = segment ? segment.cost : 0;
+
+            console.log(`[CPLEX] Segmento ${i+1}: ${fromPropIdx} -> ${toPropIdx} (modo: ${mode}, costo: ${cost.toFixed(2)})`);
+
+            // Compute path using Dijkstra on OSMnx graph
+            const path = dijkstra(fromNodeId, toNodeId);
+            
+            if (path && path.length > 1) {
+                console.log(`[CPLEX] Path encontrado con ${path.length} nodos`);
+                
+                // Extract coordinates from node path (always follow streets)
+                let segmentCoords = [];
+                for (const nodeId of path) {
+                    const node = nodeIndex.get(nodeId);
+                    if (node) {
+                        segmentCoords.push([node.lat, node.lon]);
+                    }
+                }
+                
+                if (segmentCoords.length < 2) {
+                    console.error(`[CPLEX] Insuficientes coordenadas para segmento ${fromPropIdx} -> ${toPropIdx}`);
+                    continue;
+                }
+
+                console.log(`[CPLEX] Renderizando con ${segmentCoords.length} coordenadas`);
+
+                // Calculate segment distance
+                let segmentDist = 0;
+                for (let j = 0; j < path.length - 1; j++) {
+                    const n1 = nodeIndex.get(path[j]);
+
+
+                    const n2 = nodeIndex.get(path[j + 1]);
+                    if (n1 && n2) {
+                        segmentDist += haversineDistance(n1, n2);
+                    }
+                }
+                totalDistance += segmentDist;
+
+                // Determine color by mode
+                let color = '#1E90FF'; // caminata (azul)
+                let dashArray = '5, 10';
+                if (mode === 'micro') {
+                    color = '#FF4500'; // naranja
+                    dashArray = null;
+                } else if (mode === 'metro') {
+                    color = '#6f42c1'; // morado
+                    dashArray = null;
+                }
+
+                // Draw segment and add to layer group
+                const polyline = L.polyline(segmentCoords, {
+                    color: color,
+                    weight: 5,
+                    opacity: 0.8,
+                    dashArray: dashArray
+                });
+                recommendedRouteLayer.addLayer(polyline);
+
+                allCoords.push(...segmentCoords);
+
+                // Add step to UI
+                if (stepsContainer) {
+                    const stepEl = document.createElement('div');
+                    stepEl.className = 'route-step';
+                    const fromName = fromPropIdx === 0 ? 'Punto de partida' : `Propiedad ${fromPropIdx}`;
+                    const toName = toPropIdx === 0 ? 'Punto de partida' : `Propiedad ${toPropIdx}`;
+                    stepEl.innerHTML = `<strong>${i + 1}.</strong> ${fromName} → ${toName}<br>` +
+                                       `   Modo: ${mode}, Distancia: ${segmentDist.toFixed(0)}m, Costo: ${cost.toFixed(2)}`;
+                    stepsContainer.appendChild(stepEl);
+                }
+            } else {
+                console.warn(`No path found from node ${fromNodeId} to ${toNodeId}`);
+            }
         }
 
+        // Add markers for properties
         mappedStops.forEach((p, i) => {
-            coords.push([p.lat, p.lon]);
-            const m = L.marker([p.lat, p.lon], {title: p.title || `Parada ${i+1}`});
+            const m = L.marker([p.lat, p.lon], {
+                title: p.title || `Parada ${i+1}`,
+                icon: L.divIcon({
+                    className: 'property-marker-cplex',
+                    html: `<div style="background: #ff4500; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid white;">${i+1}</div>`
+                })
+            });
             m.addTo(map);
             recommendedMarkers.push(m);
         });
 
-        // Draw polyline
-        recommendedRouteLayer = L.polyline(coords, {color: 'blue', weight: 5, opacity: 0.8}).addTo(map);
-        map.fitBounds(recommendedRouteLayer.getBounds(), {padding: [40,40]});
-
-        // Populate steps panel with simple textual directions based on mapped stops
-        const stepsContainer = document.getElementById('route-steps-container');
-        if (stepsContainer) {
-            stepsContainer.innerHTML = '';
-            mappedStops.forEach((p, i) => {
-                const el = document.createElement('div');
-                el.className = 'route-step';
-                el.innerText = `${i+1}. ${p.title || (p.address || 'Propiedad')} — ${p.price ? ('$'+p.price) : ''}`;
-                stepsContainer.appendChild(el);
-            });
+        // Fit map to route bounds
+        if (allCoords.length > 0) {
+            const bounds = L.latLngBounds(allCoords);
+            map.fitBounds(bounds, {padding: [40, 40]});
         }
 
-        // Optionally schedule appointments for these properties (existing logic expects property objects)
+        // Schedule appointments
         mappedStops.forEach((p, i) => scheduleAppointment(p));
 
-        // Start monitoring route / threats as the existing flow does
+        // Start monitoring
         startRouteRefresh();
 
         const computationTime = performance.now() - startTime;
         
-        // Calculate total distance from the route
-        let totalDistance = 0;
-        if (routeEdges.length > 1) {
-            for (let i = 0; i < routeEdges.length - 1; i++) {
-                const fromNode = nodeIndex.get(routeEdges[i].to);
-                const toNode = nodeIndex.get(routeEdges[i + 1].to);
-                if (fromNode && toNode) {
-                    totalDistance += haversineDistance(fromNode, toNode);
-                }
-            }
-        }
-        
-        console.log(`[RUTA] Ruta Docplex completada - Algoritmo: CPLEX (optimización exacta)`);
-        console.log(`[RUTA] Tiempo de cómputo: ${computationTime.toFixed(2)} ms (solo carga del archivo)`);
-        console.log(`[RUTA] Distancia total aproximada: ${totalDistance.toFixed(2)} metros`);
+        console.log(`[RUTA] Ruta CPLEX completada - Algoritmo: CPLEX (optimización exacta MILP)`);
+        console.log(`[RUTA] Tiempo de renderizado: ${computationTime.toFixed(2)} ms`);
+        console.log(`[RUTA] Distancia total: ${totalDistance.toFixed(2)} metros`);
         console.log(`[RUTA] Número de propiedades: ${mappedStops.length}`);
         console.log(`[RUTA] Óptimo: Sí (solución exacta garantizada)`);
-        console.log(`[RUTA] Valor objetivo: ${data.objective}`);
+        console.log(`[RUTA] Valor objetivo: ${data.objective.toFixed(2)}`);
         
         // Store metrics
         routeMetrics.docplex = {
-            algorithm: 'CPLEX',
+            algorithm: 'CPLEX (MILP)',
             computationTime: computationTime,
             totalDistance: totalDistance,
             numProperties: mappedStops.length,
@@ -181,14 +260,13 @@ async function generateDocplexRoute(silent=false) {
         compareRoutes();
 
         if (!silent) {
-            console.log('Docplex route rendered. Objective:', data.objective);
-            // show legend / summary
+            console.log(`Ruta CPLEX renderizada. Objetivo: ${data.objective.toFixed(2)}`);
             const legend = document.getElementById('legend-recommended-route');
-            if (legend) legend.innerText = `Docplex: objective=${data.objective}`;
+            if (legend) legend.innerText = `CPLEX: objetivo=${data.objective.toFixed(2)}, distancia=${totalDistance.toFixed(0)}m`;
         }
 
     } catch (err) {
-        console.error('Error loading docplex route:', err);
+        console.error('Error loading CPLEX route:', err);
         if (!silent) alert('Error cargando docplex_route.json: ' + err.message);
     }
 }
@@ -252,7 +330,75 @@ async function generateDocplexRoute(silent=false) {
 
         // Wire the Docplex button (if present) to the handler
         const genDocplexBtn = document.getElementById('generate-docplex-route-btn');
-        if (genDocplexBtn) genDocplexBtn.addEventListener('click', () => generateDocplexRoute(false));
+        if (genDocplexBtn) genDocplexBtn.addEventListener('click', async () => {
+            console.log('[CPLEX] Botón presionado');
+            
+            // Execute CPLEX optimization on backend
+            if (!selectedProperties.length) {
+                alert('Selecciona propiedades primero antes de ejecutar CPLEX.');
+                return;
+            }
+            
+            if (!startPointMarker) {
+                alert('Define un punto de partida antes de ejecutar CPLEX.');
+                return;
+            }
+            
+            const startLatLng = startPointMarker.getLatLng();
+            
+            // Prepare input data
+            const inputData = {
+                startPoint: {
+                    lat: startLatLng.lat,
+                    lng: startLatLng.lng
+                },
+                stops: selectedProperties.map(p => ({
+                    id: p.id,
+                    lat: p.lat,
+                    lng: p.lon,
+                    title: p.title || p.nombre || 'Propiedad'
+                }))
+            };
+            
+            console.log('[CPLEX] Enviando datos al backend:', inputData);
+            
+            try {
+                // Show loading indicator
+                genDocplexBtn.disabled = true;
+                genDocplexBtn.textContent = '⏳ Optimizando...';
+                
+                // Call backend API
+                const response = await fetch('http://localhost:5000/run-cplex', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(inputData)
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || `HTTP ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('[CPLEX] Backend response:', result);
+                
+                // Wait a moment for file to be written
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // Now load and render the route
+                await generateDocplexRoute(false);
+                
+            } catch (error) {
+                console.error('[CPLEX] Error ejecutando optimización:', error);
+                alert(`Error ejecutando CPLEX: ${error.message}\n\nAsegúrate de que el servicio API esté corriendo (docker-compose up -d)`);
+            } finally {
+                // Restore button state
+                genDocplexBtn.disabled = false;
+                genDocplexBtn.textContent = '📐 Ciplex';
+            }
+        });
 
         function limpiarFiltroPagoColegios() {
             if (filtroPagoMatricula) filtroPagoMatricula.value = '';

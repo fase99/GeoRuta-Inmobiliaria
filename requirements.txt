@@ -11,3 +11,7 @@ requests
 gurobipy
 networkx
 scipy
+docplex
+cplex
+flask
+flask-cors

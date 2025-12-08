@@ -1,11 +1,53 @@
 {
   "feasible": true,
-  "objective": 0,
+  "objective": 11164.519522185603,
   "route": [
-    { "from": 0, "to": 1, "mode": "drive" },
-    { "from": 1, "to": 2, "mode": "drive" },
-    { "from": 2, "to": 3, "mode": "drive" },
-    { "from": 3, "to": 4, "mode": "drive" },
-    { "from": 4, "to": 0, "mode": "drive" }
-  ]
+    {
+      "from": 0,
+      "to": 1,
+      "mode": "caminata",
+      "cost": 1044.0454726868463
+    },
+    {
+      "from": 1,
+      "to": 2,
+      "mode": "caminata",
+      "cost": 1491.3829815834715
+    },
+    {
+      "from": 2,
+      "to": 4,
+      "mode": "caminata",
+      "cost": 1045.582795904292
+    },
+    {
+      "from": 4,
+      "to": 5,
+      "mode": "caminata",
+      "cost": 1805.831359401414
+    },
+    {
+      "from": 5,
+      "to": 3,
+      "mode": "caminata",
+      "cost": 2239.6294355473387
+    }
+  ],
+  "order": [
+    0,
+    1,
+    2,
+    4,
+    5,
+    3
+  ],
+  "travel_times": {},
+  "nodes": {
+    "0": 5333761427,
+    "1": 252981233,
+    "2": 442001153,
+    "3": 3202948889,
+    "4": 130884646,
+    "5": 5741781321
+  }
 }
