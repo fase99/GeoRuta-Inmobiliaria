@@ -2,6 +2,8 @@
 
 Este proyecto implementa una plataforma avanzada de georuteo diseñada para optimizar la planificación de visitas a propiedades inmobiliarias. El sistema no solo calcula la ruta más eficiente en términos de distancia y tiempo, sino que también integra un análisis de "resiliencia", considerando amenazas en tiempo real, infraestructura urbana y datos históricos para garantizar recorridos seguros y predecibles.
 
+![GeoRuta placeholder](georuta.png)
+
 ## 🌟 Funcionalidades Principales
 
 1.  **Visualización Geoespacial**: Mapa interactivo con capas de propiedades, infraestructura y amenazas.
